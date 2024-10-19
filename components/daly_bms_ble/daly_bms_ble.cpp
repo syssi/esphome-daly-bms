@@ -14,12 +14,16 @@ static const uint16_t DALY_BMS_CONTROL_CHARACTERISTIC_UUID = 0xFFF2;  // handle 
 static const uint8_t DALY_FRAME_START = 0xD2;
 static const uint8_t DALY_FRAME_START2 = 0x03;
 
+static const uint8_t DALY_FUNCTION_READ = 0x03;
+static const uint8_t DALY_FUNCTION_WRITE = 0x06;
+
 static const uint8_t DALY_FRAME_LEN_STATUS = 0x7C;
 static const uint8_t DALY_FRAME_LEN_SETTINGS = 0x52;
 static const uint8_t DALY_FRAME_LEN_VERSIONS = 0x40;
 static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
 
-static const uint8_t DALY_COMMAND_REQ_STATUS = 0x00;
+static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0x0000;
+static const uint16_t DALY_COMMAND_REQ_STATUS_QTY = 0x003E;
 
 static const uint8_t MAX_RESPONSE_SIZE = 129;
 
@@ -75,7 +79,7 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
     case ESP_GATTC_REG_FOR_NOTIFY_EVT: {
       this->node_state = espbt::ClientState::ESTABLISHED;
 
-      this->send_command(DALY_COMMAND_REQ_STATUS, 0x00);
+      this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, DALY_COMMAND_REQ_STATUS_QTY);
       break;
     }
     case ESP_GATTC_NOTIFY_EVT: {
@@ -98,7 +102,7 @@ void DalyBmsBle::update() {
     return;
   }
 
-  this->send_command(DALY_COMMAND_REQ_STATUS, 0x00);
+  this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, DALY_COMMAND_REQ_STATUS_QTY);
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<uint8_t> &data) {
@@ -266,13 +270,13 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->charging_cycles_sensor_, daly_get_16bit(105) * 1.0f);
 
   // 107   2  0x00 0x01            Balancer status (0: off, 1: on)
-  ESP_LOGI(TAG, "Balancer status: %s", ONOFF((bool) data[108]));
+  ESP_LOGI(TAG, "Balancer status: %s", ONOFF((bool) daly_get_16bit(107)));
 
   // 109   2  0x00 0x00            Charging mosfet status (0: off, 1: on)
-  ESP_LOGI(TAG, "Charging mosfet: %s", ONOFF((bool) data[109]));
+  this->publish_state_(this->charging_binary_sensor_, (bool) daly_get_16bit(109));
 
   // 111   2  0x00 0x01            Discharging mosfet status (0: off, 1: on)
-  ESP_LOGI(TAG, "Discharging mosfet: %s", ONOFF((bool) data[112]));
+  this->publish_state_(this->discharging_binary_sensor_, (bool) daly_get_16bit(111));
 
   // 113   2  0x10 0x2E            Average cell voltage
   ESP_LOGV(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);
@@ -421,9 +425,11 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 
   //  77   2  0x00 0x01   0xA5    Charging MOS switch (0: off, 1: on)                     -          1
   ESP_LOGI(TAG, "Charging MOS switch: %s", ONOFF((bool) daly_get_16bit(77)));
+  this->publish_state_(this->charging_switch_, (bool) daly_get_16bit(77));
 
   //  79   2  0x00 0x01   0xA6    Discharge MOS switch (0: off, 1: on)                    -          1
   ESP_LOGI(TAG, "Discharge MOS switch: %s", ONOFF((bool) daly_get_16bit(79)));
+  this->publish_state_(this->discharging_switch_, (bool) daly_get_16bit(79));
 
   //  81   2  0x02 0xA8   0xA7    SOC settings (68.0)                                     %          0.1
   ESP_LOGI(TAG, "SOC settings: %.1f %%", daly_get_16bit(81) * 0.1f);
@@ -553,17 +559,18 @@ void DalyBmsBle::publish_state_(text_sensor::TextSensor *text_sensor, const std:
   text_sensor->publish_state(state);
 }
 
-bool DalyBmsBle::send_command(uint8_t function, uint8_t value) {
+bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
   uint8_t frame[8];
 
   frame[0] = 0xD2;  // Modbus device address
   frame[1] = 0x03;  // Function (0x03: Read register, 0x06: Write register, 0x10: Write multiple registers)
-  frame[2] = 0x00;  // Starting Address Hi
-  frame[3] = 0x00;  // Starting Address Lo
-  frame[4] = 0x00;  // Quantity of inputs Hi
-  frame[5] = 0x3E;  // Quantity of inputs Lo
-  frame[6] = 0xD7;  // CRC
-  frame[7] = 0xB9;  // CRC
+  frame[2] = address >> 8;
+  frame[3] = address >> 0;
+  frame[4] = value >> 8;
+  frame[5] = value >> 0;
+  auto crc = crc16(frame, 6);
+  frame[6] = crc >> 0;
+  frame[7] = crc >> 8;
 
   ESP_LOGD(TAG, "Send command (handle 0x%02X): %s", this->char_command_handle_,
            format_hex_pretty(frame, sizeof(frame)).c_str());

@@ -86,7 +86,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
 
   void on_daly_bms_ble_data(const uint8_t &handle, const std::vector<uint8_t> &data);
-  bool send_command(uint8_t function, uint8_t value);
+  bool send_command(uint8_t function, uint16_t address, uint16_t value);
   void set_password(uint32_t password) { this->password_ = password; }
 
  protected:
