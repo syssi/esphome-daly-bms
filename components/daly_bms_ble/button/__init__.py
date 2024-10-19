@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import button
 import esphome.config_validation as cv
-from esphome.const import CONF_FACTORY_RESET, CONF_ICON, CONF_ID
+from esphome.const import CONF_FACTORY_RESET, CONF_ICON, CONF_ID, CONF_RESTART
 
 from .. import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, daly_bms_ble_ns
 
@@ -10,7 +10,7 @@ DEPENDENCIES = ["daly_bms_ble"]
 CODEOWNERS = ["@syssi"]
 
 CONF_RETRIEVE_SETTINGS = "retrieve_settings"
-CONF_RESTART = "restart"
+# CONF_RESTART = "restart"
 CONF_SHUTDOWN = "shutdown"
 CONF_RESET_CURRENT = "reset_current"
 # CONF_FACTORY_RESET = "factory_reset"
