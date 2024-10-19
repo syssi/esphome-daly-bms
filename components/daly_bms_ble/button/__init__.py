@@ -10,23 +10,23 @@ DEPENDENCIES = ["daly_bms_ble"]
 CODEOWNERS = ["@syssi"]
 
 CONF_RETRIEVE_SETTINGS = "retrieve_settings"
+CONF_RESTART = "restart"
+CONF_SHUTDOWN = "shutdown"
+CONF_RESET_CURRENT = "reset_current"
 # CONF_FACTORY_RESET = "factory_reset"
-CONF_RESET_CHARGING_CYCLES = "reset_charging_cycles"
-CONF_RESET_TOTAL_CHARGED_CAPACITY = "reset_total_charged_capacity"
-CONF_RESET_TOTAL_DISCHARGED_CAPACITY = "reset_total_discharged_capacity"
 
 ICON_RETRIEVE_SETTINGS = "mdi:cog"
+ICON_RESTART = "mdi:restart"
+ICON_SHUTDOWN = "mdi:power"
+ICON_RESET_CURRENT = "mdi:counter"
 ICON_FACTORY_RESET = "mdi:factory"
-ICON_RESET_CHARGING_CYCLES = "mdi:counter"
-ICON_RESET_TOTAL_CHARGED_CAPACITY = "mdi:counter"
-ICON_RESET_TOTAL_DISCHARGED_CAPACITY = "mdi:counter"
 
 BUTTONS = {
-    CONF_RETRIEVE_SETTINGS: 0x0056,
-    CONF_FACTORY_RESET: 0x00CC,
-    CONF_RESET_CHARGING_CYCLES: 0x00AA,
-    CONF_RESET_TOTAL_CHARGED_CAPACITY: 0x00CB,
-    CONF_RESET_TOTAL_DISCHARGED_CAPACITY: 0x00CA,
+    CONF_RETRIEVE_SETTINGS: 0x0080,
+    CONF_RESTART: 0x00F0,
+    CONF_SHUTDOWN: 0x00F1,
+    CONF_RESET_CURRENT: 0x00F2,
+    CONF_FACTORY_RESET: 0x00F3,
 }
 
 DalyButton = daly_bms_ble_ns.class_("DalyButton", button.Button, cg.Component)
@@ -39,32 +39,28 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
                 cv.Optional(CONF_ICON, default=ICON_RETRIEVE_SETTINGS): cv.icon,
             }
         ).extend(cv.COMPONENT_SCHEMA),
+        cv.Optional(CONF_RESTART): button.BUTTON_SCHEMA.extend(
+            {
+                cv.GenerateID(): cv.declare_id(DalyButton),
+                cv.Optional(CONF_ICON, default=ICON_RESTART): cv.icon,
+            }
+        ).extend(cv.COMPONENT_SCHEMA),
+        cv.Optional(CONF_SHUTDOWN): button.BUTTON_SCHEMA.extend(
+            {
+                cv.GenerateID(): cv.declare_id(DalyButton),
+                cv.Optional(CONF_ICON, default=ICON_SHUTDOWN): cv.icon,
+            }
+        ).extend(cv.COMPONENT_SCHEMA),
+        cv.Optional(CONF_RESET_CURRENT): button.BUTTON_SCHEMA.extend(
+            {
+                cv.GenerateID(): cv.declare_id(DalyButton),
+                cv.Optional(CONF_ICON, default=ICON_RESET_CURRENT): cv.icon,
+            }
+        ).extend(cv.COMPONENT_SCHEMA),
         cv.Optional(CONF_FACTORY_RESET): button.BUTTON_SCHEMA.extend(
             {
                 cv.GenerateID(): cv.declare_id(DalyButton),
                 cv.Optional(CONF_ICON, default=ICON_FACTORY_RESET): cv.icon,
-            }
-        ).extend(cv.COMPONENT_SCHEMA),
-        cv.Optional(CONF_RESET_CHARGING_CYCLES): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(CONF_ICON, default=ICON_RESET_CHARGING_CYCLES): cv.icon,
-            }
-        ).extend(cv.COMPONENT_SCHEMA),
-        cv.Optional(CONF_RESET_TOTAL_CHARGED_CAPACITY): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(
-                    CONF_ICON, default=ICON_RESET_TOTAL_CHARGED_CAPACITY
-                ): cv.icon,
-            }
-        ).extend(cv.COMPONENT_SCHEMA),
-        cv.Optional(CONF_RESET_TOTAL_DISCHARGED_CAPACITY): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(
-                    CONF_ICON, default=ICON_RESET_TOTAL_DISCHARGED_CAPACITY
-                ): cv.icon,
             }
         ).extend(cv.COMPONENT_SCHEMA),
     }

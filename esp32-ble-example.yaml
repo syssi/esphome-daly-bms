@@ -67,10 +67,14 @@ button:
   - platform: daly_bms_ble
     retrieve_settings:
       name: "${name} retrieve settings"
+    restart:
+      name: "${name} restart"
+    shutdown:
+      name: "${name} shutdown"
     factory_reset:
       name: "${name} factory reset"
-    reset_charging_cycles:
-      name: "${name} reset charging cycles"
+    reset_current:
+      name: "${name} reset current"
 
 sensor:
   - platform: daly_bms_ble
