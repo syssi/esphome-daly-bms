@@ -118,11 +118,11 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
     case DALY_FRAME_LEN_STATUS:
       this->decode_status_data_(data);
       break;
-    case 0x20:  // Run Info Last Battery Value
-    case 0x52:  // Set Info
     case 0x40:  // Version Info
       ESP_LOGI(TAG, "Unsupported version info frame received");
       break;
+    case 0x20:  // Run Info Last Battery Value
+    case 0x52:  // Set Info
     case 0x06:  // Password?
     default:
       ESP_LOGW(TAG, "Unhandled response received (frame_type 0x%02X): %s", frame_type,
