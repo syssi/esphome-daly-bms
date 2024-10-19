@@ -313,7 +313,7 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
   //          0x00 0x00            Hardware version
   ESP_LOGI(TAG, "  Hardware version: %s", std::string(data.begin() + 35, data.begin() + 35 + 32).c_str());
 
-  //  67   2  0x65 0x13
+  //  67   2  0x65 0x13            CRC
 }
 
 void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,readability-function-size)
