@@ -16,6 +16,7 @@ static const uint8_t DALY_FRAME_START2 = 0x03;
 
 static const uint8_t DALY_FRAME_LEN_STATUS = 0x7C;
 static const uint8_t DALY_FRAME_LEN_VERSIONS = 0x40;
+static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
 
 static const uint8_t DALY_COMMAND_REQ_STATUS = 0x00;
 
@@ -122,9 +123,11 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
     case DALY_FRAME_LEN_VERSIONS:
       this->decode_version_data_(data);
       break;
+    case DALY_FRAME_LEN_PASSWORD:
+      this->decode_password_data_(data);
+      break;
     case 0x20:  // Run Info Last Battery Value
     case 0x52:  // Set Info
-    case 0x06:  // Password?
     default:
       ESP_LOGW(TAG, "Unhandled response received (frame_type 0x%02X): %s", frame_type,
                format_hex_pretty(&data.front(), data.size()).c_str());
@@ -241,7 +244,7 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   ESP_LOGV(TAG, "Min cell temperature: %.0f °C", (daly_get_16bit(95) - 40) * 1.0f);
 
   //  97   2  0x00 0x00            Charge/discharge status (0=idle, 1=charging, 2=discharging)
-  ESP_LOGI(TAG, "  Status: %s",
+  ESP_LOGI(TAG, "Status: %s",
            data[98] == 0   ? "Idle"
            : data[98] == 1 ? "Charging"
            : data[98] == 2 ? "Discharging"
@@ -260,13 +263,13 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->charging_cycles_sensor_, daly_get_16bit(105) * 1.0f);
 
   // 107   2  0x00 0x01            Balancer status (0: off, 1: on)
-  ESP_LOGI(TAG, "  Balancer status: %s", ONOFF((bool) data[108]));
+  ESP_LOGI(TAG, "Balancer status: %s", ONOFF((bool) data[108]));
 
   // 109   2  0x00 0x00            Charging mosfet status (0: off, 1: on)
-  ESP_LOGI(TAG, "  Charging mosfet: %s", ONOFF((bool) data[109]));
+  ESP_LOGI(TAG, "Charging mosfet: %s", ONOFF((bool) data[109]));
 
   // 111   2  0x00 0x01            Discharging mosfet status (0: off, 1: on)
-  ESP_LOGI(TAG, "  Discharging mosfet: %s", ONOFF((bool) data[112]));
+  ESP_LOGI(TAG, "Discharging mosfet: %s", ONOFF((bool) data[112]));
 
   // 113   2  0x10 0x2E            Average cell voltage
   ESP_LOGV(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);
@@ -301,15 +304,31 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00            Software version
-  ESP_LOGI(TAG, "  Software version: %s", std::string(data.begin() + 3, data.begin() + 3 + 32).c_str());
+  ESP_LOGI(TAG, "Software version: %s", std::string(data.begin() + 3, data.begin() + 3 + 32).c_str());
 
   //  35  32  0x42 0x4D 0x53 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00            Hardware version
-  ESP_LOGI(TAG, "  Hardware version: %s", std::string(data.begin() + 35, data.begin() + 35 + 32).c_str());
+  ESP_LOGI(TAG, "Hardware version: %s", std::string(data.begin() + 35, data.begin() + 35 + 32).c_str());
 
   //  67   2  0x65 0x13            CRC
+}
+
+void DalyBmsBle::decode_password_data_(const std::vector<uint8_t> &data) {
+  ESP_LOGI(TAG, "Password frame received");
+  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
+
+  // See docs/dalyModbusProtocol.xlsx
+  //
+  // Byte Len Payload              Description                      Unit  Precision
+  //   0   1  0xD2                 Start of frame
+  //   1   1  0x03                 Start of frame
+  //   2   1  0x06                 Data length
+  //   3   6  0x31 0x32 0x33 0x34 0x35 0x36   Password
+  ESP_LOGI(TAG, "Password: %s", std::string(data.begin() + 3, data.begin() + 3 + 6).c_str());
+
+  //   9   2  0x4C 0x69            CRC
 }
 
 void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,readability-function-size)
