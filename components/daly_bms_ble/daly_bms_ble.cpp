@@ -288,10 +288,6 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
 }
 
 void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
-  auto daly_get_16bit = [&](size_t i) -> uint16_t {
-    return (uint16_t(data[i + 0]) << 8) | (uint16_t(data[i + 1]) << 0);
-  };
-
   ESP_LOGI(TAG, "Software/hardware version frame received");
   ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
 
