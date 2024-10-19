@@ -14,16 +14,11 @@ static const uint16_t DALY_BMS_CONTROL_CHARACTERISTIC_UUID = 0xFFF2;  // handle 
 static const uint8_t DALY_FRAME_START = 0xD2;
 static const uint8_t DALY_FRAME_START2 = 0x03;
 
-static const uint8_t DALY_FRAME_TYPE_STATUS = 0x01;     // 40 bytes
-static const uint8_t DALY_FRAME_TYPE_CELL_INFO = 0x02;  // 40 bytes
-static const uint8_t DALY_FRAME_TYPE_SETTINGS = 0x03;   // 108 bytes
+static const uint8_t DALY_FRAME_LEN_STATUS = 0x7C;
 
-static const uint16_t DALY_COMMAND_REQ_STATUS = 0xc565;     // 0xc501
-static const uint16_t DALY_COMMAND_REQ_CELL_INFO = 0x5b65;  // 0x5b02
-static const uint16_t DALY_COMMAND_REQ_SETTINGS = 0x5600;   // 0x5656
+static const uint8_t DALY_COMMAND_REQ_STATUS = 0x00;
 
 static const uint8_t MAX_RESPONSE_SIZE = 129;
-static const uint8_t MAX_KNOWN_CELL_COUNT = 16;
 
 static const uint8_t ERRORS_SIZE = 8;
 static const char *const ERRORS[ERRORS_SIZE] = {
@@ -92,7 +87,7 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
     case ESP_GATTC_REG_FOR_NOTIFY_EVT: {
       this->node_state = espbt::ClientState::ESTABLISHED;
 
-      this->send_command(DALY_COMMAND_REQ_STATUS);
+      this->send_command(DALY_COMMAND_REQ_STATUS, 0x00);
       break;
     }
     case ESP_GATTC_NOTIFY_EVT: {
@@ -115,7 +110,7 @@ void DalyBmsBle::update() {
     return;
   }
 
-  this->send_command(DALY_COMMAND_REQ_STATUS);
+  this->send_command(DALY_COMMAND_REQ_STATUS, 0x00);
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<uint8_t> &data) {
@@ -135,7 +130,7 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
   uint8_t frame_type = data[2];  // data length
 
   switch (frame_type) {
-    case 0x7C:
+    case DALY_FRAME_LEN_STATUS:
       this->decode_status_data_(data);
       break;
     case 0x20:  // Run Info Last Battery Value
@@ -257,12 +252,13 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   ESP_LOGV(TAG, "Min cell voltage: %.3f V", daly_get_16bit(91) * 0.001f);
 
   //  93   2  0x00 0x00            Max cell temperature
-  ESP_LOGV(TAG, "Max cell temperature: %.0f °C?", (daly_get_16bit(93) - 40) * 1.0f);
+  ESP_LOGV(TAG, "Max cell temperature: %.0f °C", (daly_get_16bit(93) - 40) * 1.0f);
 
   //  95   2  0x00 0x00            Min cell temperature
-  ESP_LOGV(TAG, "Min cell temperature: %.0f °C?", (daly_get_16bit(95) - 40) * 1.0f);
+  ESP_LOGV(TAG, "Min cell temperature: %.0f °C", (daly_get_16bit(95) - 40) * 1.0f);
 
   //  97   2  0x00 0x00            Charge/discharge status (0=idle, 1=charging, 2=discharging)
+  ESP_LOGI(TAG, "  Status: %s", data[98] == 0 ? "Idle" : data[98] == 1 ? "Charging" : data[98] == 2 ? "Discharging" : "Unknown");
 
   //  99   2  0x0D 0x80            Capacity remaining
   this->publish_state_(this->capacity_remaining_sensor_, daly_get_16bit(99) * 0.1f);
@@ -277,10 +273,13 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->charging_cycles_sensor_, daly_get_16bit(105) * 1.0f);
 
   // 107   2  0x00 0x01            Balancer status (0: off, 1: on)
+  ESP_LOGI(TAG, "  Balancer status: %s", ONOFF((bool) data[108]));
 
   // 109   2  0x00 0x00            Charging mosfet status (0: off, 1: on)
+  ESP_LOGI(TAG, "  Charging mosfet: %s", ONOFF((bool) data[109]));
 
   // 111   2  0x00 0x01            Discharging mosfet status (0: off, 1: on)
+  ESP_LOGI(TAG, "  Discharging mosfet: %s", ONOFF((bool) data[112]));
 
   // 113   2  0x10 0x2E            Average cell voltage
   ESP_LOGV(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);
@@ -379,7 +378,7 @@ void DalyBmsBle::publish_state_(text_sensor::TextSensor *text_sensor, const std:
   text_sensor->publish_state(state);
 }
 
-bool DalyBmsBle::send_command(uint16_t function) {
+bool DalyBmsBle::send_command(uint8_t function, uint8_t value) {
   uint8_t frame[8];
 
   frame[0] = 0xD2;  // Modbus device address

@@ -16,8 +16,8 @@ ICON_CHARGING = "mdi:battery-charging-50"
 ICON_DISCHARGING = "mdi:battery-charging-50"
 
 SWITCHES = {
-    CONF_CHARGING: [0xD888, 0xD900],
-    CONF_DISCHARGING: [0x8555, 0x8600],
+    CONF_CHARGING: 0xD9,
+    CONF_DISCHARGING: 0x86,
 }
 
 DalySwitch = daly_bms_ble_ns.class_("DalySwitch", switch.Switch, cg.Component)
@@ -50,5 +50,4 @@ async def to_code(config):
             await switch.register_switch(var, conf)
             cg.add(getattr(hub, f"set_{key}_switch")(var))
             cg.add(var.set_parent(hub))
-            cg.add(var.set_command_turn_on(address[0]))
-            cg.add(var.set_command_turn_off(address[1]))
+            cg.add(var.set_holding_register(address))
