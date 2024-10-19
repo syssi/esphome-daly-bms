@@ -7,14 +7,11 @@ from esphome.const import (
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_EMPTY,
-    DEVICE_CLASS_ENERGY,
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_VOLTAGE,
     ICON_EMPTY,
-    ICON_TIMELAPSE,
     STATE_CLASS_MEASUREMENT,
-    STATE_CLASS_TOTAL_INCREASING,
     UNIT_AMPERE,
     UNIT_CELSIUS,
     UNIT_EMPTY,
@@ -44,10 +41,9 @@ CONF_MIN_VOLTAGE_CELL = "min_voltage_cell"
 CONF_MAX_VOLTAGE_CELL = "max_voltage_cell"
 CONF_DELTA_CELL_VOLTAGE = "delta_cell_voltage"
 CONF_AVERAGE_CELL_VOLTAGE = "average_cell_voltage"
-CONF_TOTAL_RUNTIME = "total_runtime"
-CONF_BALANCER_VOLTAGE = "balancer_voltage"
-CONF_TOTAL_CHARGED_CAPACITY = "total_charged_capacity"
-CONF_TOTAL_DISCHARGED_CAPACITY = "total_discharged_capacity"
+CONF_CELL_COUNT = "cell_count"
+CONF_TEMPERATURE_SENSORS = "temperature_sensors"
+CONF_CAPACITY_REMAINING = "capacity_remaining"
 
 CONF_CELL_VOLTAGE_1 = "cell_voltage_1"
 CONF_CELL_VOLTAGE_2 = "cell_voltage_2"
@@ -68,6 +64,12 @@ CONF_CELL_VOLTAGE_16 = "cell_voltage_16"
 
 CONF_TEMPERATURE_1 = "temperature_1"
 CONF_TEMPERATURE_2 = "temperature_2"
+CONF_TEMPERATURE_3 = "temperature_3"
+CONF_TEMPERATURE_4 = "temperature_4"
+CONF_TEMPERATURE_5 = "temperature_5"
+CONF_TEMPERATURE_6 = "temperature_6"
+CONF_TEMPERATURE_7 = "temperature_7"
+CONF_TEMPERATURE_8 = "temperature_8"
 
 ICON_CURRENT_DC = "mdi:current-dc"
 ICON_CHARGING_CYCLES = "mdi:battery-sync"
@@ -76,8 +78,8 @@ ICON_MAX_CELL_VOLTAGE = "mdi:battery-plus-outline"
 ICON_MIN_VOLTAGE_CELL = "mdi:battery-minus-outline"
 ICON_MAX_VOLTAGE_CELL = "mdi:battery-plus-outline"
 ICON_ERROR_BITMASK = "mdi:alert-circle-outline"
-ICON_TOTAL_CHARGED_CAPACITY = "mdi:battery-plus"
-ICON_TOTAL_DISCHARGED_CAPACITY = "mdi:battery-minus"
+ICON_CELL_COUNT = "mdi:car-battery"
+ICON_CAPACITY_REMAINING = "mdi:battery-50"
 
 UNIT_AMPERE_HOURS = "Ah"
 UNIT_SECONDS = "s"
@@ -104,6 +106,12 @@ CELLS = [
 TEMPERATURES = [
     CONF_TEMPERATURE_1,
     CONF_TEMPERATURE_2,
+    CONF_TEMPERATURE_3,
+    CONF_TEMPERATURE_4,
+    CONF_TEMPERATURE_5,
+    CONF_TEMPERATURE_6,
+    CONF_TEMPERATURE_7,
+    CONF_TEMPERATURE_8,
 ]
 
 SENSORS = [
@@ -121,10 +129,9 @@ SENSORS = [
     CONF_MAX_VOLTAGE_CELL,
     CONF_DELTA_CELL_VOLTAGE,
     CONF_AVERAGE_CELL_VOLTAGE,
-    CONF_TOTAL_RUNTIME,
-    CONF_BALANCER_VOLTAGE,
-    CONF_TOTAL_CHARGED_CAPACITY,
-    CONF_TOTAL_DISCHARGED_CAPACITY,
+    CONF_CELL_COUNT,
+    CONF_TEMPERATURE_SENSORS,
+    CONF_CAPACITY_REMAINING,
 ]
 
 # pylint: disable=too-many-function-args
@@ -148,21 +155,21 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_POWER): sensor.sensor_schema(
             unit_of_measurement=UNIT_WATT,
             icon=ICON_EMPTY,
-            accuracy_decimals=2,
+            accuracy_decimals=0,
             device_class=DEVICE_CLASS_POWER,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_CHARGING_POWER): sensor.sensor_schema(
             unit_of_measurement=UNIT_WATT,
             icon=ICON_EMPTY,
-            accuracy_decimals=2,
+            accuracy_decimals=0,
             device_class=DEVICE_CLASS_POWER,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_DISCHARGING_POWER): sensor.sensor_schema(
             unit_of_measurement=UNIT_WATT,
             icon=ICON_EMPTY,
-            accuracy_decimals=2,
+            accuracy_decimals=0,
             device_class=DEVICE_CLASS_POWER,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
@@ -217,7 +224,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_DELTA_CELL_VOLTAGE): sensor.sensor_schema(
             unit_of_measurement=UNIT_VOLT,
             icon=ICON_EMPTY,
-            accuracy_decimals=3,
+            accuracy_decimals=4,
             device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
@@ -236,6 +243,48 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_TEMPERATURE_2): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_TEMPERATURE_3): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_TEMPERATURE_4): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_TEMPERATURE_5): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_TEMPERATURE_6): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_TEMPERATURE_7): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_TEMPERATURE_8): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
             icon=ICON_EMPTY,
             accuracy_decimals=1,
@@ -354,33 +403,26 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
-        cv.Optional(CONF_TOTAL_RUNTIME): sensor.sensor_schema(
-            unit_of_measurement=UNIT_SECONDS,
-            icon=ICON_TIMELAPSE,
+        cv.Optional(CONF_CELL_COUNT): sensor.sensor_schema(
+            unit_of_measurement=UNIT_EMPTY,
+            icon=ICON_CELL_COUNT,
             accuracy_decimals=0,
             device_class=DEVICE_CLASS_EMPTY,
-            state_class=STATE_CLASS_TOTAL_INCREASING,
-        ),
-        cv.Optional(CONF_BALANCER_VOLTAGE): sensor.sensor_schema(
-            unit_of_measurement=UNIT_VOLT,
-            icon=ICON_EMPTY,
-            accuracy_decimals=3,
-            device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
-        cv.Optional(CONF_TOTAL_CHARGED_CAPACITY): sensor.sensor_schema(
-            unit_of_measurement=UNIT_AMPERE_HOURS,
-            icon=ICON_TOTAL_CHARGED_CAPACITY,
-            accuracy_decimals=3,
-            device_class=DEVICE_CLASS_ENERGY,
-            state_class=STATE_CLASS_TOTAL_INCREASING,
+        cv.Optional(CONF_TEMPERATURE_SENSORS): sensor.sensor_schema(
+            unit_of_measurement=UNIT_EMPTY,
+            icon=ICON_EMPTY,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_EMPTY,
+            state_class=STATE_CLASS_MEASUREMENT,
         ),
-        cv.Optional(CONF_TOTAL_DISCHARGED_CAPACITY): sensor.sensor_schema(
+        cv.Optional(CONF_CAPACITY_REMAINING): sensor.sensor_schema(
             unit_of_measurement=UNIT_AMPERE_HOURS,
-            icon=ICON_TOTAL_DISCHARGED_CAPACITY,
-            accuracy_decimals=3,
-            device_class=DEVICE_CLASS_ENERGY,
-            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon=ICON_CAPACITY_REMAINING,
+            accuracy_decimals=1,
+            device_class=DEVICE_CLASS_EMPTY,
+            state_class=STATE_CLASS_MEASUREMENT,
         ),
     }
 )

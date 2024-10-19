@@ -171,11 +171,6 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   //   5   2  0x10 0x29            Cell voltage 2
   //   7   2  0x10 0x33            Cell voltage 3
   //   9   2  0x10 0x3D            Cell voltage 4
-  ESP_LOGI(TAG, "Cell voltage 1: %.3f V", daly_get_16bit(3) * 0.001f);
-  ESP_LOGI(TAG, "Cell voltage 2: %.3f V", daly_get_16bit(5) * 0.001f);
-  ESP_LOGI(TAG, "Cell voltage 3: %.3f V", daly_get_16bit(7) * 0.001f);
-  ESP_LOGI(TAG, "Cell voltage 4: %.3f V", daly_get_16bit(9) * 0.001f);
-
   //  11   2  0x00 0x00            Cell voltage 5
   //  13   2  0x00 0x00            Cell voltage 6
   //  15   2  0x00 0x00            Cell voltage 7
@@ -204,118 +199,14 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   //  61   2  0x00 0x00            Cell voltage 30
   //  63   2  0x00 0x00            Cell voltage 31
   //  65   2  0x00 0x00            Cell voltage 32
-  //  67   2  0x00 0x3C            Temperature 1    [-40,100] °C
-  //  69   2  0x00 0x3D            Temperature 2
-  //  71   2  0x00 0x3E            Temperature 3
-  //  73   2  0x00 0x3F            Temperature 4
-  ESP_LOGI(TAG, "Temperature 1: %.2f °C", (daly_get_16bit(67) - 40) * 1.0f);
-  ESP_LOGI(TAG, "Temperature 2: %.2f °C", (daly_get_16bit(69) - 40) * 1.0f);
-  ESP_LOGI(TAG, "Temperature 3: %.2f °C", (daly_get_16bit(71) - 40) * 1.0f);
-  ESP_LOGI(TAG, "Temperature 4: %.2f °C", (daly_get_16bit(73) - 40) * 1.0f);
-  //  75   2  0x00 0x00            Temperature 5
-  //  77   2  0x00 0x00            Temperature 6
-  //  79   2  0x00 0x00            Temperature 7
-  //  81   2  0x00 0x00            Temperature 8
-  //  83   2  0x00 0x8C            Total voltage
-  ESP_LOGI(TAG, "Battery voltage: %.1f V", daly_get_16bit(83) * 0.1f);
-  //  85   2  0x75 0x4E            Current
-  ESP_LOGI(TAG, "Current: %.1f A", (daly_get_16bit(85) - 30000) * 0.1f);
-  //  87   2  0x03 0x84            State of charge
-  ESP_LOGI(TAG, "State of charge: %.0f %%", daly_get_16bit(87) * 0.001f);
-  //  89   2  0x10 0x3D            Max cell voltage
-  ESP_LOGI(TAG, "Max cell voltage: %.3f V", daly_get_16bit(89) * 0.001f);
-  //  91   2  0x10 0x1F            Min cell voltage
-  ESP_LOGI(TAG, "Min cell voltage: %.3f V", daly_get_16bit(91) * 0.001f);
-  //  93   2  0x00 0x00            Max cell temperature
-  ESP_LOGI(TAG, "Max cell temperature: %.0f °C", (daly_get_16bit(93) - 40) * 1.0f);
-  //  95   2  0x00 0x00            Min cell temperature
-  ESP_LOGI(TAG, "Min cell temperature: %.0f °C", (daly_get_16bit(95) - 40) * 1.0f);
-  //  97   2  0x00 0x00            Charge/discharge status (0=?, 1=charging, 2=discharging)
-  //  99   2  0x0D 0x80            Capacity remaining
-  ESP_LOGI(TAG, "Capacity remaining: %.1f Ah", daly_get_16bit(99) * 0.1f);
-  // 101   2  0x00 0x04            Cell count
-  ESP_LOGI(TAG, "Cell count: %.0f", daly_get_16bit(101) * 1.0f);
-  // 103   2  0x00 0x04            Number of temperature sensors
-  ESP_LOGI(TAG, "Number of temperature sensors: %.0f", daly_get_16bit(103) * 1.0f);
-  // 105   2  0x00 0x39            Charging cycles
-  ESP_LOGI(TAG, "Charging cycles: %.0f", daly_get_16bit(105) * 1.0f);
-  // 107   2  0x00 0x01            Balancer status (0: off, 1: on)
-  // 109   2  0x00 0x00            Charging mosfet status (0: off, 1: on)
-  // 111   2  0x00 0x01            Discharging mosfet status (0: off, 1: on)
-  // 113   2  0x10 0x2E            Average cell voltage
-  ESP_LOGI(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);
-  // 115   2  0x01 0x41            Delta cell voltage
-  ESP_LOGI(TAG, "Delta cell voltage: %.3f V", daly_get_16bit(115) * 0.001f);
-  // 117   2  0x00 0x2A            Power
-  ESP_LOGI(TAG, "Power: %.0f W", daly_get_16bit(117) * 1.0f);
-  // 119   2  0x00 0x00            Alarm1
-  // 121   2  0x00 0x00            Alarm2
-  // 123   2  0x00 0x00            Alarm3
-  // 125   2  0x00 0x00            Alarm4
-  // 127   2  0xA0 0xDF            CRC
-}
-
-void DalyBmsBle::decode_cell_info_data_(const std::vector<uint8_t> &data) {
-  auto daly_get_16bit = [&](size_t i) -> uint16_t {
-    return (uint16_t(data[i + 0]) << 8) | (uint16_t(data[i + 1]) << 0);
-  };
-  auto daly_get_32bit = [&](size_t i) -> uint32_t {
-    return (uint32_t(daly_get_16bit(i + 0)) << 16) | (uint32_t(daly_get_16bit(i + 2)) << 0);
-  };
-
-  ESP_LOGI(TAG, "Cell info frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
-
-  // Byte Len Payload              Description                      Unit  Precision
-  //  0    1  0x02                 Frame type
-  //  1    1  0x00
-  //  2    1  0x07                 Cell count
-  ESP_LOGI(TAG, "  Cell count: %d", data[2]);
-  uint8_t cell_count = data[2];
-
-  //  3    1  0x00
-  //  4    1  0x00
-  //  5    1  0x00
-  //  6    1  0x00
-  //  7    1  0x00
-  //  8    4  0x00 0x00 0x00 0x00  Balancing mask
-  ESP_LOGI(TAG, "  Balancing mask: %d", daly_get_32bit(8));
-
-  //  12   1  0x00
-  //  13   1  0x00
-  //  14   1  0x00
-  //  15   1  0x00
-  //  16   1  0x00
-  //  17   1  0x00
-  //  18   1  0x00
-  //  19   1  0x00
-  //  20   4  0x40 0x56 0x66 0x66  Balancer voltage
-  this->publish_state_(this->balancer_voltage_sensor_, ieee_float_(daly_get_32bit(20)));
-
-  //  24   4  0x40 0x53 0x33 0x33  Cell voltage 1
-  //  28   4  0x40 0x53 0x3a 0xe1  Cell voltage 2
-  //  32   4  0x40 0x53 0x47 0xae  Cell voltage 3
-  //  36   4  0x40 0x53 0x3a 0xe1  Cell voltage 4
-  //  40   4  0x40 0x53 0x42 0x8f  Cell voltage 5
-  //  44   4  0x40 0x53 0x40 0x00  Cell voltage 6
-  //  48   4  0x40 0x53 0x3d 0x71  Cell voltage 7
-  //  52   4  0x00 0x00 0x00 0x00  Cell voltage 8
-  //  56   4  0x00 0x00 0x00 0x00  Cell voltage 9
-  //  60   4  0x00 0x00 0x00 0x00  Cell voltage 10
-  //  64   4  0x00 0x00 0x00 0x00  Cell voltage 11
-  //  68   4  0x00 0x00 0x00 0x00  Cell voltage 12
-  //  72   4  0x00 0x00 0x00 0x00  Cell voltage 13
-  //  76   4  0x00 0x00 0x00 0x00  Cell voltage 14
-  //  80   4  0x00 0x00 0x00 0x00  Cell voltage 15
-  //  84   4  0x00 0x00 0x00 0x00  Cell voltage 16
   float min_cell_voltage = 100.0f;
   float max_cell_voltage = -100.0f;
   float average_cell_voltage = 0.0f;
   uint8_t min_voltage_cell = 0;
   uint8_t max_voltage_cell = 0;
-  uint8_t cells = std::min(MAX_KNOWN_CELL_COUNT, cell_count);
+  uint8_t cells = std::min(data[102], (uint8_t) 16);
   for (uint8_t i = 0; i < cells; i++) {
-    float cell_voltage = ieee_float_(daly_get_32bit((i * 4) + 24));
+    float cell_voltage = daly_get_16bit(3 + (i * 2)) * 0.001f;
     average_cell_voltage = average_cell_voltage + cell_voltage;
     if (cell_voltage > 0 && cell_voltage < min_cell_voltage) {
       min_cell_voltage = cell_voltage;
@@ -333,8 +224,81 @@ void DalyBmsBle::decode_cell_info_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->max_cell_voltage_sensor_, max_cell_voltage);
   this->publish_state_(this->max_voltage_cell_sensor_, (float) max_voltage_cell);
   this->publish_state_(this->min_voltage_cell_sensor_, (float) min_voltage_cell);
-  this->publish_state_(this->delta_cell_voltage_sensor_, max_cell_voltage - min_cell_voltage);
+  // this->publish_state_(this->delta_cell_voltage_sensor_, max_cell_voltage - min_cell_voltage);
   this->publish_state_(this->average_cell_voltage_sensor_, average_cell_voltage);
+
+  //  67   2  0x00 0x3C            Temperature 1    [-40,100] °C
+  //  69   2  0x00 0x3D            Temperature 2
+  //  71   2  0x00 0x3E            Temperature 3
+  //  73   2  0x00 0x3F            Temperature 4
+  //  75   2  0x00 0x00            Temperature 5
+  //  77   2  0x00 0x00            Temperature 6
+  //  79   2  0x00 0x00            Temperature 7
+  //  81   2  0x00 0x00            Temperature 8
+  uint8_t temperature_sensors = std::min(data[104], (uint8_t) 8);
+  this->publish_state_(this->temperature_sensors_sensor_, temperature_sensors);
+  for (uint8_t i = 0; i < temperature_sensors; i++) {
+    this->publish_state_(this->temperatures_[i].temperature_sensor_, (daly_get_16bit(67 + (i * 2)) - 40) * 1.0f);
+  }
+
+  //  83   2  0x00 0x8C            Total voltage
+  this->publish_state_(this->total_voltage_sensor_, daly_get_16bit(83) * 0.1f);
+
+  //  85   2  0x75 0x4E            Current
+  this->publish_state_(this->current_sensor_, (daly_get_16bit(85) - 30000) * 0.1f);
+
+  //  87   2  0x03 0x84            State of charge
+  this->publish_state_(this->state_of_charge_sensor_, daly_get_16bit(87) * 0.1f);
+
+  //  89   2  0x10 0x3D            Max cell voltage
+  ESP_LOGV(TAG, "Max cell voltage: %.3f V", daly_get_16bit(89) * 0.001f);
+
+  //  91   2  0x10 0x1F            Min cell voltage
+  ESP_LOGV(TAG, "Min cell voltage: %.3f V", daly_get_16bit(91) * 0.001f);
+
+  //  93   2  0x00 0x00            Max cell temperature
+  ESP_LOGV(TAG, "Max cell temperature: %.0f °C?", (daly_get_16bit(93) - 40) * 1.0f);
+
+  //  95   2  0x00 0x00            Min cell temperature
+  ESP_LOGV(TAG, "Min cell temperature: %.0f °C?", (daly_get_16bit(95) - 40) * 1.0f);
+
+  //  97   2  0x00 0x00            Charge/discharge status (0=idle, 1=charging, 2=discharging)
+
+  //  99   2  0x0D 0x80            Capacity remaining
+  this->publish_state_(this->capacity_remaining_sensor_, daly_get_16bit(99) * 0.1f);
+
+  // 101   2  0x00 0x04            Cell count
+  this->publish_state_(this->cell_count_sensor_, daly_get_16bit(101) * 1.0f);
+
+  // 103   2  0x00 0x04            Number of temperature sensors
+  this->publish_state_(this->temperature_sensors_sensor_, daly_get_16bit(103) * 1.0f);
+
+  // 105   2  0x00 0x39            Charging cycles
+  this->publish_state_(this->charging_cycles_sensor_, daly_get_16bit(105) * 1.0f);
+
+  // 107   2  0x00 0x01            Balancer status (0: off, 1: on)
+
+  // 109   2  0x00 0x00            Charging mosfet status (0: off, 1: on)
+
+  // 111   2  0x00 0x01            Discharging mosfet status (0: off, 1: on)
+
+  // 113   2  0x10 0x2E            Average cell voltage
+  ESP_LOGV(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);
+
+  // 115   2  0x01 0x41            Delta cell voltage
+  this->publish_state_(this->delta_cell_voltage_sensor_, daly_get_16bit(115) * 0.0001f);
+
+  // 117   2  0x00 0x2A            Power
+  float power = daly_get_16bit(117) * 1.0f;
+  this->publish_state_(this->power_sensor_, power);
+  this->publish_state_(this->charging_power_sensor_, std::max(0.0f, power));               // 500W vs 0W -> 500W
+  this->publish_state_(this->discharging_power_sensor_, std::abs(std::min(0.0f, power)));  // -500W vs 0W -> 500W
+
+  // 119   2  0x00 0x00            Alarm1
+  // 121   2  0x00 0x00            Alarm2
+  // 123   2  0x00 0x00            Alarm3
+  // 125   2  0x00 0x00            Alarm4
+  // 127   2  0xA0 0xDF            CRC
 }
 
 void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,readability-function-size)
@@ -358,6 +322,12 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Delta cell voltage", this->delta_cell_voltage_sensor_);
   LOG_SENSOR("", "Temperature 1", this->temperatures_[0].temperature_sensor_);
   LOG_SENSOR("", "Temperature 2", this->temperatures_[1].temperature_sensor_);
+  LOG_SENSOR("", "Temperature 3", this->temperatures_[2].temperature_sensor_);
+  LOG_SENSOR("", "Temperature 4", this->temperatures_[3].temperature_sensor_);
+  LOG_SENSOR("", "Temperature 5", this->temperatures_[4].temperature_sensor_);
+  LOG_SENSOR("", "Temperature 6", this->temperatures_[5].temperature_sensor_);
+  LOG_SENSOR("", "Temperature 7", this->temperatures_[6].temperature_sensor_);
+  LOG_SENSOR("", "Temperature 8", this->temperatures_[7].temperature_sensor_);
   LOG_SENSOR("", "Cell Voltage 1", this->cells_[0].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 2", this->cells_[1].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 3", this->cells_[2].cell_voltage_sensor_);
@@ -374,9 +344,9 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Cell Voltage 14", this->cells_[13].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 15", this->cells_[14].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 16", this->cells_[15].cell_voltage_sensor_);
-  LOG_SENSOR("", "Balancer voltage", this->balancer_voltage_sensor_);
-  LOG_SENSOR("", "Total charged capacity", this->total_charged_capacity_sensor_);
-  LOG_SENSOR("", "Total discharged capacity", this->total_discharged_capacity_sensor_);
+  LOG_SENSOR("", "Cell count", this->cell_count_sensor_);
+  LOG_SENSOR("", "Temperature sensors", this->temperature_sensors_sensor_);
+  LOG_SENSOR("", "Capacity remaining", this->capacity_remaining_sensor_);
 
   LOG_TEXT_SENSOR("", "Errors", this->errors_text_sensor_);
 }
@@ -434,8 +404,6 @@ bool DalyBmsBle::send_command(uint16_t function) {
 
   return (status == 0);
 }
-
-bool DalyBmsBle::send_factory_reset() { return false; }
 
 std::string DalyBmsBle::bitmask_to_string_(const char *const messages[], const uint8_t &messages_size,
                                            const uint8_t &mask) {

@@ -94,7 +94,5 @@ logger:
 * https://github.com/fl4p/batmon-ha/blob/master/bmslib/models/daly2.py
 * https://github.com/patman15/BMS_BLE-HA/blob/main/custom_components/bms_ble/plugins/daly_bms.py
 * https://github.com/patman15/BMS_BLE-HA/blob/main/tests/test_daly_bms.py
-* https://github.com/dreadnought/python-daly-bms/blob/main/dalybms/daly_bms_bluetooth.py
-* https://github.com/tomatensaus/python-daly-bms/blob/main/dalybms/daly_bms_bluetooth.py
 * https://esphome.io/components/sensor/daly_bms.html
 * https://diysolarforum.com/threads/a-new-uart-protocol-for-a-daly-smart-150a-bms.86306/

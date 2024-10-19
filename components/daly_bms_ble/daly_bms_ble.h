@@ -72,28 +72,21 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_temperature_sensor(uint8_t temperature, sensor::Sensor *temperature_sensor) {
     this->temperatures_[temperature].temperature_sensor_ = temperature_sensor;
   }
-  void set_total_runtime_sensor(sensor::Sensor *total_runtime_sensor) { total_runtime_sensor_ = total_runtime_sensor; }
-  void set_balancer_voltage_sensor(sensor::Sensor *balancer_voltage_sensor) {
-    balancer_voltage_sensor_ = balancer_voltage_sensor;
+  void set_cell_count_sensor(sensor::Sensor *cell_count_sensor) { cell_count_sensor_ = cell_count_sensor; }
+  void set_temperature_sensors_sensor(sensor::Sensor *temperature_sensors_sensor) {
+    temperature_sensors_sensor_ = temperature_sensors_sensor;
   }
-  void set_total_charged_capacity_sensor(sensor::Sensor *total_charged_capacity_sensor) {
-    total_charged_capacity_sensor_ = total_charged_capacity_sensor;
-  }
-  void set_total_discharged_capacity_sensor(sensor::Sensor *total_discharged_capacity_sensor) {
-    total_discharged_capacity_sensor_ = total_discharged_capacity_sensor;
+  void set_capacity_remaining_sensor(sensor::Sensor *capacity_remaining_sensor) {
+    capacity_remaining_sensor_ = capacity_remaining_sensor;
   }
 
   void set_errors_text_sensor(text_sensor::TextSensor *errors_text_sensor) { errors_text_sensor_ = errors_text_sensor; }
-  void set_total_runtime_formatted_text_sensor(text_sensor::TextSensor *total_runtime_formatted_text_sensor) {
-    total_runtime_formatted_text_sensor_ = total_runtime_formatted_text_sensor;
-  }
 
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
 
   void on_daly_bms_ble_data(const uint8_t &handle, const std::vector<uint8_t> &data);
   bool send_command(uint16_t function);
-  bool send_factory_reset();
   void set_password(uint32_t password) { this->password_ = password; }
 
  protected:
@@ -114,16 +107,14 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   sensor::Sensor *max_voltage_cell_sensor_;
   sensor::Sensor *delta_cell_voltage_sensor_;
   sensor::Sensor *average_cell_voltage_sensor_;
-  sensor::Sensor *total_runtime_sensor_;
-  sensor::Sensor *balancer_voltage_sensor_;
-  sensor::Sensor *total_charged_capacity_sensor_;
-  sensor::Sensor *total_discharged_capacity_sensor_;
+  sensor::Sensor *cell_count_sensor_;
+  sensor::Sensor *temperature_sensors_sensor_;
+  sensor::Sensor *capacity_remaining_sensor_;
 
   switch_::Switch *charging_switch_;
   switch_::Switch *discharging_switch_;
 
   text_sensor::TextSensor *errors_text_sensor_;
-  text_sensor::TextSensor *total_runtime_formatted_text_sensor_;
 
   struct Cell {
     sensor::Sensor *cell_voltage_sensor_{nullptr};
@@ -131,7 +122,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
 
   struct Temperature {
     sensor::Sensor *temperature_sensor_{nullptr};
-  } temperatures_[2];
+  } temperatures_[8];
 
   uint16_t char_notify_handle_;
   uint16_t char_command_handle_;
@@ -146,24 +137,6 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   std::string bitmask_to_string_(const char *const messages[], const uint8_t &messages_size, const uint8_t &mask);
 
   bool check_bit_(uint16_t mask, uint16_t flag) { return (mask & flag) == flag; }
-
-  std::string format_total_runtime_(const uint32_t value) {
-    int seconds = (int) value;
-    int years = seconds / (24 * 3600 * 365);
-    seconds = seconds % (24 * 3600 * 365);
-    int days = seconds / (24 * 3600);
-    seconds = seconds % (24 * 3600);
-    int hours = seconds / 3600;
-    return (years ? to_string(years) + "y " : "") + (days ? to_string(days) + "d " : "") +
-           (hours ? to_string(hours) + "h" : "");
-  }
-
-  float ieee_float_(uint32_t f) {
-    static_assert(sizeof(float) == sizeof f, "`float` has a weird size.");
-    float ret;
-    std::memcpy(&ret, &f, sizeof(float));
-    return ret;
-  }
 };
 
 }  // namespace daly_bms_ble
