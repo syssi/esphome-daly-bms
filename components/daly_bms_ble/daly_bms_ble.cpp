@@ -270,13 +270,13 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->charging_cycles_sensor_, daly_get_16bit(105) * 1.0f);
 
   // 107   2  0x00 0x01            Balancer status (0: off, 1: on)
-  ESP_LOGI(TAG, "Balancer status: %s", ONOFF((bool) data[108]));
+  ESP_LOGI(TAG, "Balancer status: %s", ONOFF((bool) daly_get_16bit(107)));
 
   // 109   2  0x00 0x00            Charging mosfet status (0: off, 1: on)
-  ESP_LOGI(TAG, "Charging mosfet: %s", ONOFF((bool) data[109]));
+  this->publish_state_(this->charging_binary_sensor_, (bool) daly_get_16bit(109));
 
   // 111   2  0x00 0x01            Discharging mosfet status (0: off, 1: on)
-  ESP_LOGI(TAG, "Discharging mosfet: %s", ONOFF((bool) data[112]));
+  this->publish_state_(this->discharging_binary_sensor_, (bool) daly_get_16bit(111));
 
   // 113   2  0x10 0x2E            Average cell voltage
   ESP_LOGV(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);
@@ -425,9 +425,11 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 
   //  77   2  0x00 0x01   0xA5    Charging MOS switch (0: off, 1: on)                     -          1
   ESP_LOGI(TAG, "Charging MOS switch: %s", ONOFF((bool) daly_get_16bit(77)));
+  this->publish_state_(this->charging_switch_, (bool) daly_get_16bit(77));
 
   //  79   2  0x00 0x01   0xA6    Discharge MOS switch (0: off, 1: on)                    -          1
   ESP_LOGI(TAG, "Discharge MOS switch: %s", ONOFF((bool) daly_get_16bit(79)));
+  this->publish_state_(this->discharging_switch_, (bool) daly_get_16bit(79));
 
   //  81   2  0x02 0xA8   0xA7    SOC settings (68.0)                                     %          0.1
   ESP_LOGI(TAG, "SOC settings: %.1f %%", daly_get_16bit(81) * 0.1f);
