@@ -15,6 +15,7 @@ static const uint8_t DALY_FRAME_START = 0xD2;
 static const uint8_t DALY_FRAME_START2 = 0x03;
 
 static const uint8_t DALY_FRAME_LEN_STATUS = 0x7C;
+static const uint8_t DALY_FRAME_LEN_VERSIONS = 0x40;
 
 static const uint8_t DALY_COMMAND_REQ_STATUS = 0x00;
 
@@ -118,7 +119,7 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
     case DALY_FRAME_LEN_STATUS:
       this->decode_status_data_(data);
       break;
-    case 0x40:
+    case DALY_FRAME_LEN_VERSIONS:
       this->decode_version_data_(data);
       break;
     case 0x20:  // Run Info Last Battery Value
