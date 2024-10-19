@@ -15,6 +15,7 @@ static const uint8_t DALY_FRAME_START = 0xD2;
 static const uint8_t DALY_FRAME_START2 = 0x03;
 
 static const uint8_t DALY_FRAME_LEN_STATUS = 0x7C;
+static const uint8_t DALY_FRAME_LEN_SETTINGS = 0x52;
 static const uint8_t DALY_FRAME_LEN_VERSIONS = 0x40;
 static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
 
@@ -120,6 +121,9 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
     case DALY_FRAME_LEN_STATUS:
       this->decode_status_data_(data);
       break;
+    case DALY_FRAME_LEN_SETTINGS:
+      this->decode_settings_data_(data);
+      break;
     case DALY_FRAME_LEN_VERSIONS:
       this->decode_version_data_(data);
       break;
@@ -127,7 +131,6 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
       this->decode_password_data_(data);
       break;
     case 0x20:  // Run Info Last Battery Value
-    case 0x52:  // Set Info
     default:
       ESP_LOGW(TAG, "Unhandled response received (frame_type 0x%02X): %s", frame_type,
                format_hex_pretty(&data.front(), data.size()).c_str());
@@ -288,6 +291,67 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   // 123   2  0x00 0x00            Alarm3
   // 125   2  0x00 0x00            Alarm4
   // 127   2  0xA0 0xDF            CRC
+}
+
+void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
+  auto daly_get_16bit = [&](size_t i) -> uint16_t {
+    return (uint16_t(data[i + 0]) << 8) | (uint16_t(data[i + 1]) << 0);
+  };
+
+  ESP_LOGI(TAG, "Settings frame received");
+  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
+
+  // See docs/dalyModbusProtocol.xlsx
+  //
+  // Byte Len Payload    Register Description                                      Unit  Precision
+  //   0   1  0xD2                Start of frame
+  //   1   1  0x03                Start of frame
+  //   2   1  0x52                Data length
+
+  //   3   2  0x04 0x1A   0x80    Rated capacity (105.0)                                  Ah         0.1
+  ESP_LOGI(TAG, "Rated capacity: %.1f Ah", daly_get_16bit(3) * 0.1f);
+
+  //   5   2  0x0C 0x80   0x81    Cell reference voltage (3200)                           mV         1
+  //   7   2  0x00 0x01   0x82    Number of acquisition boards (1)                        -          1
+  //   9   2  0x00 0x04   0x83    Number of units in collection board 1 (4)               -          1
+  //  11   2  0x00 0x00   0x84    Number of units in collection board 2 (0)               -          1
+  //  13   2  0x00 0x00   0x85    Number of units in collection board 3 (0)               -          1
+  //  15   2  0x01 0x00   0x86    Temperature for board 1 (256)                           -          1
+  //  17   2  0x00 0x00   0x87    Temperature for board 2 (0)                             -          1
+  //  19   2  0x00 0x00   0x88    Temperature for board 3 (0)                             -          1
+  //  21   2  0x00 0x00   0x89    Battery type (0: LiFePO4, 1: Li-ion, 2: LTO)            -          1
+  //  23   2  0x1C 0x20   0x8A    Sleep wait time (7200)                                  S          1
+  //  25   2  0x0D 0xAC   0x8B    Level 1 alarm - cell voltage too high (3500)            mV         1
+  //  27   2  0x0D 0xAC   0x8C    Level 2 alarm - cell voltage too high (3500)            mV         1
+  //  29   2  0x0A 0x28   0x8D    Level 1 alarm - cell voltage too low (2600)             mV         1
+  //  31   2  0x0A 0x28   0x8E    Level 2 alarm - cell voltage too low (2600)             mV         1
+  //  33   2  0x00 0x8C   0x8F    Level 1 alarm - total voltage too high (14.0)           V          0.1
+  //  35   2  0x00 0x8C   0x90    Level 2 alarm - total voltage too high (14.0)           V          0.1
+  //  37   2  0x00 0x68   0x91    Level 1 alarm - total voltage too low (10.4)            V          0.1
+  //  39   2  0x00 0x68   0x92    Level 2 alarm - total voltage too low (10.4)            V          0.1
+  //  41   2  0x74 0xCC   0x93    Level 1 alarm - charging current too high (-1.0)        A          0.1
+  //  43   2  0x74 0xCC   0x94    Level 2 alarm - charging current too high (-1.0)        A          0.1
+  //  45   2  0x74 0x90   0x95    Level 1 alarm - discharge current too high (298.4)      A          0.1
+  //  47   2  0x75 0xD0   0x96    Level 2 alarm - discharge current too high (301.6)      A          0.1
+  //  49   2  0x00 0x55   0x97    Level 1 alarm - charging temperature too high (45)      °C         1
+  //  51   2  0x00 0x55   0x98    Level 2 alarm - charging temperature too high (45)      °C         1
+  //  53   2  0x00 0x28   0x99    Level 1 alarm - charging temperature too low (0)        °C         1
+  //  55   2  0x00 0x28   0x9A    Level 2 alarm - charging temperature too low (0)        °C         1
+  //  57   2  0x00 0x6E   0x9B    Level 1 alarm - discharge temperature too high (70)     °C         1
+  //  59   2  0x00 0x6E   0x9C    Level 2 alarm - discharge temperature too high (70)     °C         1
+  //  61   2  0x00 0x27   0x9D    Level 1 alarm - discharge temperature too low (-1)      °C         1
+  //  63   2  0x00 0x27   0x9E    Level 2 alarm - discharge temperature too low (-1)      °C         1
+  //  65   2  0x00 0xFF   0x9F    Level 1 alarm - excessive voltage difference (255)      mV         1
+  //  67   2  0x00 0xFF   0xA0    Level 2 alarm - excessive voltage difference (255)      mV         1
+  //  69   2  0x00 0xFF   0xA1    Level 1 alarm - excessive temperature difference (215)  °C         1
+  //  71   2  0x00 0xFF   0xA2    Level 2 alarm - excessive temperature difference (215)  °C         1
+  //  73   2  0x0C 0x80   0xA3    Balancing turn on voltage (3200)                        mV         1
+  //  75   2  0x00 0x14   0xA4    Equilibrium opening voltage difference (20)             mV         1
+  //  77   2  0x00 0x01   0xA5    Charging MOS switch (1: on)                             -          1
+  //  79   2  0x00 0x01   0xA6    Discharge MOS switch (1: on)                            -          1
+  //  81   2  0x02 0xA8   0xA7    SOC settings (68.0)                                     %          0.1
+  //  83   2  0x00 0x57   0xA8    MOS temperature protection alarm (47-40=7)              °C         1
+  //  85   2  0x7F 0x8B   CRC
 }
 
 void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
