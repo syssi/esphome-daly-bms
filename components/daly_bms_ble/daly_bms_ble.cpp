@@ -32,21 +32,6 @@ static const char *const ERRORS[ERRORS_SIZE] = {
     "Short circuit protection",              // 1000 0000
 };
 
-uint16_t crc16(const uint8_t *data, size_t length) {
-  uint16_t crc = 0xFFFF;
-  for (int i = 0; i < length; i++) {
-    crc ^= data[i];
-    for (int j = 0; j < 8; j++) {
-      if (crc & 1) {
-        crc = (crc >> 1) ^ 0xA001;
-      } else {
-        crc >>= 1;
-      }
-    }
-  }
-  return crc;
-}
-
 void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                                      esp_ble_gattc_cb_param_t *param) {
   switch (event) {
@@ -136,6 +121,8 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
     case 0x20:  // Run Info Last Battery Value
     case 0x52:  // Set Info
     case 0x40:  // Version Info
+      ESP_LOGI(TAG, "Unsupported version info frame received");
+      break;
     case 0x06:  // Password?
     default:
       ESP_LOGW(TAG, "Unhandled response received (frame_type 0x%02X): %s", frame_type,
@@ -258,7 +245,11 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   ESP_LOGV(TAG, "Min cell temperature: %.0f °C", (daly_get_16bit(95) - 40) * 1.0f);
 
   //  97   2  0x00 0x00            Charge/discharge status (0=idle, 1=charging, 2=discharging)
-  ESP_LOGI(TAG, "  Status: %s", data[98] == 0 ? "Idle" : data[98] == 1 ? "Charging" : data[98] == 2 ? "Discharging" : "Unknown");
+  ESP_LOGI(TAG, "  Status: %s",
+           data[98] == 0   ? "Idle"
+           : data[98] == 1 ? "Charging"
+           : data[98] == 2 ? "Discharging"
+                           : "Unknown");
 
   //  99   2  0x0D 0x80            Capacity remaining
   this->publish_state_(this->capacity_remaining_sensor_, daly_get_16bit(99) * 0.1f);
