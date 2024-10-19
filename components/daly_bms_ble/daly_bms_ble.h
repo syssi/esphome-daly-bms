@@ -129,7 +129,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   uint32_t password_ = 12345678;
 
   void decode_status_data_(const std::vector<uint8_t> &data);
-  void decode_cell_info_data_(const std::vector<uint8_t> &data);
+  void decode_version_data_(const std::vector<uint8_t> &data);
   void publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state);
   void publish_state_(sensor::Sensor *sensor, float value);
   void publish_state_(switch_::Switch *obj, const bool &state);
