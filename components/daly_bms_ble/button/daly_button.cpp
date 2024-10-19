@@ -20,7 +20,8 @@ void DalyButton::press_action() {
     return;
   }
 
-  this->parent_->send_command(DALY_FUNCTION_WRITE, this->holding_register_, 0x0000);
+  this->parent_->send_command(DALY_FUNCTION_WRITE, this->holding_register_,
+                              0x0000);  // @FIXME: This payload is just a guess
 }
 
 }  // namespace daly_bms_ble
