@@ -118,8 +118,8 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
     case DALY_FRAME_LEN_STATUS:
       this->decode_status_data_(data);
       break;
-    case 0x40:  // Version Info
-      ESP_LOGI(TAG, "Unsupported version info frame received");
+    case 0x40:
+      this->decode_version_data_(data);
       break;
     case 0x20:  // Run Info Last Battery Value
     case 0x52:  // Set Info
@@ -137,11 +137,6 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
 
   ESP_LOGI(TAG, "Status frame received");
   ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
-
-  if (data.size() < 40) {
-    ESP_LOGW(TAG, "Invalid status frame length: %d", data.size());
-    return;
-  }
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -289,6 +284,35 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   // 123   2  0x00 0x00            Alarm3
   // 125   2  0x00 0x00            Alarm4
   // 127   2  0xA0 0xDF            CRC
+}
+
+void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
+  auto daly_get_16bit = [&](size_t i) -> uint16_t {
+    return (uint16_t(data[i + 0]) << 8) | (uint16_t(data[i + 1]) << 0);
+  };
+
+  ESP_LOGI(TAG, "Software/hardware version frame received");
+  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
+
+  // See docs/dalyModbusProtocol.xlsx
+  //
+  // Byte Len Payload              Description                      Unit  Precision
+  //   0   1  0xD2                 Start of frame
+  //   1   1  0x03                 Start of frame
+  //   2   1  0x40                 Data length
+  //   3  32  0x34 0x30 0x31 0x30 0x31 0x32 0x00 0x00 0x00 0x00
+  //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+  //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+  //          0x00 0x00            Software version
+  ESP_LOGI(TAG, "  Software version: %s", std::string(data.begin() + 3, data.begin() + 3 + 32).c_str());
+
+  //  35  32  0x42 0x4D 0x53 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+  //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+  //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+  //          0x00 0x00            Hardware version
+  ESP_LOGI(TAG, "  Hardware version: %s", std::string(data.begin() + 35, data.begin() + 35 + 32).c_str());
+
+  //  67   2  0x65 0x13
 }
 
 void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,readability-function-size)
