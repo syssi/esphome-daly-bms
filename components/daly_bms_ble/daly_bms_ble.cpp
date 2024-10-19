@@ -19,7 +19,7 @@ static const uint8_t DALY_FRAME_LEN_SETTINGS = 0x52;
 static const uint8_t DALY_FRAME_LEN_VERSIONS = 0x40;
 static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
 
-static const uint8_t DALY_COMMAND_REQ_STATUS = 0x00;
+static const uint16_t DALY_COMMAND_REQ_STATUS = 0x0000;
 
 static const uint8_t MAX_RESPONSE_SIZE = 129;
 
@@ -75,7 +75,7 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
     case ESP_GATTC_REG_FOR_NOTIFY_EVT: {
       this->node_state = espbt::ClientState::ESTABLISHED;
 
-      this->send_command(DALY_COMMAND_REQ_STATUS, 0x00);
+      this->send_command(DALY_COMMAND_REQ_STATUS, 0x0000);
       break;
     }
     case ESP_GATTC_NOTIFY_EVT: {
@@ -98,7 +98,7 @@ void DalyBmsBle::update() {
     return;
   }
 
-  this->send_command(DALY_COMMAND_REQ_STATUS, 0x00);
+  this->send_command(DALY_COMMAND_REQ_STATUS, 0x0000);
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<uint8_t> &data) {
@@ -553,7 +553,7 @@ void DalyBmsBle::publish_state_(text_sensor::TextSensor *text_sensor, const std:
   text_sensor->publish_state(state);
 }
 
-bool DalyBmsBle::send_command(uint8_t function, uint8_t value) {
+bool DalyBmsBle::send_command(uint16_t address, uint16_t value) {
   uint8_t frame[8];
 
   frame[0] = 0xD2;  // Modbus device address

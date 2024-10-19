@@ -16,8 +16,8 @@ ICON_CHARGING = "mdi:battery-charging-50"
 ICON_DISCHARGING = "mdi:battery-charging-50"
 
 SWITCHES = {
-    CONF_CHARGING: 0xD9,
-    CONF_DISCHARGING: 0x86,
+    CONF_CHARGING: 0x00A5,
+    CONF_DISCHARGING: 0x00A6,
 }
 
 DalySwitch = daly_bms_ble_ns.class_("DalySwitch", switch.Switch, cg.Component)
