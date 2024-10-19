@@ -8,8 +8,8 @@ namespace daly_bms_ble {
 static const char *const TAG = "daly_bms_ble";
 
 static const uint16_t DALY_BMS_SERVICE_UUID = 0xFFF0;
-static const uint16_t DALY_BMS_NOTIFY_CHARACTERISTIC_UUID = 0xFFF1;   // handle 0x17?
-static const uint16_t DALY_BMS_CONTROL_CHARACTERISTIC_UUID = 0xFFF2;  // handle 0x15?
+static const uint16_t DALY_BMS_NOTIFY_CHARACTERISTIC_UUID = 0xFFF1;
+static const uint16_t DALY_BMS_CONTROL_CHARACTERISTIC_UUID = 0xFFF2;
 
 static const uint8_t DALY_FRAME_START = 0xD2;
 static const uint8_t DALY_FRAME_START2 = 0x03;
@@ -17,13 +17,13 @@ static const uint8_t DALY_FRAME_START2 = 0x03;
 static const uint8_t DALY_FUNCTION_READ = 0x03;
 static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 
+static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0x0000;
+static const uint16_t DALY_COMMAND_REQ_STATUS_QTY = 0x003E;
+
 static const uint8_t DALY_FRAME_LEN_STATUS = 0x7C;
 static const uint8_t DALY_FRAME_LEN_SETTINGS = 0x52;
 static const uint8_t DALY_FRAME_LEN_VERSIONS = 0x40;
 static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
-
-static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0x0000;
-static const uint16_t DALY_COMMAND_REQ_STATUS_QTY = 0x003E;
 
 static const uint8_t MAX_RESPONSE_SIZE = 129;
 
@@ -88,7 +88,7 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
 
       std::vector<uint8_t> data(param->notify.value, param->notify.value + param->notify.value_len);
 
-      this->on_daly_bms_ble_data(param->notify.handle, data);
+      this->on_daly_bms_ble_data(data);
       break;
     }
     default:
@@ -105,7 +105,7 @@ void DalyBmsBle::update() {
   this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, DALY_COMMAND_REQ_STATUS_QTY);
 }
 
-void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<uint8_t> &data) {
+void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   if (data[0] != DALY_FRAME_START || data[1] != DALY_FRAME_START2 || data.size() > MAX_RESPONSE_SIZE) {
     ESP_LOGW(TAG, "Invalid response received: %s", format_hex_pretty(&data.front(), data.size()).c_str());
     return;
@@ -134,7 +134,6 @@ void DalyBmsBle::on_daly_bms_ble_data(const uint8_t &handle, const std::vector<u
     case DALY_FRAME_LEN_PASSWORD:
       this->decode_password_data_(data);
       break;
-    case 0x20:  // Run Info Last Battery Value
     default:
       ESP_LOGW(TAG, "Unhandled response received (frame_type 0x%02X): %s", frame_type,
                format_hex_pretty(&data.front(), data.size()).c_str());
