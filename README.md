@@ -10,7 +10,7 @@ ESPHome component to monitor a DALY Battery Management System via BLE
 
 ## Supported devices
 
-* TBD
+* Daly BMS advertised via BLE as `DL-xxxxxxxxxxxx` f.e. `DL-40D63C3223A2`
 
 ## Requirements
 
