@@ -27,16 +27,88 @@ static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
 
 static const uint8_t MAX_RESPONSE_SIZE = 129;
 
-static const uint8_t ERRORS_SIZE = 8;
+static const uint8_t ERRORS_SIZE = 64;
 static const char *const ERRORS[ERRORS_SIZE] = {
-    "Total voltage overcharge protection",   // 0000 0001
-    "Single voltage overcharge protection",  // 0000 0010
-    "Charge overcurrent protection",         // 0000 0100
-    "Discharge overcurrent protection",      // 0000 1000
-    "Total voltage overdischarge",           // 0001 0000
-    "Single voltage overdischarge",          // 0010 0000
-    "High temperature protection",           // 0100 0000
-    "Short circuit protection",              // 1000 0000
+    // Register 0x3D, Byte 0
+    // Reserved but unused
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    // Register 0x3D, Byte 1
+    // Reserved but unused
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    // Register 0x3C, Byte 0
+    "Charging MOS over-temperature warning",
+    "Discharging MOS over-temperature warning",
+    "Charging MOS temperature sensor failure",
+    "Discharging MOS temperature sensor failure",
+    "Charging MOS adhesion failure",
+    "Discharging MOS adhesion failure",
+    "Charging MOS circuit fault",
+    "Discharging MOS circuit fault",
+
+    // Register 0x3C, Byte 1
+    "AFE acquisition chip failure",
+    "Single unit collection is offline",
+    "Single temperature sensor failure",
+    "EEPROM storage failure",
+    "RTC clock failure",
+    "Precharge failed",
+    "Vehicle communication failed",
+    "Internal network communication module failure",
+
+    // Register 0x3B, Byte 0
+    "Warning: Charging current too high",
+    "Critical: Charging current too high",
+    "Warning: Discharging current too low",
+    "Critical: Discharging current too low",
+    "Warning: SOC too high",
+    "Critical: SOC too high",
+    "Warning: SOC too low",
+    "Critical: SOC too low",
+
+    // Register 0x3B, Byte 1
+    "Warning: Voltage difference too high",
+    "Critical: Voltage difference too high",
+    "Warning: Temperature difference too high",
+    "Critical: Temperature difference too high",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+
+    // Register 0x3A, Byte 0
+    "Warning: Cell voltage too high",
+    "Critical: Cell voltage too high",
+    "Warning: Cell voltage too low",
+    "Critical: Cell voltage too low",
+    "Critical: Total voltage too high",
+    "Warning: Total voltage too low",
+    "Critical: Total voltage too low",
+
+    // Register 0x3A, Byte 1
+    "Warning: Charging temperature too high",
+    "Critical: Charging temperature too high",
+    "Warning: Charging temperature too low",
+    "Critical: Charging temperature too low",
+    "Warning: Discharging temperature too high",
+    "Critical: Discharging temperature too high",
+    "Warning: Discharging temperature too low",
+    "Critical: Discharging temperature too low",
 };
 
 void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
@@ -143,6 +215,12 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
 void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   auto daly_get_16bit = [&](size_t i) -> uint16_t {
     return (uint16_t(data[i + 0]) << 8) | (uint16_t(data[i + 1]) << 0);
+  };
+  auto daly_get_32bit = [&](size_t i) -> uint32_t {
+    return (uint32_t(daly_get_16bit(i + 0)) << 16) | (uint32_t(daly_get_16bit(i + 2)) << 0);
+  };
+  auto daly_get_64bit = [&](size_t i) -> uint64_t {
+    return (uint64_t(daly_get_32bit(i + 0)) << 32) | (uint64_t(daly_get_32bit(i + 4)) << 0);
   };
 
   ESP_LOGI(TAG, "Status frame received");
@@ -296,6 +374,10 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   // 121   2  0x00 0x00            Alarm2
   // 123   2  0x00 0x00            Alarm3
   // 125   2  0x00 0x00            Alarm4
+  ESP_LOGVV(TAG, "Alarm bitmask: %llu", daly_get_64bit(119));
+  this->publish_state_(this->error_bitmask_sensor_, daly_get_64bit(119) * 1.0f);
+  this->publish_state_(this->errors_text_sensor_, bitmask_to_string_(ERRORS, ERRORS_SIZE, daly_get_64bit(119)));
+
   // 127   2  0xA0 0xDF            CRC
 }
 
@@ -347,77 +429,77 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
   //  23   2  0x1C 0x20   0x8A    Sleep wait time (7200)                                  S          1
   ESP_LOGI(TAG, "Sleep wait time: %d S", daly_get_16bit(23));
 
-  //  25   2  0x0D 0xAC   0x8B    Level 1 alarm - cell voltage too high (3500)            mV         1
-  ESP_LOGI(TAG, "Level 1 alarm - cell voltage too high:  %d mV", daly_get_16bit(25));
+  //  25   2  0x0D 0xAC   0x8B    Warning: cell voltage too high (3500)            mV         1
+  ESP_LOGI(TAG, "Warning: Cell voltage too high:  %d mV", daly_get_16bit(25));
 
-  //  27   2  0x0D 0xAC   0x8C    Level 2 alarm - cell voltage too high (3500)            mV         1
-  ESP_LOGI(TAG, "Level 2 alarm - cell voltage too high:  %d mV", daly_get_16bit(27));
+  //  27   2  0x0D 0xAC   0x8C    Critical: cell voltage too high (3500)            mV         1
+  ESP_LOGI(TAG, "Critical: Cell voltage too high:  %d mV", daly_get_16bit(27));
 
-  //  29   2  0x0A 0x28   0x8D    Level 1 alarm - cell voltage too low (2600)             mV         1
-  ESP_LOGI(TAG, "Level 1 alarm - cell voltage too low:   %d mV", daly_get_16bit(29));
+  //  29   2  0x0A 0x28   0x8D    Warning: cell voltage too low (2600)             mV         1
+  ESP_LOGI(TAG, "Warning: Cell voltage too low:   %d mV", daly_get_16bit(29));
 
-  //  31   2  0x0A 0x28   0x8E    Level 2 alarm - cell voltage too low (2600)             mV         1
-  ESP_LOGI(TAG, "Level 2 alarm - cell voltage too low:   %d mV", daly_get_16bit(31));
+  //  31   2  0x0A 0x28   0x8E    Critical: cell voltage too low (2600)             mV         1
+  ESP_LOGI(TAG, "Critical: Cell voltage too low:   %d mV", daly_get_16bit(31));
 
-  //  33   2  0x00 0x8C   0x8F    Level 1 alarm - total voltage too high (14.0)           V          0.1
-  ESP_LOGI(TAG, "Level 1 alarm - total voltage too high: %.1f V", daly_get_16bit(33) * 0.1f);
+  //  33   2  0x00 0x8C   0x8F    Warning: total voltage too high (14.0)           V          0.1
+  ESP_LOGI(TAG, "Warning: Total voltage too high: %.1f V", daly_get_16bit(33) * 0.1f);
 
-  //  35   2  0x00 0x8C   0x90    Level 2 alarm - total voltage too high (14.0)           V          0.1
-  ESP_LOGI(TAG, "Level 2 alarm - total voltage too high: %.1f V", daly_get_16bit(35) * 0.1f);
+  //  35   2  0x00 0x8C   0x90    Critical: total voltage too high (14.0)           V          0.1
+  ESP_LOGI(TAG, "Critical: Total voltage too high: %.1f V", daly_get_16bit(35) * 0.1f);
 
-  //  37   2  0x00 0x68   0x91    Level 1 alarm - total voltage too low (10.4)            V          0.1
-  ESP_LOGI(TAG, "Level 1 alarm - total voltage too low:  %.1f V", daly_get_16bit(37) * 0.1f);
+  //  37   2  0x00 0x68   0x91    Warning: total voltage too low (10.4)            V          0.1
+  ESP_LOGI(TAG, "Warning: Total voltage too low:  %.1f V", daly_get_16bit(37) * 0.1f);
 
-  //  39   2  0x00 0x68   0x92    Level 2 alarm - total voltage too low (10.4)            V          0.1
-  ESP_LOGI(TAG, "Level 2 alarm - total voltage too low:  %.1f V", daly_get_16bit(39) * 0.1f);
+  //  39   2  0x00 0x68   0x92    Critical: total voltage too low (10.4)            V          0.1
+  ESP_LOGI(TAG, "Critical: Total voltage too low:  %.1f V", daly_get_16bit(39) * 0.1f);
 
-  //  41   2  0x74 0xCC   0x93    Level 1 alarm - charging current too high (-10.0)       A          0.1
-  ESP_LOGI(TAG, "Level 1 alarm - charging current too high:  %.1f A", (daly_get_16bit(41) - 30000) * 0.1f);
+  //  41   2  0x74 0xCC   0x93    Warning: charging current too high (-10.0)       A          0.1
+  ESP_LOGI(TAG, "Warning: Charging current too high:  %.1f A", (daly_get_16bit(41) - 30000) * 0.1f);
 
-  //  43   2  0x74 0xCC   0x94    Level 2 alarm - charging current too high (-10.0)       A          0.1
-  ESP_LOGI(TAG, "Level 2 alarm - charging current too high:  %.1f A", (daly_get_16bit(43) - 30000) * 0.1f);
+  //  43   2  0x74 0xCC   0x94    Critical: charging current too high (-10.0)       A          0.1
+  ESP_LOGI(TAG, "Critical: Charging current too high:  %.1f A", (daly_get_16bit(43) - 30000) * 0.1f);
 
-  //  45   2  0x74 0x90   0x95    Level 1 alarm - discharge current too high (-16.0)      A          0.1
-  ESP_LOGI(TAG, "Level 1 alarm - discharge current too high: %.1f A", (daly_get_16bit(45) - 30000) * 0.1f);
+  //  45   2  0x74 0x90   0x95    Warning: discharge current too high (-16.0)      A          0.1
+  ESP_LOGI(TAG, "Warning: Discharge current too high: %.1f A", (daly_get_16bit(45) - 30000) * 0.1f);
 
-  //  47   2  0x75 0xD0   0x96    Level 2 alarm - discharge current too high (16.0)       A          0.1
-  ESP_LOGI(TAG, "Level 2 alarm - discharge current too high: %.1f A", (daly_get_16bit(47) - 30000) * 0.1f);
+  //  47   2  0x75 0xD0   0x96    Critical: discharge current too high (16.0)       A          0.1
+  ESP_LOGI(TAG, "Critical: Discharge current too high: %.1f A", (daly_get_16bit(47) - 30000) * 0.1f);
 
-  //  49   2  0x00 0x55   0x97    Level 1 alarm - charging temperature too high (45)      °C         1
-  ESP_LOGI(TAG, "Level 1 alarm - charging temperature too high: %d °C", daly_get_16bit(49) - 40);
+  //  49   2  0x00 0x55   0x97    Warning: charging temperature too high (45)      °C         1
+  ESP_LOGI(TAG, "Warning: Charging temperature too high: %d °C", daly_get_16bit(49) - 40);
 
-  //  51   2  0x00 0x55   0x98    Level 2 alarm - charging temperature too high (45)      °C         1
-  ESP_LOGI(TAG, "Level 2 alarm - charging temperature too high: %d °C", daly_get_16bit(51) - 40);
+  //  51   2  0x00 0x55   0x98    Critical: charging temperature too high (45)      °C         1
+  ESP_LOGI(TAG, "Critical: Charging temperature too high: %d °C", daly_get_16bit(51) - 40);
 
-  //  53   2  0x00 0x28   0x99    Level 1 alarm - charging temperature too low (0)        °C         1
-  ESP_LOGI(TAG, "Level 1 alarm - charging temperature too low: %d °C", daly_get_16bit(53) - 40);
+  //  53   2  0x00 0x28   0x99    Warning: charging temperature too low (0)        °C         1
+  ESP_LOGI(TAG, "Warning: Charging temperature too low: %d °C", daly_get_16bit(53) - 40);
 
-  //  55   2  0x00 0x28   0x9A    Level 2 alarm - charging temperature too low (0)        °C         1
-  ESP_LOGI(TAG, "Level 2 alarm - charging temperature too low: %d °C", daly_get_16bit(55) - 40);
+  //  55   2  0x00 0x28   0x9A    Critical: charging temperature too low (0)        °C         1
+  ESP_LOGI(TAG, "Critical: Charging temperature too low: %d °C", daly_get_16bit(55) - 40);
 
-  //  57   2  0x00 0x6E   0x9B    Level 1 alarm - discharge temperature too high (70)     °C         1
-  ESP_LOGI(TAG, "Level 1 alarm - discharge temperature too high: %d °C", daly_get_16bit(57) - 40);
+  //  57   2  0x00 0x6E   0x9B    Warning: discharge temperature too high (70)     °C         1
+  ESP_LOGI(TAG, "Warning: Discharge temperature too high: %d °C", daly_get_16bit(57) - 40);
 
-  //  59   2  0x00 0x6E   0x9C    Level 2 alarm - discharge temperature too high (70)     °C         1
-  ESP_LOGI(TAG, "Level 2 alarm - discharge temperature too high: %d °C", daly_get_16bit(59) - 40);
+  //  59   2  0x00 0x6E   0x9C    Critical: discharge temperature too high (70)     °C         1
+  ESP_LOGI(TAG, "Critical: Discharge temperature too high: %d °C", daly_get_16bit(59) - 40);
 
-  //  61   2  0x00 0x27   0x9D    Level 1 alarm - discharge temperature too low (-1)      °C         1
-  ESP_LOGI(TAG, "Level 1 alarm - discharge temperature too low: %d °C", daly_get_16bit(61) - 40);
+  //  61   2  0x00 0x27   0x9D    Warning: discharge temperature too low (-1)      °C         1
+  ESP_LOGI(TAG, "Warning: Discharge temperature too low: %d °C", daly_get_16bit(61) - 40);
 
-  //  63   2  0x00 0x27   0x9E    Level 2 alarm - discharge temperature too low (-1)      °C         1
-  ESP_LOGI(TAG, "Level 2 alarm - discharge temperature too low: %d °C", daly_get_16bit(63) - 40);
+  //  63   2  0x00 0x27   0x9E    Critical: discharge temperature too low (-1)      °C         1
+  ESP_LOGI(TAG, "Critical: Discharge temperature too low: %d °C", daly_get_16bit(63) - 40);
 
-  //  65   2  0x00 0xFF   0x9F    Level 1 alarm - excessive voltage difference (255)      mV         1
-  ESP_LOGI(TAG, "Level 1 alarm - excessive voltage difference: %d mV", daly_get_16bit(65));
+  //  65   2  0x00 0xFF   0x9F    Warning: excessive voltage difference (255)      mV         1
+  ESP_LOGI(TAG, "Warning: Excessive voltage difference: %d mV", daly_get_16bit(65));
 
-  //  67   2  0x00 0xFF   0xA0    Level 2 alarm - excessive voltage difference (255)      mV         1
-  ESP_LOGI(TAG, "Level 2 alarm - excessive voltage difference: %d mV", daly_get_16bit(67));
+  //  67   2  0x00 0xFF   0xA0    Critical: excessive voltage difference (255)      mV         1
+  ESP_LOGI(TAG, "Critical: Excessive voltage difference: %d mV", daly_get_16bit(67));
 
-  //  69   2  0x00 0xFF   0xA1    Level 1 alarm - excessive temperature difference (255)  °C         1
-  ESP_LOGI(TAG, "Level 1 alarm - excessive temperature difference: %d °C", daly_get_16bit(69));
+  //  69   2  0x00 0xFF   0xA1    Warning: excessive temperature difference (255)  °C         1
+  ESP_LOGI(TAG, "Warning: Excessive temperature difference: %d °C", daly_get_16bit(69));
 
-  //  71   2  0x00 0xFF   0xA2    Level 2 alarm - excessive temperature difference (255)  °C         1
-  ESP_LOGI(TAG, "Level 2 alarm - excessive temperature difference: %d °C", daly_get_16bit(71));
+  //  71   2  0x00 0xFF   0xA2    Critical: excessive temperature difference (255)  °C         1
+  ESP_LOGI(TAG, "Critical: Excessive temperature difference: %d °C", daly_get_16bit(71));
 
   //  73   2  0x0C 0x80   0xA3    Balancing turn on voltage (3200)                        mV         1
   ESP_LOGI(TAG, "Balancing turn on voltage: %d mV", daly_get_16bit(73));
@@ -589,11 +671,11 @@ bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value
 }
 
 std::string DalyBmsBle::bitmask_to_string_(const char *const messages[], const uint8_t &messages_size,
-                                           const uint8_t &mask) {
+                                           const uint64_t &mask) {
   std::string values = "";
   if (mask) {
-    for (int i = 0; i < messages_size; i++) {
-      if (mask & (1 << i)) {
+    for (uint8_t i = 0; i < messages_size; i++) {
+      if (mask & (1ULL << i)) {
         values.append(messages[i]);
         values.append(";");
       }

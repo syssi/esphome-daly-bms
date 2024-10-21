@@ -5,7 +5,7 @@ from esphome.const import CONF_ID, CONF_PASSWORD
 
 CODEOWNERS = ["@syssi"]
 
-AUTO_LOAD = ["binary_sensor", "sensor", "text_sensor"]
+AUTO_LOAD = ["binary_sensor", "button", "sensor", "text_sensor", "switch"]
 MULTI_CONF = True
 
 CONF_DALY_BMS_BLE_ID = "daly_bms_ble_id"
