@@ -189,7 +189,7 @@ jobs:
           esphome version
       - name: Write secrets.yaml
         shell: bash
-        run: 'echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password" > secrets.yaml'
+        run: 'echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF" > secrets.yaml'
       - run: |
           for YAML in esp*.yaml; do
             esphome -s external_components_source components config $YAML >/dev/null
@@ -229,6 +229,6 @@ jobs:
           echo "::add-matcher::.github/workflows/matchers/python.json"
       - name: Write secrets.yaml
         shell: bash
-        run: 'echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password" > secrets.yaml'
+        run: 'echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF" > secrets.yaml'
       - run: |
           esphome -s external_components_source components compile esp32-ble-example-faker.yaml
