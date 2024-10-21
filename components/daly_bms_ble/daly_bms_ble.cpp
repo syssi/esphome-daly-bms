@@ -561,8 +561,8 @@ void DalyBmsBle::publish_state_(text_sensor::TextSensor *text_sensor, const std:
 bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
   uint8_t frame[8];
 
-  frame[0] = 0xD2;  // Modbus device address
-  frame[1] = 0x03;  // Function (0x03: Read register, 0x06: Write register, 0x10: Write multiple registers)
+  frame[0] = 0xD2;      // Modbus device address
+  frame[1] = function;  // Function (0x03: Read register, 0x06: Write register, 0x10: Write multiple registers)
   frame[2] = address >> 8;
   frame[3] = address >> 0;
   frame[4] = value >> 8;
