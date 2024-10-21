@@ -37,6 +37,8 @@ cd esphome-daly-bms
 
 # Create a secrets.yaml containing some setup specific secrets
 cat > secrets.yaml <<EOF
+bms0_mac_address: MY_BMS_MAC_ADDRESS
+
 wifi_ssid: MY_WIFI_SSID
 wifi_password: MY_WIFI_PASSWORD
 
@@ -53,12 +55,46 @@ esphome run esp32-ble-example.yaml
 ## Example response all sensors enabled
 
 ```
-TBD.
+[D][sensor:094]: 'daly-bms-ble cell voltage 1': Sending state 3.43800 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell voltage 2': Sending state 3.43300 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell voltage 3': Sending state 3.41700 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell voltage 4': Sending state 3.54300 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell voltage 5': Sending state 3.33900 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell voltage 6': Sending state 3.33900 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell voltage 7': Sending state 3.34000 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell voltage 8': Sending state 3.33900 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble min cell voltage': Sending state 3.33900 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble max cell voltage': Sending state 3.54300 V with 3 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble max voltage cell': Sending state 4.00000  with 0 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble min voltage cell': Sending state 5.00000  with 0 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble average cell voltage': Sending state 3.39850 V with 4 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble temperature sensors': Sending state 1.00000  with 0 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble temperature 1': Sending state 21.00000 °C with 1 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble total voltage': Sending state 27.10000 V with 2 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble current': Sending state 0.00000 A with 2 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble state of charge': Sending state 100.00000 % with 0 decimals of accuracy
+[V][daly_bms_ble:241]: Max cell voltage: 3.543 V
+[V][daly_bms_ble:244]: Min cell voltage: 3.339 V
+[V][daly_bms_ble:247]: Max cell temperature: 21 °C
+[V][daly_bms_ble:250]: Min cell temperature: 21 °C
+[I][daly_bms_ble:257]: Status: Idle
+[D][sensor:094]: 'daly-bms-ble capacity remaining': Sending state 25.00000 Ah with 1 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble cell count': Sending state 8.00000  with 0 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble temperature sensors': Sending state 1.00000  with 0 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble charging cycles': Sending state 0.00000  with 0 decimals of accuracy
+[I][daly_bms_ble:272]: Balancer status: OFF
+[V][daly_bms_ble:281]: Average cell voltage: 3.398 V
+[D][sensor:094]: 'daly-bms-ble delta cell voltage': Sending state 0.02040 V with 4 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble power': Sending state 0.00000 W with 0 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble charging power': Sending state 0.00000 W with 0 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble discharging power': Sending state 0.00000 W with 0 decimals of accuracy
+[W][component:237]: Component interval took a long time for an operation (298 ms).
+[W][component:238]: Components should block for at most 30 ms.
 ```
 
 ## Protocol
 
-TBD.
+See [dalyModbusProtocol.xlsx](docs/dalyModbusProtocol.xlsx)
 
 ## Known issues
 

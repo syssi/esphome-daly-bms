@@ -2,7 +2,7 @@ substitutions:
   name: daly-bms-ble
   device_description: "Monitor a DALY Battery Management System via BLE"
   external_components_source: github://syssi/esphome-daly-bms@main
-  mac_address: B0:A7:32:13:57:72
+  mac_address: !secret bms0_mac_address
 
 esphome:
   name: ${name}
