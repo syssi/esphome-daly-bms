@@ -9,13 +9,12 @@ DEPENDENCIES = ["daly_bms_ble"]
 
 CODEOWNERS = ["@syssi"]
 
+CONF_BALANCING = "balancing"
 CONF_CHARGING = "charging"
 CONF_DISCHARGING = "discharging"
 
-ICON_CHARGING = "mdi:battery-charging"
-ICON_DISCHARGING = "mdi:power-plug"
-
 BINARY_SENSORS = [
+    CONF_BALANCING,
     CONF_CHARGING,
     CONF_DISCHARGING,
 ]
@@ -23,17 +22,14 @@ BINARY_SENSORS = [
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_DALY_BMS_BLE_ID): cv.use_id(DalyBmsBle),
-        cv.Optional(CONF_CHARGING): binary_sensor.BINARY_SENSOR_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(binary_sensor.BinarySensor),
-                cv.Optional(CONF_ICON, default=ICON_CHARGING): cv.icon,
-            }
+        cv.Optional(CONF_BALANCING): binary_sensor.binary_sensor_schema(
+            icon="mdi:battery-heart-variant"
         ),
-        cv.Optional(CONF_DISCHARGING): binary_sensor.BINARY_SENSOR_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(binary_sensor.BinarySensor),
-                cv.Optional(CONF_ICON, default=ICON_DISCHARGING): cv.icon,
-            }
+        cv.Optional(CONF_CHARGING): binary_sensor.binary_sensor_schema(
+            icon="mdi:battery-charging"
+        ),
+        cv.Optional(CONF_DISCHARGING): binary_sensor.binary_sensor_schema(
+            icon="mdi:power-plug"
         ),
     }
 )
