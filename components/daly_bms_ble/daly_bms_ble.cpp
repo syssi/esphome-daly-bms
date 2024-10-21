@@ -269,13 +269,13 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->charging_cycles_sensor_, daly_get_16bit(105) * 1.0f);
 
   // 107   2  0x00 0x01            Balancer status (0: off, 1: on)
-  ESP_LOGI(TAG, "Balancer status: %s", ONOFF((bool) daly_get_16bit(107)));
+  this->publish_state_(this->balancing_binary_sensor_, daly_get_16bit(107) == 0x01);
 
   // 109   2  0x00 0x00            Charging mosfet status (0: off, 1: on)
-  this->publish_state_(this->charging_binary_sensor_, (bool) daly_get_16bit(109));
+  this->publish_state_(this->charging_binary_sensor_, daly_get_16bit(109) == 0x01);
 
   // 111   2  0x00 0x01            Discharging mosfet status (0: off, 1: on)
-  this->publish_state_(this->discharging_binary_sensor_, (bool) daly_get_16bit(111));
+  this->publish_state_(this->discharging_binary_sensor_, daly_get_16bit(111) == 0x01);
 
   // 113   2  0x10 0x2E            Average cell voltage
   ESP_LOGV(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);

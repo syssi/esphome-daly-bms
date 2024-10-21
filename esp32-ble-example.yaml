@@ -58,6 +58,8 @@ daly_bms_ble:
 binary_sensor:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0
+    balancing:
+      name: "${name} balancing"
     charging:
       name: "${name} charging"
     discharging:

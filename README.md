@@ -73,17 +73,14 @@ esphome run esp32-ble-example.yaml
 [D][sensor:094]: 'daly-bms-ble total voltage': Sending state 27.10000 V with 2 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble current': Sending state 0.00000 A with 2 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble state of charge': Sending state 100.00000 % with 0 decimals of accuracy
-[V][daly_bms_ble:241]: Max cell voltage: 3.543 V
-[V][daly_bms_ble:244]: Min cell voltage: 3.339 V
-[V][daly_bms_ble:247]: Max cell temperature: 21 °C
-[V][daly_bms_ble:250]: Min cell temperature: 21 °C
 [I][daly_bms_ble:257]: Status: Idle
 [D][sensor:094]: 'daly-bms-ble capacity remaining': Sending state 25.00000 Ah with 1 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble cell count': Sending state 8.00000  with 0 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble temperature sensors': Sending state 1.00000  with 0 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble charging cycles': Sending state 0.00000  with 0 decimals of accuracy
-[I][daly_bms_ble:272]: Balancer status: OFF
-[V][daly_bms_ble:281]: Average cell voltage: 3.398 V
+[11:50:17][D][binary_sensor:036]: 'daly-bms-ble balancing': Sending state ON
+[11:50:17][D][binary_sensor:036]: 'daly-bms-ble charging': Sending state OFF
+[11:50:17][D][binary_sensor:036]: 'daly-bms-ble discharging': Sending state ON
 [D][sensor:094]: 'daly-bms-ble delta cell voltage': Sending state 0.02040 V with 4 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble power': Sending state 0.00000 W with 0 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble charging power': Sending state 0.00000 W with 0 decimals of accuracy

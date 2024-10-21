@@ -25,6 +25,9 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void update() override;
   float get_setup_priority() const override { return setup_priority::DATA; }
 
+  void set_balancing_binary_sensor(binary_sensor::BinarySensor *balancing_binary_sensor) {
+    balancing_binary_sensor_ = balancing_binary_sensor;
+  }
   void set_charging_binary_sensor(binary_sensor::BinarySensor *charging_binary_sensor) {
     charging_binary_sensor_ = charging_binary_sensor;
   }
@@ -90,6 +93,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_password(uint32_t password) { this->password_ = password; }
 
  protected:
+  binary_sensor::BinarySensor *balancing_binary_sensor_;
   binary_sensor::BinarySensor *charging_binary_sensor_;
   binary_sensor::BinarySensor *discharging_binary_sensor_;
 
