@@ -86,7 +86,7 @@ esphome run esp32-ble-example.yaml
 [11:50:17][D][binary_sensor:036]: 'daly-bms-ble balancing': Sending state ON
 [11:50:17][D][binary_sensor:036]: 'daly-bms-ble charging': Sending state OFF
 [11:50:17][D][binary_sensor:036]: 'daly-bms-ble discharging': Sending state ON
-[D][sensor:094]: 'daly-bms-ble delta cell voltage': Sending state 0.02040 V with 4 decimals of accuracy
+[D][sensor:094]: 'daly-bms-ble delta cell voltage': Sending state 0.204 V with 3 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble power': Sending state 0.00000 W with 0 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble charging power': Sending state 0.00000 W with 0 decimals of accuracy
 [D][sensor:094]: 'daly-bms-ble discharging power': Sending state 0.00000 W with 0 decimals of accuracy
