@@ -85,6 +85,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
 
   void set_errors_text_sensor(text_sensor::TextSensor *errors_text_sensor) { errors_text_sensor_ = errors_text_sensor; }
 
+  void set_balancer_switch(switch_::Switch *balancer_switch) { balancer_switch_ = balancer_switch; }
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
 
@@ -115,6 +116,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   sensor::Sensor *temperature_sensors_sensor_;
   sensor::Sensor *capacity_remaining_sensor_;
 
+  switch_::Switch *balancer_switch_;
   switch_::Switch *charging_switch_;
   switch_::Switch *discharging_switch_;
 

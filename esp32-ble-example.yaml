@@ -172,6 +172,8 @@ text_sensor:
 
 switch:
   - platform: daly_bms_ble
+    balancer:
+      name: "${name} balancer"
     charging:
       name: "${name} charging"
     discharging:
