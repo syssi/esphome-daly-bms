@@ -281,7 +281,7 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   ESP_LOGV(TAG, "Average cell voltage: %.3f V", daly_get_16bit(113) * 0.001f);
 
   // 115   2  0x01 0x41            Delta cell voltage
-  this->publish_state_(this->delta_cell_voltage_sensor_, daly_get_16bit(115) * 0.0001f);
+  this->publish_state_(this->delta_cell_voltage_sensor_, daly_get_16bit(115) * 0.001f);
 
   // 117   2  0x00 0x2A            Power
   float power = daly_get_16bit(117) * 1.0f;
