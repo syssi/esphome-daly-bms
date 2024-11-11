@@ -67,14 +67,19 @@ binary_sensor:
 
 button:
   - platform: daly_bms_ble
+    # Retrieves the BMS settings and prints them in the ESPHome logs
     retrieve_settings:
       name: "${name} retrieve settings"
+    # Restarts the BMS
     restart:
       name: "${name} restart"
+    # Shuts down the BMS
     shutdown:
       name: "${name} shutdown"
+    # Resets the BMS to the factory settings
     factory_reset:
       name: "${name} factory reset"
+    # Resets the BMS current to zero
     reset_current:
       name: "${name} reset current"
 
