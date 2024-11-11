@@ -9,13 +9,16 @@ DEPENDENCIES = ["daly_bms_ble"]
 
 CODEOWNERS = ["@syssi"]
 
+CONF_BALANCER = "balancer"
 CONF_CHARGING = "charging"
 CONF_DISCHARGING = "discharging"
 
+ICON_BALANCER = "mdi:seesaw"
 ICON_CHARGING = "mdi:battery-charging-50"
 ICON_DISCHARGING = "mdi:battery-charging-50"
 
 SWITCHES = {
+    CONF_BALANCER: 0x00CF,
     CONF_CHARGING: 0x00A5,
     CONF_DISCHARGING: 0x00A6,
 }
@@ -24,6 +27,12 @@ DalySwitch = daly_bms_ble_ns.class_("DalySwitch", switch.Switch, cg.Component)
 
 CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
+        cv.Optional(CONF_BALANCER): switch.SWITCH_SCHEMA.extend(
+            {
+                cv.GenerateID(): cv.declare_id(DalySwitch),
+                cv.Optional(CONF_ICON, default=ICON_BALANCER): cv.icon,
+            }
+        ).extend(cv.COMPONENT_SCHEMA),
         cv.Optional(CONF_CHARGING): switch.SWITCH_SCHEMA.extend(
             {
                 cv.GenerateID(): cv.declare_id(DalySwitch),
