@@ -286,6 +286,7 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->delta_cell_voltage_sensor_, daly_get_16bit(115) * 0.001f);
 
   // 117   2  0x00 0x2A            Power
+	// Prefer to calculate as the power sensor from the BMS is unsigned. Note the current sensor is signed.
   float power = total_voltage * current;
   this->publish_state_(this->power_sensor_, power);
   this->publish_state_(this->charging_power_sensor_, std::max(0.0f, power));               // 500W vs 0W -> 500W
