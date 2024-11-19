@@ -27,16 +27,71 @@ static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
 
 static const uint8_t MAX_RESPONSE_SIZE = 129;
 
-static const uint8_t ERRORS_SIZE = 8;
+static const uint8_t ERRORS_SIZE = 48;
 static const char *const ERRORS[ERRORS_SIZE] = {
-    "Total voltage overcharge protection",   // 0000 0001
-    "Single voltage overcharge protection",  // 0000 0010
-    "Charge overcurrent protection",         // 0000 0100
-    "Discharge overcurrent protection",      // 0000 1000
-    "Total voltage overdischarge",           // 0001 0000
-    "Single voltage overdischarge",          // 0010 0000
-    "High temperature protection",           // 0100 0000
-    "Short circuit protection",              // 1000 0000
+    // Register 0x3A, Byte 0
+    "Level 1 alarm - cell voltage too high",   // 0000 0000 0000 0001
+    "Level 2 alarm - cell voltage too high",   // 0000 0000 0000 0010
+    "Level 1 alarm - cell voltage too low",    // 0000 0000 0000 0100
+    "Level 2 alarm - cell voltage too low",    // 0000 0000 0000 1000
+    "Level 1 alarm - total voltage too high",  // 0000 0000 0001 0000
+    "Level 2 alarm - total voltage too high",  // 0000 0000 0010 0000
+    "Level 1 alarm - total voltage too low",   // 0000 0000 0100 0000
+    "Level 2 alarm - total voltage too low",   // 0000 0000 1000 0000
+
+    // Register 0x3A, Byte 1
+    "Level 1 alarm - charging temperature too high",     // 0000 0001 0000 0000
+    "Level 2 alarm - charging temperature too high",     // 0000 0010 0000 0000
+    "Level 1 alarm - charging temperature too low",      // 0000 0100 0000 0000
+    "Level 2 alarm - charging temperature too low",      // 0000 1000 0000 0000
+    "Level 1 alarm - discharging temperature too high",  // 0001 0000 0000 0000
+    "Level 2 alarm - discharging temperature too high",  // 0010 0000 0000 0000
+    "Level 1 alarm - discharging temperature too low",   // 0100 0000 0000 0000
+    "Level 2 alarm - discharging temperature too low",   // 1000 0000 0000 0000
+
+    // Register 0x3B, Byte 0
+    "Level 1 alarm - charging current too high",    // 0000 0000 0000 0001
+    "Level 2 alarm - charging current too high",    // 0000 0000 0000 0010
+    "Level 1 alarm - discharging current too low",  // 0000 0000 0000 0100
+    "Level 2 alarm - discharging current too low",  // 0000 0000 0000 1000
+    "Level 1 alarm - SOC too high",                 // 0000 0000 0001 0000
+    "Level 2 alarm - SOC too high",                 // 0000 0000 0010 0000
+    "Level 1 alarm - SOC too low",                  // 0000 0000 0100 0000
+    "Level 2 alarm - SOC too low",                  // 0000 0000 1000 0000
+
+    // Register 0x3B, Byte 1
+    "Level 1 alarm - voltage difference too high",      // 0000 0001 0000 0000
+    "Level 2 alarm - voltage difference too high",      // 0000 0010 0000 0000
+    "Level 1 alarm - temperature difference too high",  // 0000 0100 0000 0000
+    "Level 2 alarm - temperature difference too high",  // 0000 1000 0000 0000
+    "Reserved",                                         // 0001 0000 0000 0000
+    "Reserved",                                         // 0010 0000 0000 0000
+    "Reserved",                                         // 0100 0000 0000 0000
+    "Reserved",                                         // 1000 0000 0000 0000
+
+    // Register 0x3C, Byte 0
+    "Charging MOS over-temperature warning",       // 0000 0000 0000 0001
+    "Discharging MOS over-temperature warning",    // 0000 0000 0000 0010
+    "Charging MOS temperature sensor failure",     // 0000 0000 0000 0100
+    "Discharging MOS temperature sensor failure",  // 0000 0000 0000 1000
+    "Charging MOS adhesion failure",               // 0000 0000 0001 0000
+    "Discharging MOS adhesion failure",            // 0000 0000 0010 0000
+    "Charging MOS circuit fault",                  // 0000 0000 0100 0000
+    "Discharging MOS circuit fault",               // 0000 0000 1000 0000
+
+    // Register 0x3C, Byte 1
+    "AFE acquisition chip failure",                   // 0000 0001 0000 0000
+    "Single unit collection is offline",              // 0000 0010 0000 0000
+    "Single temperature sensor failure",              // 0000 0100 0000 0000
+    "EEPROM storage failure",                         // 0000 1000 0000 0000
+    "RTC clock failure",                              // 0001 0000 0000 0000
+    "Precharge failed",                               // 0010 0000 0000 0000
+    "Vehicle communication failed",                   // 0100 0000 0000 0000
+    "Internal network communication module failure",  // 1000 0000 0000 0000
+
+    // Register 0x3D
+    //
+    // Reserved but unused
 };
 
 void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
