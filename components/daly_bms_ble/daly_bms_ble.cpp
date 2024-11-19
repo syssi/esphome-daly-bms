@@ -229,10 +229,12 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   }
 
   //  83   2  0x00 0x8C            Total voltage
-  this->publish_state_(this->total_voltage_sensor_, daly_get_16bit(83) * 0.1f);
+  float total_voltage = daly_get_16bit(83) * 0.1f;
+  this->publish_state_(this->total_voltage_sensor_, total_voltage);
 
   //  85   2  0x75 0x4E            Current
-  this->publish_state_(this->current_sensor_, (daly_get_16bit(85) - 30000) * 0.1f);
+  float current = (daly_get_16bit(85) - 30000) * 0.1f;
+  this->publish_state_(this->current_sensor_, current);
 
   //  87   2  0x03 0x84            State of charge
   this->publish_state_(this->state_of_charge_sensor_, daly_get_16bit(87) * 0.1f);
@@ -284,7 +286,9 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->delta_cell_voltage_sensor_, daly_get_16bit(115) * 0.001f);
 
   // 117   2  0x00 0x2A            Power
-  float power = daly_get_16bit(117) * 1.0f;
+  // Calculate the measurement because the value of the power register is unsigned
+  // float power = daly_get_16bit(117) * 1.0f;
+  float power = total_voltage * current;
   this->publish_state_(this->power_sensor_, power);
   this->publish_state_(this->charging_power_sensor_, std::max(0.0f, power));               // 500W vs 0W -> 500W
   this->publish_state_(this->discharging_power_sensor_, std::abs(std::min(0.0f, power)));  // -500W vs 0W -> 500W
