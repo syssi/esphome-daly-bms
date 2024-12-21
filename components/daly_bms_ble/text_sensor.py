@@ -9,17 +9,26 @@ DEPENDENCIES = ["daly_bms_ble"]
 
 CODEOWNERS = ["@syssi"]
 
+CONF_BATTERY_STATUS = "battery_status"
 CONF_ERRORS = "errors"
 
+ICON_BATTERY_STATUS = "mdi:battery-charging"
 ICON_ERRORS = "mdi:alert-circle-outline"
 
 TEXT_SENSORS = [
+    CONF_BATTERY_STATUS,
     CONF_ERRORS,
 ]
 
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_DALY_BMS_BLE_ID): cv.use_id(DalyBmsBle),
+        cv.Optional(CONF_BATTERY_STATUS): text_sensor.TEXT_SENSOR_SCHEMA.extend(
+            {
+                cv.GenerateID(): cv.declare_id(text_sensor.TextSensor),
+                cv.Optional(CONF_ICON, default=ICON_BATTERY_STATUS): cv.icon,
+            }
+        ),
         cv.Optional(CONF_ERRORS): text_sensor.TEXT_SENSOR_SCHEMA.extend(
             {
                 cv.GenerateID(): cv.declare_id(text_sensor.TextSensor),

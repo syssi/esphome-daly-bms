@@ -252,11 +252,10 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   ESP_LOGV(TAG, "Min cell temperature: %.0f °C", (daly_get_16bit(95) - 40) * 1.0f);
 
   //  97   2  0x00 0x00            Charge/discharge status (0=idle, 1=charging, 2=discharging)
-  ESP_LOGI(TAG, "Status: %s",
-           data[98] == 0   ? "Idle"
-           : data[98] == 1 ? "Charging"
-           : data[98] == 2 ? "Discharging"
-                           : "Unknown");
+  this->publish_state(this->battery_status_text_sensor_, data[98] == 0   ? "Idle"
+                                                         : data[98] == 1 ? "Charging"
+                                                         : data[98] == 2 ? "Discharging"
+                                                                         : "Unknown");
 
   //  99   2  0x0D 0x80            Capacity remaining
   this->publish_state_(this->capacity_remaining_sensor_, daly_get_16bit(99) * 0.1f);
