@@ -172,6 +172,8 @@ sensor:
 text_sensor:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0
+    battery_status:
+      name: "${name} battery status"
     errors:
       name: "${name} errors"
 

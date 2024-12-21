@@ -83,6 +83,9 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
     capacity_remaining_sensor_ = capacity_remaining_sensor;
   }
 
+  void set_battery_status_text_sensor(text_sensor::TextSensor *battery_status_text_sensor) {
+    battery_status_text_sensor_ = battery_status_text_sensor;
+  }
   void set_errors_text_sensor(text_sensor::TextSensor *errors_text_sensor) { errors_text_sensor_ = errors_text_sensor; }
 
   void set_balancer_switch(switch_::Switch *balancer_switch) { balancer_switch_ = balancer_switch; }
@@ -120,6 +123,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   switch_::Switch *charging_switch_;
   switch_::Switch *discharging_switch_;
 
+  text_sensor::TextSensor *battery_status_text_sensor_;
   text_sensor::TextSensor *errors_text_sensor_;
 
   struct Cell {
