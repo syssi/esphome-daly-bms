@@ -3,7 +3,6 @@ substitutions:
   device_description: "Verify the project builds from source on ESP32C6"
   external_components_source: github://syssi/esphome-daly-bms@main
   mac_address: !secret bms0_mac_address
-  ble_name: !secret bms0_ble_name
 
 esphome:
   name: ${name}
