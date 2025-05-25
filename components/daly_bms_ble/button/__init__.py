@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import button
 import esphome.config_validation as cv
-from esphome.const import CONF_FACTORY_RESET, CONF_ICON, CONF_ID, CONF_RESTART
+from esphome.const import CONF_FACTORY_RESET, CONF_ID, CONF_RESTART
 
 from .. import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, daly_bms_ble_ns
 
@@ -33,35 +33,20 @@ DalyButton = daly_bms_ble_ns.class_("DalyButton", button.Button, cg.Component)
 
 CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
-        cv.Optional(CONF_RETRIEVE_SETTINGS): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(CONF_ICON, default=ICON_RETRIEVE_SETTINGS): cv.icon,
-            }
+        cv.Optional(CONF_RETRIEVE_SETTINGS): button.button_schema(
+            DalyButton, icon=ICON_RETRIEVE_SETTINGS
         ).extend(cv.COMPONENT_SCHEMA),
-        cv.Optional(CONF_RESTART): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(CONF_ICON, default=ICON_RESTART): cv.icon,
-            }
+        cv.Optional(CONF_RESTART): button.button_schema(
+            DalyButton, icon=ICON_RESTART
         ).extend(cv.COMPONENT_SCHEMA),
-        cv.Optional(CONF_SHUTDOWN): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(CONF_ICON, default=ICON_SHUTDOWN): cv.icon,
-            }
+        cv.Optional(CONF_SHUTDOWN): button.button_schema(
+            DalyButton, icon=ICON_SHUTDOWN
         ).extend(cv.COMPONENT_SCHEMA),
-        cv.Optional(CONF_RESET_CURRENT): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(CONF_ICON, default=ICON_RESET_CURRENT): cv.icon,
-            }
+        cv.Optional(CONF_RESET_CURRENT): button.button_schema(
+            DalyButton, icon=ICON_RESET_CURRENT
         ).extend(cv.COMPONENT_SCHEMA),
-        cv.Optional(CONF_FACTORY_RESET): button.BUTTON_SCHEMA.extend(
-            {
-                cv.GenerateID(): cv.declare_id(DalyButton),
-                cv.Optional(CONF_ICON, default=ICON_FACTORY_RESET): cv.icon,
-            }
+        cv.Optional(CONF_FACTORY_RESET): button.button_schema(
+            DalyButton, icon=ICON_FACTORY_RESET
         ).extend(cv.COMPONENT_SCHEMA),
     }
 )
