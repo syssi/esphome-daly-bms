@@ -67,6 +67,7 @@ binary_sensor:
 
 button:
   - platform: daly_bms_ble
+    daly_bms_ble_id: bms0
     # Retrieves the BMS settings and prints them in the ESPHome logs
     retrieve_settings:
       name: "${name} retrieve settings"
@@ -179,6 +180,7 @@ text_sensor:
 
 switch:
   - platform: daly_bms_ble
+    daly_bms_ble_id: bms0
     balancer:
       name: "${name} balancer"
     charging:
