@@ -421,7 +421,7 @@ jobs:
       - name: Validate example configurations
         run: |
           . venv/bin/activate
-          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF" > secrets.yaml
+          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF\nbms1_mac_address: EE:EE:EE:EE:EE:EE" > secrets.yaml
           for YAML in esp*.yaml; do
             esphome -s external_components_source components config $YAML >/dev/null
           done
@@ -429,7 +429,7 @@ jobs:
       - name: Validate test configurations
         run: |
           . venv/bin/activate
-          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF" > tests/secrets.yaml
+          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF\nbms1_mac_address: EE:EE:EE:EE:EE:EE" > tests/secrets.yaml
           for YAML in tests/esp*.yaml; do
             esphome -s external_components_source ../components config $YAML >/dev/null
           done
@@ -456,7 +456,7 @@ jobs:
       - name: Compile example configurations
         run: |
           . venv/bin/activate
-          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF" > secrets.yaml
+          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF\nbms1_mac_address: EE:EE:EE:EE:EE:EE" > secrets.yaml
           for YAML in esp*faker.yaml; do
             esphome -s external_components_source components compile $YAML >/dev/null
           done
@@ -464,5 +464,5 @@ jobs:
       - name: Compile test configurations
         run: |
           . venv/bin/activate
-          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF" > tests/secrets.yaml
+          echo -e "wifi_ssid: ssid\nwifi_password: password\nmqtt_host: host\nmqtt_username: username\nmqtt_password: password\nbms0_mac_address: FF:FF:FF:FF:FF:FF\nbms1_mac_address: EE:EE:EE:EE:EE:EE" > tests/secrets.yaml
           esphome -s external_components_source ../components compile tests/esp32c6-compatibility-test.yaml
