@@ -104,7 +104,25 @@ See [dalyModbusProtocol.xlsx](docs/dalyModbusProtocol.xlsx)
 
 ## Known issues
 
-None.
+### WiFi/Cloud Support Conflicts with Bluetooth
+
+**Issue:** Enabling WiFi/Cloud support on Daly BMS modules completely disables Bluetooth functionality, preventing communication with this ESPHome component.
+
+**Important:** Once cloud connectivity is enabled on your Daly BMS, the Bluetooth interface becomes unavailable. To use this component, you must reset the BMS module to disconnect it from the cloud and re-enable Bluetooth functionality.
+
+**Solution:** Reset the BLE module to disable cloud support and restore Bluetooth connectivity (see troubleshooting section below).
+
+## Troubleshooting
+
+### Resetting BLE Module (Cloud to Bluetooth)
+
+If you have previously enabled WiFi/Cloud support on your Daly BMS and need to restore Bluetooth functionality:
+
+1. Open the official Daly mobile app in cloud mode
+2. Make a long press on your device in the device list
+3. Select "Delete" from the menu options
+4. Confirm the deletion to remove the device from cloud connectivity
+5. After deletion, Bluetooth connectivity will be restored and you can connect anytime with BT
 
 ## Debugging
 
