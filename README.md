@@ -19,9 +19,7 @@ ESPHome component to monitor a DALY Battery Management System via BLE
 
 ## Alternative for wired communication
 
-If you prefer a wired connection over Bluetooth, consider using the alternative project by @patagonaa: https://github.com/patagonaa/esphome-daly-hkms-bms
-
-This custom component handles the DALY BMS serial protocol directly (which is similar to Modbus but incompatible with the official standard) and works with wired connections.
+If you prefer a wired connection (UART/RS485) over Bluetooth, consider using the alternative project by @patagonaa: https://github.com/patagonaa/esphome-daly-hkms-bms
 
 ## Requirements
 
