@@ -17,6 +17,12 @@ ESPHome component to monitor a DALY Battery Management System via BLE
 
 * Daly Smart BMS J/T/A/U/W/ND series (start of frame: `0xA5`)
 
+## Alternative for wired connections
+
+If you prefer a wired connection over Bluetooth, consider using the alternative project by @patagonaa: https://github.com/patagonaa/esphome-daly-hkms-bms
+
+This custom component handles the DALY BMS serial protocol directly (which is similar to Modbus but incompatible with the official standard) and works with wired connections.
+
 ## Requirements
 
 * [ESPHome 2024.6.0 or higher](https://github.com/esphome/esphome/releases)
