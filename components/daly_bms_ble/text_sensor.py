@@ -3,7 +3,7 @@ from esphome.components import text_sensor
 import esphome.config_validation as cv
 from esphome.const import CONF_ID
 
-from . import CONF_DALY_BMS_BLE_ID, DalyBmsBle
+from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, DalyBmsBle
 
 DEPENDENCIES = ["daly_bms_ble"]
 
@@ -20,9 +20,8 @@ TEXT_SENSORS = [
     CONF_ERRORS,
 ]
 
-CONFIG_SCHEMA = cv.Schema(
+CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
-        cv.GenerateID(CONF_DALY_BMS_BLE_ID): cv.use_id(DalyBmsBle),
         cv.Optional(CONF_BATTERY_STATUS): text_sensor.text_sensor_schema(
             text_sensor.TextSensor,
             icon=ICON_BATTERY_STATUS,
