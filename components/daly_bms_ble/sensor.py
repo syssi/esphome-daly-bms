@@ -20,7 +20,7 @@ from esphome.const import (
     UNIT_WATT,
 )
 
-from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, DalyBmsBle
+from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
 
 DEPENDENCIES = ["daly_bms_ble"]
 
