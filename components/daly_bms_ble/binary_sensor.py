@@ -3,7 +3,7 @@ from esphome.components import binary_sensor
 import esphome.config_validation as cv
 from esphome.const import CONF_ID
 
-from . import CONF_DALY_BMS_BLE_ID, DalyBmsBle
+from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
 
 DEPENDENCIES = ["daly_bms_ble"]
 
@@ -19,9 +19,8 @@ BINARY_SENSORS = [
     CONF_DISCHARGING,
 ]
 
-CONFIG_SCHEMA = cv.Schema(
+CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
-        cv.GenerateID(CONF_DALY_BMS_BLE_ID): cv.use_id(DalyBmsBle),
         cv.Optional(CONF_BALANCING): binary_sensor.binary_sensor_schema(
             icon="mdi:battery-heart-variant"
         ),

@@ -20,7 +20,7 @@ from esphome.const import (
     UNIT_WATT,
 )
 
-from . import CONF_DALY_BMS_BLE_ID, DalyBmsBle
+from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
 
 DEPENDENCIES = ["daly_bms_ble"]
 
@@ -135,9 +135,8 @@ SENSORS = [
 ]
 
 # pylint: disable=too-many-function-args
-CONFIG_SCHEMA = cv.Schema(
+CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
-        cv.GenerateID(CONF_DALY_BMS_BLE_ID): cv.use_id(DalyBmsBle),
         cv.Optional(CONF_TOTAL_VOLTAGE): sensor.sensor_schema(
             unit_of_measurement=UNIT_VOLT,
             icon=ICON_EMPTY,
