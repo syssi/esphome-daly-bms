@@ -27,6 +27,10 @@ wifi:
 
 ota:
   platform: esphome
+  on_begin:
+    then:
+      - switch.turn_off: ble_client_switch0
+      - logger.log: "BLE connection suspended for OTA update"
 
 logger:
   level: DEBUG
@@ -170,14 +174,6 @@ sensor:
     capacity_remaining:
       name: "${name} capacity remaining"
 
-text_sensor:
-  - platform: daly_bms_ble
-    daly_bms_ble_id: bms0
-    battery_status:
-      name: "${name} battery status"
-    errors:
-      name: "${name} errors"
-
 switch:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0
@@ -190,5 +186,13 @@ switch:
 
   - platform: ble_client
     ble_client_id: client0
-    id: ble_client_switch0
     name: "${name} enable bluetooth connection"
+    id: ble_client_switch0
+
+text_sensor:
+  - platform: daly_bms_ble
+    daly_bms_ble_id: bms0
+    battery_status:
+      name: "${name} battery status"
+    errors:
+      name: "${name} errors"
