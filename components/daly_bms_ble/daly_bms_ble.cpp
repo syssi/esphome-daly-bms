@@ -287,7 +287,7 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   float average_cell_voltage = 0.0f;
   uint8_t min_voltage_cell = 0;
   uint8_t max_voltage_cell = 0;
-  uint8_t cells = std::min(data[102], (uint8_t) 16);
+  uint8_t cells = std::min(data[102], (uint8_t) 32);
   for (uint8_t i = 0; i < cells; i++) {
     float cell_voltage = daly_get_16bit(3 + (i * 2)) * 0.001f;
     average_cell_voltage = average_cell_voltage + cell_voltage;
@@ -628,6 +628,22 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Cell Voltage 14", this->cells_[13].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 15", this->cells_[14].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 16", this->cells_[15].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 17", this->cells_[16].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 18", this->cells_[17].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 19", this->cells_[18].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 20", this->cells_[19].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 21", this->cells_[20].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 22", this->cells_[21].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 23", this->cells_[22].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 24", this->cells_[23].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 25", this->cells_[24].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 26", this->cells_[25].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 27", this->cells_[26].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 28", this->cells_[27].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 29", this->cells_[28].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 30", this->cells_[29].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 31", this->cells_[30].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 32", this->cells_[31].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell count", this->cell_count_sensor_);
   LOG_SENSOR("", "Temperature sensors", this->temperature_sensors_sensor_);
   LOG_SENSOR("", "Capacity remaining", this->capacity_remaining_sensor_);

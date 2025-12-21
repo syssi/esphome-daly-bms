@@ -167,6 +167,38 @@ sensor:
       name: "${name} cell voltage 15"
     cell_voltage_16:
       name: "${name} cell voltage 16"
+    cell_voltage_17:
+      name: "${name} cell voltage 17"
+    cell_voltage_18:
+      name: "${name} cell voltage 18"
+    cell_voltage_19:
+      name: "${name} cell voltage 19"
+    cell_voltage_20:
+      name: "${name} cell voltage 20"
+    cell_voltage_21:
+      name: "${name} cell voltage 21"
+    cell_voltage_22:
+      name: "${name} cell voltage 22"
+    cell_voltage_23:
+      name: "${name} cell voltage 23"
+    cell_voltage_24:
+      name: "${name} cell voltage 24"
+    cell_voltage_25:
+      name: "${name} cell voltage 25"
+    cell_voltage_26:
+      name: "${name} cell voltage 26"
+    cell_voltage_27:
+      name: "${name} cell voltage 27"
+    cell_voltage_28:
+      name: "${name} cell voltage 28"
+    cell_voltage_29:
+      name: "${name} cell voltage 29"
+    cell_voltage_30:
+      name: "${name} cell voltage 30"
+    cell_voltage_31:
+      name: "${name} cell voltage 31"
+    cell_voltage_32:
+      name: "${name} cell voltage 32"
     cell_count:
       name: "${name} cell count"
     temperature_sensors:
