@@ -128,7 +128,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
 
   struct Cell {
     sensor::Sensor *cell_voltage_sensor_{nullptr};
-  } cells_[16];
+  } cells_[32];
 
   struct Temperature {
     sensor::Sensor *temperature_sensor_{nullptr};

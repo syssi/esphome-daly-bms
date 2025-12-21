@@ -259,6 +259,54 @@ sensor:
     cell_voltage_16:
       name: "${bms0} cell voltage 16"
       device_id: device0
+    cell_voltage_17:
+      name: "${bms0} cell voltage 17"
+      device_id: device0
+    cell_voltage_18:
+      name: "${bms0} cell voltage 18"
+      device_id: device0
+    cell_voltage_19:
+      name: "${bms0} cell voltage 19"
+      device_id: device0
+    cell_voltage_20:
+      name: "${bms0} cell voltage 20"
+      device_id: device0
+    cell_voltage_21:
+      name: "${bms0} cell voltage 21"
+      device_id: device0
+    cell_voltage_22:
+      name: "${bms0} cell voltage 22"
+      device_id: device0
+    cell_voltage_23:
+      name: "${bms0} cell voltage 23"
+      device_id: device0
+    cell_voltage_24:
+      name: "${bms0} cell voltage 24"
+      device_id: device0
+    cell_voltage_25:
+      name: "${bms0} cell voltage 25"
+      device_id: device0
+    cell_voltage_26:
+      name: "${bms0} cell voltage 26"
+      device_id: device0
+    cell_voltage_27:
+      name: "${bms0} cell voltage 27"
+      device_id: device0
+    cell_voltage_28:
+      name: "${bms0} cell voltage 28"
+      device_id: device0
+    cell_voltage_29:
+      name: "${bms0} cell voltage 29"
+      device_id: device0
+    cell_voltage_30:
+      name: "${bms0} cell voltage 30"
+      device_id: device0
+    cell_voltage_31:
+      name: "${bms0} cell voltage 31"
+      device_id: device0
+    cell_voltage_32:
+      name: "${bms0} cell voltage 32"
+      device_id: device0
     cell_count:
       name: "${bms0} cell count"
       device_id: device0
@@ -384,6 +432,54 @@ sensor:
       device_id: device1
     cell_voltage_16:
       name: "${bms1} cell voltage 16"
+      device_id: device1
+    cell_voltage_17:
+      name: "${bms1} cell voltage 17"
+      device_id: device1
+    cell_voltage_18:
+      name: "${bms1} cell voltage 18"
+      device_id: device1
+    cell_voltage_19:
+      name: "${bms1} cell voltage 19"
+      device_id: device1
+    cell_voltage_20:
+      name: "${bms1} cell voltage 20"
+      device_id: device1
+    cell_voltage_21:
+      name: "${bms1} cell voltage 21"
+      device_id: device1
+    cell_voltage_22:
+      name: "${bms1} cell voltage 22"
+      device_id: device1
+    cell_voltage_23:
+      name: "${bms1} cell voltage 23"
+      device_id: device1
+    cell_voltage_24:
+      name: "${bms1} cell voltage 24"
+      device_id: device1
+    cell_voltage_25:
+      name: "${bms1} cell voltage 25"
+      device_id: device1
+    cell_voltage_26:
+      name: "${bms1} cell voltage 26"
+      device_id: device1
+    cell_voltage_27:
+      name: "${bms1} cell voltage 27"
+      device_id: device1
+    cell_voltage_28:
+      name: "${bms1} cell voltage 28"
+      device_id: device1
+    cell_voltage_29:
+      name: "${bms1} cell voltage 29"
+      device_id: device1
+    cell_voltage_30:
+      name: "${bms1} cell voltage 30"
+      device_id: device1
+    cell_voltage_31:
+      name: "${bms1} cell voltage 31"
+      device_id: device1
+    cell_voltage_32:
+      name: "${bms1} cell voltage 32"
       device_id: device1
     cell_count:
       name: "${bms1} cell count"
