@@ -174,7 +174,7 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
     }
     case ESP_GATTC_NOTIFY_EVT: {
       ESP_LOGV(TAG, "Notification received (handle 0x%02X): %s", param->notify.handle,
-               format_hex_pretty(param->notify.value, param->notify.value_len).c_str());
+               format_hex_pretty(param->notify.value, param->notify.value_len).c_str());  // NOLINT
 
       std::vector<uint8_t> data(param->notify.value, param->notify.value + param->notify.value_len);
 
@@ -197,7 +197,7 @@ void DalyBmsBle::update() {
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   if (data[0] != DALY_FRAME_START || data[1] != DALY_FRAME_START2 || data.size() > MAX_RESPONSE_SIZE) {
-    ESP_LOGW(TAG, "Invalid response received: %s", format_hex_pretty(&data.front(), data.size()).c_str());
+    ESP_LOGW(TAG, "Invalid response received: %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
     return;
   }
 
@@ -226,7 +226,7 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
       break;
     default:
       ESP_LOGW(TAG, "Unhandled response received (frame_type 0x%02X): %s", frame_type,
-               format_hex_pretty(&data.front(), data.size()).c_str());
+               format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
   }
 }
 
@@ -242,7 +242,7 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   };
 
   ESP_LOGI(TAG, "Status frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
+  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -405,7 +405,7 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
   };
 
   ESP_LOGI(TAG, "Settings frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
+  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -544,7 +544,7 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 
 void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
   ESP_LOGI(TAG, "Software/hardware version frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
+  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -569,7 +569,7 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
 
 void DalyBmsBle::decode_password_data_(const std::vector<uint8_t> &data) {
   ESP_LOGI(TAG, "Password frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());
+  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -694,7 +694,7 @@ bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value
   frame[7] = crc >> 8;
 
   ESP_LOGD(TAG, "Send command (handle 0x%02X): %s", this->char_command_handle_,
-           format_hex_pretty(frame, sizeof(frame)).c_str());
+           format_hex_pretty(frame, sizeof(frame)).c_str());  // NOLINT
 
   auto status =
       esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(), this->char_command_handle_,
