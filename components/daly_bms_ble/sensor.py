@@ -44,6 +44,9 @@ CONF_AVERAGE_CELL_VOLTAGE = "average_cell_voltage"
 CONF_CELL_COUNT = "cell_count"
 CONF_TEMPERATURE_SENSORS = "temperature_sensors"
 CONF_CAPACITY_REMAINING = "capacity_remaining"
+CONF_BALANCE_CURRENT = "balance_current"
+CONF_MOSFET_TEMPERATURE = "mosfet_temperature"
+CONF_BOARD_TEMPERATURE = "board_temperature"
 
 CONF_CELL_VOLTAGE_1 = "cell_voltage_1"
 CONF_CELL_VOLTAGE_2 = "cell_voltage_2"
@@ -164,6 +167,9 @@ SENSORS = [
     CONF_CELL_COUNT,
     CONF_TEMPERATURE_SENSORS,
     CONF_CAPACITY_REMAINING,
+    CONF_BALANCE_CURRENT,
+    CONF_MOSFET_TEMPERATURE,
+    CONF_BOARD_TEMPERATURE,
 ]
 
 # pylint: disable=too-many-function-args
@@ -565,6 +571,27 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
             icon=ICON_CAPACITY_REMAINING,
             accuracy_decimals=1,
             device_class=DEVICE_CLASS_EMPTY,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_BALANCE_CURRENT): sensor.sensor_schema(
+            unit_of_measurement=UNIT_AMPERE,
+            icon=ICON_CURRENT_DC,
+            accuracy_decimals=3,
+            device_class=DEVICE_CLASS_CURRENT,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_MOSFET_TEMPERATURE): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_BOARD_TEMPERATURE): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            icon=ICON_EMPTY,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_TEMPERATURE,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
     }

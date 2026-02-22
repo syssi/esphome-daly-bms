@@ -24,15 +24,15 @@ static const uint8_t DALY_FRAME_START2 = 0x03;
 static const uint8_t DALY_FUNCTION_READ = 0x03;
 static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 
-static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0x0000;
-static const uint16_t DALY_COMMAND_REQ_STATUS_QTY = 0x003E;
+static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0;
+static const uint16_t DALY_COMMAND_REQ_STATUS_QTY = 80;
 
-static const uint8_t DALY_FRAME_LEN_STATUS = 0x7C;
-static const uint8_t DALY_FRAME_LEN_SETTINGS = 0x52;
-static const uint8_t DALY_FRAME_LEN_VERSIONS = 0x40;
-static const uint8_t DALY_FRAME_LEN_PASSWORD = 0x06;
+static const uint8_t DALY_FRAME_LEN_STATUS = 160;
+static const uint8_t DALY_FRAME_LEN_SETTINGS = 82;
+static const uint8_t DALY_FRAME_LEN_VERSIONS = 64;
+static const uint8_t DALY_FRAME_LEN_PASSWORD = 6;
 
-static const uint8_t MAX_RESPONSE_SIZE = 129;
+static const uint8_t MAX_RESPONSE_SIZE = 165;
 
 static const uint8_t ERRORS_SIZE = 64;
 static const char *const ERRORS[ERRORS_SIZE] = {
@@ -197,7 +197,8 @@ void DalyBmsBle::update() {
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   if (data[0] != DALY_FRAME_START || data[1] != DALY_FRAME_START2 || data.size() > MAX_RESPONSE_SIZE) {
-    ESP_LOGW(TAG, "Invalid response received: %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+    ESP_LOGW(TAG, "Invalid response received (%d bytes): %s", data.size(),
+             format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
     return;
   }
 
@@ -241,8 +242,9 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
     return (uint64_t(daly_get_32bit(i + 0)) << 32) | (uint64_t(daly_get_32bit(i + 4)) << 0);
   };
 
-  ESP_LOGI(TAG, "Status frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+  ESP_LOGI(TAG, "Status frame received (%d bytes)", data.size());
+  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), 100).c_str());                      // NOLINT
+  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front() + 100, data.size() - 100).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -396,7 +398,23 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->error_bitmask_sensor_, daly_get_64bit(119) * 1.0f);
   this->publish_state_(this->errors_text_sensor_, bitmask_to_string_(ERRORS, ERRORS_SIZE, daly_get_64bit(119)));
 
-  // 127   2  0xA0 0xDF            CRC
+  // 127   2  0x00 0x00            Cell balance bitmask 1-16
+  // 129   2  0x00 0x00            Cell balance bitmask 17-32
+  ESP_LOGD(TAG, "Cell balance bitmask 1-16:  0x%04X", daly_get_16bit(127));
+  ESP_LOGD(TAG, "Cell balance bitmask 17-32: 0x%04X", daly_get_16bit(129));
+
+  // 131   2  0x75 0x30            Balance current (offset -30000, ×0.001)
+  this->publish_state_(this->balance_current_sensor_, (daly_get_16bit(131) - 30000) * 0.001f);
+
+  // 133   2  0x00 0x00            Unknown
+
+  // 135   2  0x00 0x37            Mosfet temperature (offset -40)
+  this->publish_state_(this->mosfet_temperature_sensor_, (daly_get_16bit(135) - 40) * 1.0f);
+
+  // 137   2  0x00 0x00            Board temperature (offset -40)
+  this->publish_state_(this->board_temperature_sensor_, (daly_get_16bit(137) - 40) * 1.0f);
+
+  // 163   2  CRC
 }
 
 void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
@@ -405,7 +423,7 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
   };
 
   ESP_LOGI(TAG, "Settings frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -544,7 +562,7 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 
 void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
   ESP_LOGI(TAG, "Software/hardware version frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -569,7 +587,7 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
 
 void DalyBmsBle::decode_password_data_(const std::vector<uint8_t> &data) {
   ESP_LOGI(TAG, "Password frame received");
-  ESP_LOGD(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -647,6 +665,9 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Cell count", this->cell_count_sensor_);
   LOG_SENSOR("", "Temperature sensors", this->temperature_sensors_sensor_);
   LOG_SENSOR("", "Capacity remaining", this->capacity_remaining_sensor_);
+  LOG_SENSOR("", "Balance current", this->balance_current_sensor_);
+  LOG_SENSOR("", "Mosfet temperature", this->mosfet_temperature_sensor_);
+  LOG_SENSOR("", "Board temperature", this->board_temperature_sensor_);
 
   LOG_TEXT_SENSOR("", "Errors", this->errors_text_sensor_);
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);
