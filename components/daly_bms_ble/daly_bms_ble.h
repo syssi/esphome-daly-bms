@@ -127,9 +127,9 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   sensor::Sensor *cell_count_sensor_;
   sensor::Sensor *temperature_sensors_sensor_;
   sensor::Sensor *capacity_remaining_sensor_;
-  sensor::Sensor *balance_current_sensor_{nullptr};
-  sensor::Sensor *mosfet_temperature_sensor_{nullptr};
-  sensor::Sensor *board_temperature_sensor_{nullptr};
+  sensor::Sensor *balance_current_sensor_;
+  sensor::Sensor *mosfet_temperature_sensor_;
+  sensor::Sensor *board_temperature_sensor_;
 
   switch_::Switch *balancer_switch_;
   switch_::Switch *charging_switch_;
