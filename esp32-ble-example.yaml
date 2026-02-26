@@ -212,6 +212,12 @@ sensor:
     board_temperature:
       name: "${name} board temperature"
 
+number:
+  - platform: daly_bms_ble
+    daly_bms_ble_id: bms0
+    state_of_charge_setting:
+      name: "${name} state of charge setting"
+
 switch:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0

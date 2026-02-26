@@ -196,7 +196,7 @@ void DalyBmsBle::update() {
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
-  if (data[0] != DALY_FRAME_START || data[1] != DALY_FRAME_START2 || data.size() > MAX_RESPONSE_SIZE) {
+  if (data[0] != DALY_FRAME_START || data.size() > MAX_RESPONSE_SIZE) {
     ESP_LOGW(TAG, "Invalid response received (%d bytes): %s", data.size(),
              format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
     return;
@@ -207,6 +207,17 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   uint16_t remote_crc = uint16_t(data[frame_len - 2]) | (uint16_t(data[frame_len - 1]) << 8);
   if (computed_crc != remote_crc) {
     ESP_LOGW(TAG, "CRC check failed! 0x%04X != 0x%04X", computed_crc, remote_crc);
+    return;
+  }
+
+  if (data[1] == DALY_FUNCTION_WRITE) {
+    ESP_LOGD(TAG, "Write register acknowledged (reg=0x%02X%02X, value=0x%02X%02X)", data[2], data[3], data[4], data[5]);
+    return;
+  }
+
+  if (data[1] != DALY_FRAME_START2) {
+    ESP_LOGW(TAG, "Unknown function code 0x%02X: %s", data[1],
+             format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
     return;
   }
 
@@ -553,6 +564,7 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 
   //  81   2  0x02 0xA8   0xA7    SOC settings (68.0)                                     %          0.1
   ESP_LOGI(TAG, "SOC settings: %.1f %%", daly_get_16bit(81) * 0.1f);
+  this->publish_state_(this->state_of_charge_setting_number_, daly_get_16bit(81) * 0.1f);
 
   //  83   2  0x00 0x57   0xA8    MOS temperature protection alarm (7)                    °C         1
   ESP_LOGI(TAG, "MOS temperature protection alarm: %d °C", daly_get_16bit(83) - 40);
@@ -669,6 +681,8 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Mosfet temperature", this->mosfet_temperature_sensor_);
   LOG_SENSOR("", "Board temperature", this->board_temperature_sensor_);
 
+  LOG_NUMBER("", "State of charge setting", this->state_of_charge_setting_number_);
+
   LOG_TEXT_SENSOR("", "Errors", this->errors_text_sensor_);
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);
 }
@@ -685,6 +699,13 @@ void DalyBmsBle::publish_state_(sensor::Sensor *sensor, float value) {
     return;
 
   sensor->publish_state(value);
+}
+
+void DalyBmsBle::publish_state_(number::Number *obj, float value) {
+  if (obj == nullptr)
+    return;
+
+  obj->publish_state(value);
 }
 
 void DalyBmsBle::publish_state_(switch_::Switch *obj, const bool &state) {
