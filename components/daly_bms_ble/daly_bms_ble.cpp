@@ -196,7 +196,7 @@ void DalyBmsBle::update() {
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
-  if (data[0] != DALY_FRAME_START || data[1] != DALY_FRAME_START2 || data.size() > MAX_RESPONSE_SIZE) {
+  if (data[0] != DALY_FRAME_START || data.size() > MAX_RESPONSE_SIZE) {
     ESP_LOGW(TAG, "Invalid response received: %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
     return;
   }
@@ -206,6 +206,17 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   uint16_t remote_crc = uint16_t(data[frame_len - 2]) | (uint16_t(data[frame_len - 1]) << 8);
   if (computed_crc != remote_crc) {
     ESP_LOGW(TAG, "CRC check failed! 0x%04X != 0x%04X", computed_crc, remote_crc);
+    return;
+  }
+
+  if (data[1] == DALY_FUNCTION_WRITE) {
+    ESP_LOGD(TAG, "Write register acknowledged (reg=0x%02X%02X, value=0x%02X%02X)", data[2], data[3], data[4], data[5]);
+    return;
+  }
+
+  if (data[1] != DALY_FRAME_START2) {
+    ESP_LOGW(TAG, "Unknown function code 0x%02X: %s", data[1],
+             format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
     return;
   }
 
