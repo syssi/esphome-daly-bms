@@ -4,6 +4,7 @@
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
+#include "esphome/components/number/number.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/switch/switch.h"
 #include "esphome/components/text_sensor/text_sensor.h"
@@ -92,6 +93,8 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
 
+  void set_soc_number(number::Number *soc_number) { soc_number_ = soc_number; }
+
   void on_daly_bms_ble_data(const std::vector<uint8_t> &data);
   bool send_command(uint8_t function, uint16_t address, uint16_t value);
   void set_password(uint32_t password) { this->password_ = password; }
@@ -123,6 +126,8 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   switch_::Switch *charging_switch_;
   switch_::Switch *discharging_switch_;
 
+  number::Number *soc_number_;
+
   text_sensor::TextSensor *battery_status_text_sensor_;
   text_sensor::TextSensor *errors_text_sensor_;
 
@@ -144,6 +149,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void decode_password_data_(const std::vector<uint8_t> &data);
   void publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state);
   void publish_state_(sensor::Sensor *sensor, float value);
+  void publish_state_(number::Number *obj, float value);
   void publish_state_(switch_::Switch *obj, const bool &state);
   void publish_state_(text_sensor::TextSensor *text_sensor, const std::string &state);
   std::string bitmask_to_string_(const char *const messages[], const uint8_t &messages_size, const uint64_t &mask);

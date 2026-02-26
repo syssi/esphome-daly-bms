@@ -535,6 +535,7 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 
   //  81   2  0x02 0xA8   0xA7    SOC settings (68.0)                                     %          0.1
   ESP_LOGI(TAG, "SOC settings: %.1f %%", daly_get_16bit(81) * 0.1f);
+  this->publish_state_(this->soc_number_, daly_get_16bit(81) * 0.1f);
 
   //  83   2  0x00 0x57   0xA8    MOS temperature protection alarm (7)                    °C         1
   ESP_LOGI(TAG, "MOS temperature protection alarm: %d °C", daly_get_16bit(83) - 40);
@@ -664,6 +665,13 @@ void DalyBmsBle::publish_state_(sensor::Sensor *sensor, float value) {
     return;
 
   sensor->publish_state(value);
+}
+
+void DalyBmsBle::publish_state_(number::Number *obj, float value) {
+  if (obj == nullptr)
+    return;
+
+  obj->publish_state(value);
 }
 
 void DalyBmsBle::publish_state_(switch_::Switch *obj, const bool &state) {
