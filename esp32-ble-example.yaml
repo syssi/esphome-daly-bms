@@ -205,6 +205,12 @@ sensor:
       name: "${name} temperature sensors"
     capacity_remaining:
       name: "${name} capacity remaining"
+    balance_current:
+      name: "${name} balance current"
+    mosfet_temperature:
+      name: "${name} mosfet temperature"
+    board_temperature:
+      name: "${name} board temperature"
 
 number:
   - platform: daly_bms_ble
