@@ -9,17 +9,22 @@ DEPENDENCIES = ["daly_bms_ble"]
 
 CODEOWNERS = ["@syssi"]
 
-CONF_SET_SOC = "set_soc"
+CONF_STATE_OF_CHARGE_SETTING = "state_of_charge_setting"
 
-ICON_SET_SOC = "mdi:battery-sync"
+ICON_STATE_OF_CHARGE_SETTING = "mdi:battery-sync"
 
 DalyNumber = daly_bms_ble_ns.class_("DalyNumber", number.Number, cg.Component)
 
+# key: (register_address, factor, min_value, max_value, step)
+NUMBERS = {
+    CONF_STATE_OF_CHARGE_SETTING: (0x00A7, 10.0, 0.0, 100.0, 0.1),
+}
+
 CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
-        cv.Optional(CONF_SET_SOC): number.number_schema(
+        cv.Optional(CONF_STATE_OF_CHARGE_SETTING): number.number_schema(
             DalyNumber,
-            icon=ICON_SET_SOC,
+            icon=ICON_STATE_OF_CHARGE_SETTING,
             unit_of_measurement=UNIT_PERCENT,
         ).extend(cv.COMPONENT_SCHEMA),
     }
@@ -28,13 +33,16 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_DALY_BMS_BLE_ID])
-    if CONF_SET_SOC in config:
-        conf = config[CONF_SET_SOC]
+    for key, (address, factor, min_val, max_val, step) in NUMBERS.items():
+        if key not in config:
+            continue
+        conf = config[key]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
         await number.register_number(
-            var, conf, min_value=0.0, max_value=100.0, step=0.1
+            var, conf, min_value=min_val, max_value=max_val, step=step
         )
-        cg.add(hub.set_soc_number(var))
+        cg.add(getattr(hub, f"set_{key}_number")(var))
         cg.add(var.set_parent(hub))
-        cg.add(var.set_holding_register(0x00A7))
+        cg.add(var.set_holding_register(address))
+        cg.add(var.set_factor(factor))

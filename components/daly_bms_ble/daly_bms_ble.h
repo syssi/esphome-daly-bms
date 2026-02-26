@@ -93,7 +93,8 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
 
-  void set_soc_number(number::Number *soc_number) { soc_number_ = soc_number; }
+  void set_state_of_charge_setting_number(number::Number *number) { state_of_charge_setting_number_ = number; }
+  bool write_register(uint16_t address, uint16_t value) { return send_command(0x06, address, value); }
 
   void on_daly_bms_ble_data(const std::vector<uint8_t> &data);
   bool send_command(uint8_t function, uint16_t address, uint16_t value);
@@ -126,7 +127,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   switch_::Switch *charging_switch_;
   switch_::Switch *discharging_switch_;
 
-  number::Number *soc_number_;
+  number::Number *state_of_charge_setting_number_;
 
   text_sensor::TextSensor *battery_status_text_sensor_;
   text_sensor::TextSensor *errors_text_sensor_;
