@@ -82,6 +82,15 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_capacity_remaining_sensor(sensor::Sensor *capacity_remaining_sensor) {
     capacity_remaining_sensor_ = capacity_remaining_sensor;
   }
+  void set_balance_current_sensor(sensor::Sensor *balance_current_sensor) {
+    balance_current_sensor_ = balance_current_sensor;
+  }
+  void set_mosfet_temperature_sensor(sensor::Sensor *mosfet_temperature_sensor) {
+    mosfet_temperature_sensor_ = mosfet_temperature_sensor;
+  }
+  void set_board_temperature_sensor(sensor::Sensor *board_temperature_sensor) {
+    board_temperature_sensor_ = board_temperature_sensor;
+  }
 
   void set_battery_status_text_sensor(text_sensor::TextSensor *battery_status_text_sensor) {
     battery_status_text_sensor_ = battery_status_text_sensor;
@@ -118,6 +127,9 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   sensor::Sensor *cell_count_sensor_;
   sensor::Sensor *temperature_sensors_sensor_;
   sensor::Sensor *capacity_remaining_sensor_;
+  sensor::Sensor *balance_current_sensor_;
+  sensor::Sensor *mosfet_temperature_sensor_;
+  sensor::Sensor *board_temperature_sensor_;
 
   switch_::Switch *balancer_switch_;
   switch_::Switch *charging_switch_;
