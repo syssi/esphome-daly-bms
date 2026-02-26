@@ -32,7 +32,9 @@ async def to_code(config):
         conf = config[CONF_SET_SOC]
         var = cg.new_Pvariable(conf[CONF_ID])
         await cg.register_component(var, conf)
-        await number.register_number(var, conf, min_value=0.0, max_value=100.0, step=0.1)
+        await number.register_number(
+            var, conf, min_value=0.0, max_value=100.0, step=0.1
+        )
         cg.add(hub.set_soc_number(var))
         cg.add(var.set_parent(hub))
         cg.add(var.set_holding_register(0x00A7))
