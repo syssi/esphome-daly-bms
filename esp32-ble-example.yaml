@@ -57,6 +57,7 @@ daly_bms_ble:
   - ble_client_id: client0
     id: bms0
     password: 12345678
+    status_registers: 62
     update_interval: 10s
 
 binary_sensor:

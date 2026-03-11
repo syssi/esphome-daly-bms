@@ -108,6 +108,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void on_daly_bms_ble_data(const std::vector<uint8_t> &data);
   bool send_command(uint8_t function, uint16_t address, uint16_t value);
   void set_password(uint32_t password) { this->password_ = password; }
+  void set_status_registers(uint8_t protocol_version) { this->status_registers_ = protocol_version; }
 
  protected:
   binary_sensor::BinarySensor *balancing_binary_sensor_;
@@ -155,6 +156,7 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   uint16_t char_notify_handle_;
   uint16_t char_command_handle_;
   uint32_t password_ = 12345678;
+  uint8_t status_registers_{62};
 
   void decode_status_data_(const std::vector<uint8_t> &data);
   void decode_settings_data_(const std::vector<uint8_t> &data);

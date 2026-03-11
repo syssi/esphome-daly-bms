@@ -9,6 +9,7 @@ AUTO_LOAD = ["binary_sensor", "button", "number", "sensor", "text_sensor", "swit
 MULTI_CONF = True
 
 CONF_DALY_BMS_BLE_ID = "daly_bms_ble_id"
+CONF_STATUS_REGISTERS = "status_registers"
 
 daly_bms_ble_ns = cg.esphome_ns.namespace("daly_bms_ble")
 DalyBmsBle = daly_bms_ble_ns.class_(
@@ -26,6 +27,7 @@ CONFIG_SCHEMA = (
         {
             cv.GenerateID(): cv.declare_id(DalyBmsBle),
             cv.Optional(CONF_PASSWORD, default="12345678"): cv.uint32_t,
+            cv.Optional(CONF_STATUS_REGISTERS, default=62): cv.one_of(62, 80, int=True),
         }
     )
     .extend(ble_client.BLE_CLIENT_SCHEMA)
@@ -39,3 +41,4 @@ async def to_code(config):
     await ble_client.register_ble_node(var, config)
 
     cg.add(var.set_password(config[CONF_PASSWORD]))
+    cg.add(var.set_status_registers(config[CONF_STATUS_REGISTERS]))

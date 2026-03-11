@@ -25,9 +25,9 @@ static const uint8_t DALY_FUNCTION_READ = 0x03;
 static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 
 static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0;
-static const uint16_t DALY_COMMAND_REQ_STATUS_QTY = 80;
 
-static const uint8_t DALY_FRAME_LEN_STATUS = 160;
+static const uint8_t DALY_FRAME_LEN_STATUS_80_REGISTERS = 80 * 2;
+static const uint8_t DALY_FRAME_LEN_STATUS_62_REGISTERS = 62 * 2;
 static const uint8_t DALY_FRAME_LEN_SETTINGS = 82;
 static const uint8_t DALY_FRAME_LEN_VERSIONS = 64;
 static const uint8_t DALY_FRAME_LEN_PASSWORD = 6;
@@ -169,7 +169,7 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
     case ESP_GATTC_REG_FOR_NOTIFY_EVT: {
       this->node_state = espbt::ClientState::ESTABLISHED;
 
-      this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, DALY_COMMAND_REQ_STATUS_QTY);
+      this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
       break;
     }
     case ESP_GATTC_NOTIFY_EVT: {
@@ -192,7 +192,7 @@ void DalyBmsBle::update() {
     return;
   }
 
-  this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, DALY_COMMAND_REQ_STATUS_QTY);
+  this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
@@ -224,7 +224,8 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   uint8_t frame_type = data[2];  // data length
 
   switch (frame_type) {
-    case DALY_FRAME_LEN_STATUS:
+    case DALY_FRAME_LEN_STATUS_80_REGISTERS:
+    case DALY_FRAME_LEN_STATUS_62_REGISTERS:
       this->decode_status_data_(data);
       break;
     case DALY_FRAME_LEN_SETTINGS:
@@ -409,23 +410,25 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->error_bitmask_sensor_, daly_get_64bit(119) * 1.0f);
   this->publish_state_(this->errors_text_sensor_, bitmask_to_string_(ERRORS, ERRORS_SIZE, daly_get_64bit(119)));
 
-  // 127   2  0x00 0x00            Cell balance bitmask 1-16
-  // 129   2  0x00 0x00            Cell balance bitmask 17-32
-  ESP_LOGD(TAG, "Cell balance bitmask 1-16:  0x%04X", daly_get_16bit(127));
-  ESP_LOGD(TAG, "Cell balance bitmask 17-32: 0x%04X", daly_get_16bit(129));
+  if (data.size() == 3 + DALY_FRAME_LEN_STATUS_80_REGISTERS + 2) {
+    // 127   2  0x00 0x00            Cell balance bitmask 1-16
+    // 129   2  0x00 0x00            Cell balance bitmask 17-32
+    ESP_LOGD(TAG, "Cell balance bitmask 1-16:  0x%04X", daly_get_16bit(127));
+    ESP_LOGD(TAG, "Cell balance bitmask 17-32: 0x%04X", daly_get_16bit(129));
 
-  // 131   2  0x75 0x30            Balance current (offset -30000, ×0.001)
-  this->publish_state_(this->balance_current_sensor_, (daly_get_16bit(131) - 30000) * 0.001f);
+    // 131   2  0x75 0x30            Balance current (offset -30000, ×0.001)
+    this->publish_state_(this->balance_current_sensor_, (daly_get_16bit(131) - 30000) * 0.001f);
 
-  // 133   2  0x00 0x00            Unknown
+    // 133   2  0x00 0x00            Unknown
 
-  // 135   2  0x00 0x37            Mosfet temperature (offset -40)
-  this->publish_state_(this->mosfet_temperature_sensor_, (daly_get_16bit(135) - 40) * 1.0f);
+    // 135   2  0x00 0x37            Mosfet temperature (offset -40)
+    this->publish_state_(this->mosfet_temperature_sensor_, (daly_get_16bit(135) - 40) * 1.0f);
 
-  // 137   2  0x00 0x00            Board temperature (offset -40)
-  this->publish_state_(this->board_temperature_sensor_, (daly_get_16bit(137) - 40) * 1.0f);
+    // 137   2  0x00 0x00            Board temperature (offset -40)
+    this->publish_state_(this->board_temperature_sensor_, (daly_get_16bit(137) - 40) * 1.0f);
 
-  // 163   2  CRC
+    // 163   2  CRC
+  }
 }
 
 void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
