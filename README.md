@@ -23,7 +23,7 @@ If you prefer a wired connection (UART/RS485) over Bluetooth, consider using the
 
 ## Requirements
 
-* [ESPHome 2024.6.0 or higher](https://github.com/esphome/esphome/releases)
+* [ESPHome 2024.12.0 or higher](https://github.com/esphome/esphome/releases)
 * Generic ESP32 board
 
 ## Installation
