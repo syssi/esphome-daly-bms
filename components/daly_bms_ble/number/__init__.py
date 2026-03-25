@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import number
 import esphome.config_validation as cv
-from esphome.const import CONF_ID, UNIT_PERCENT
+from esphome.const import UNIT_PERCENT
 
 from .. import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, daly_bms_ble_ns
 
@@ -37,11 +37,10 @@ async def to_code(config):
         if key not in config:
             continue
         conf = config[key]
-        var = cg.new_Pvariable(conf[CONF_ID])
-        await cg.register_component(var, conf)
-        await number.register_number(
-            var, conf, min_value=min_val, max_value=max_val, step=step
+        var = await number.new_number(
+            conf, min_value=min_val, max_value=max_val, step=step
         )
+        await cg.register_component(var, conf)
         cg.add(getattr(hub, f"set_{key}_number")(var))
         cg.add(var.set_parent(hub))
         cg.add(var.set_holding_register(address))
