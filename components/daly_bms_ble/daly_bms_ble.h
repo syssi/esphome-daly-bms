@@ -111,39 +111,39 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_status_registers(uint8_t protocol_version) { this->status_registers_ = protocol_version; }
 
  protected:
-  binary_sensor::BinarySensor *balancing_binary_sensor_;
-  binary_sensor::BinarySensor *charging_binary_sensor_;
-  binary_sensor::BinarySensor *discharging_binary_sensor_;
+  binary_sensor::BinarySensor *balancing_binary_sensor_{nullptr};
+  binary_sensor::BinarySensor *charging_binary_sensor_{nullptr};
+  binary_sensor::BinarySensor *discharging_binary_sensor_{nullptr};
 
-  sensor::Sensor *total_voltage_sensor_;
-  sensor::Sensor *current_sensor_;
-  sensor::Sensor *power_sensor_;
-  sensor::Sensor *charging_power_sensor_;
-  sensor::Sensor *discharging_power_sensor_;
-  sensor::Sensor *error_bitmask_sensor_;
-  sensor::Sensor *state_of_charge_sensor_;
-  sensor::Sensor *charging_cycles_sensor_;
-  sensor::Sensor *min_cell_voltage_sensor_;
-  sensor::Sensor *max_cell_voltage_sensor_;
-  sensor::Sensor *min_voltage_cell_sensor_;
-  sensor::Sensor *max_voltage_cell_sensor_;
-  sensor::Sensor *delta_cell_voltage_sensor_;
-  sensor::Sensor *average_cell_voltage_sensor_;
-  sensor::Sensor *cell_count_sensor_;
-  sensor::Sensor *temperature_sensors_sensor_;
-  sensor::Sensor *capacity_remaining_sensor_;
-  sensor::Sensor *balance_current_sensor_;
-  sensor::Sensor *mosfet_temperature_sensor_;
-  sensor::Sensor *board_temperature_sensor_;
+  sensor::Sensor *total_voltage_sensor_{nullptr};
+  sensor::Sensor *current_sensor_{nullptr};
+  sensor::Sensor *power_sensor_{nullptr};
+  sensor::Sensor *charging_power_sensor_{nullptr};
+  sensor::Sensor *discharging_power_sensor_{nullptr};
+  sensor::Sensor *error_bitmask_sensor_{nullptr};
+  sensor::Sensor *state_of_charge_sensor_{nullptr};
+  sensor::Sensor *charging_cycles_sensor_{nullptr};
+  sensor::Sensor *min_cell_voltage_sensor_{nullptr};
+  sensor::Sensor *max_cell_voltage_sensor_{nullptr};
+  sensor::Sensor *min_voltage_cell_sensor_{nullptr};
+  sensor::Sensor *max_voltage_cell_sensor_{nullptr};
+  sensor::Sensor *delta_cell_voltage_sensor_{nullptr};
+  sensor::Sensor *average_cell_voltage_sensor_{nullptr};
+  sensor::Sensor *cell_count_sensor_{nullptr};
+  sensor::Sensor *temperature_sensors_sensor_{nullptr};
+  sensor::Sensor *capacity_remaining_sensor_{nullptr};
+  sensor::Sensor *balance_current_sensor_{nullptr};
+  sensor::Sensor *mosfet_temperature_sensor_{nullptr};
+  sensor::Sensor *board_temperature_sensor_{nullptr};
 
-  switch_::Switch *balancer_switch_;
-  switch_::Switch *charging_switch_;
-  switch_::Switch *discharging_switch_;
+  switch_::Switch *balancer_switch_{nullptr};
+  switch_::Switch *charging_switch_{nullptr};
+  switch_::Switch *discharging_switch_{nullptr};
 
-  number::Number *state_of_charge_setting_number_;
+  number::Number *state_of_charge_setting_number_{nullptr};
 
-  text_sensor::TextSensor *battery_status_text_sensor_;
-  text_sensor::TextSensor *errors_text_sensor_;
+  text_sensor::TextSensor *battery_status_text_sensor_{nullptr};
+  text_sensor::TextSensor *errors_text_sensor_{nullptr};
 
   struct Cell {
     sensor::Sensor *cell_voltage_sensor_{nullptr};
