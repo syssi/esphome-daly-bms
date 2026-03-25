@@ -36,9 +36,7 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
         cv.Optional(CONF_RETRIEVE_SETTINGS): button.button_schema(
             DalyButton, icon=ICON_RETRIEVE_SETTINGS
         ),
-        cv.Optional(CONF_RESTART): button.button_schema(
-            DalyButton, icon=ICON_RESTART
-        ),
+        cv.Optional(CONF_RESTART): button.button_schema(DalyButton, icon=ICON_RESTART),
         cv.Optional(CONF_SHUTDOWN): button.button_schema(
             DalyButton, icon=ICON_SHUTDOWN
         ),
