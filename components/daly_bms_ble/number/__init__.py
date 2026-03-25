@@ -26,7 +26,7 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
             DalyNumber,
             icon=ICON_STATE_OF_CHARGE_SETTING,
             unit_of_measurement=UNIT_PERCENT,
-        ).extend(cv.COMPONENT_SCHEMA),
+        ),
     }
 )
 
