@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import button
 import esphome.config_validation as cv
-from esphome.const import CONF_FACTORY_RESET, CONF_RESTART
+from esphome.const import CONF_FACTORY_RESET, CONF_RESTART, DEVICE_CLASS_RESTART
 
 from .. import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, daly_bms_ble_ns
 
@@ -36,7 +36,9 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
         cv.Optional(CONF_RETRIEVE_SETTINGS): button.button_schema(
             DalyButton, icon=ICON_RETRIEVE_SETTINGS
         ),
-        cv.Optional(CONF_RESTART): button.button_schema(DalyButton, icon=ICON_RESTART),
+        cv.Optional(CONF_RESTART): button.button_schema(
+            DalyButton, icon=ICON_RESTART, device_class=DEVICE_CLASS_RESTART
+        ),
         cv.Optional(CONF_SHUTDOWN): button.button_schema(
             DalyButton, icon=ICON_SHUTDOWN
         ),
@@ -44,7 +46,7 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
             DalyButton, icon=ICON_RESET_CURRENT
         ),
         cv.Optional(CONF_FACTORY_RESET): button.button_schema(
-            DalyButton, icon=ICON_FACTORY_RESET
+            DalyButton, icon=ICON_FACTORY_RESET, device_class=DEVICE_CLASS_RESTART
         ),
     }
 )
