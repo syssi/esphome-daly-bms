@@ -1,6 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import binary_sensor
 import esphome.config_validation as cv
+from esphome.const import ENTITY_CATEGORY_DIAGNOSTIC
 
 from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
 
@@ -21,13 +22,13 @@ BINARY_SENSORS = [
 CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
         cv.Optional(CONF_BALANCING): binary_sensor.binary_sensor_schema(
-            icon="mdi:battery-heart-variant"
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC, icon="mdi:battery-heart-variant"
         ),
         cv.Optional(CONF_CHARGING): binary_sensor.binary_sensor_schema(
-            icon="mdi:battery-charging"
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC, icon="mdi:battery-charging"
         ),
         cv.Optional(CONF_DISCHARGING): binary_sensor.binary_sensor_schema(
-            icon="mdi:power-plug"
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC, icon="mdi:power-plug"
         ),
     }
 )
