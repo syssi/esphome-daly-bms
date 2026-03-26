@@ -1,7 +1,6 @@
 import esphome.codegen as cg
 from esphome.components import button
 import esphome.config_validation as cv
-
 from esphome.const import CONF_FACTORY_RESET, CONF_RESTART, DEVICE_CLASS_RESTART
 
 from .. import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, daly_bms_ble_ns
