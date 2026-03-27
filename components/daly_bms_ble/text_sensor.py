@@ -1,6 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import text_sensor
 import esphome.config_validation as cv
+from esphome.const import ENTITY_CATEGORY_DIAGNOSTIC
 
 from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
 
@@ -22,12 +23,11 @@ TEXT_SENSORS = [
 CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
         cv.Optional(CONF_BATTERY_STATUS): text_sensor.text_sensor_schema(
-            text_sensor.TextSensor,
             icon=ICON_BATTERY_STATUS,
         ),
         cv.Optional(CONF_ERRORS): text_sensor.text_sensor_schema(
-            text_sensor.TextSensor,
             icon=ICON_ERRORS,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         ),
     }
 )
