@@ -153,8 +153,8 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
     sensor::Sensor *temperature_sensor_{nullptr};
   } temperatures_[8];
 
-  uint16_t char_notify_handle_;
-  uint16_t char_command_handle_;
+  uint16_t char_notify_handle_{0};
+  uint16_t char_command_handle_{0};
   uint32_t password_ = 12345678;
   uint8_t status_registers_{62};
 
