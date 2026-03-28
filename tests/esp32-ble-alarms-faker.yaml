@@ -369,6 +369,7 @@ substitutions:
 
 esphome:
   name: ${name}
+  friendly_name: ${name}
   comment: ${device_description}
   min_version: 2024.6.0
   project:
@@ -414,10 +415,10 @@ sensor:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0
     error_bitmask:
-      name: "${name} error bitmask"
+      name: "error bitmask"
 
 text_sensor:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0
     errors:
-      name: "${name} errors"
+      name: "errors"
