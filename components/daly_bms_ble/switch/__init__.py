@@ -3,18 +3,15 @@ from esphome.components import switch
 import esphome.config_validation as cv
 
 from .. import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA, daly_bms_ble_ns
+from ..const import CONF_CHARGING, CONF_DISCHARGING, ICON_CHARGING, ICON_DISCHARGING
 
 DEPENDENCIES = ["daly_bms_ble"]
 
 CODEOWNERS = ["@syssi"]
 
 CONF_BALANCER = "balancer"
-CONF_CHARGING = "charging"
-CONF_DISCHARGING = "discharging"
 
 ICON_BALANCER = "mdi:seesaw"
-ICON_CHARGING = "mdi:battery-charging-50"
-ICON_DISCHARGING = "mdi:battery-charging-50"
 
 SWITCHES = {
     CONF_BALANCER: 0x00CF,
