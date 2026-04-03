@@ -34,14 +34,13 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_DALY_BMS_BLE_ID])
     for key, (address, factor, min_val, max_val, step) in NUMBERS.items():
-        if key not in config:
-            continue
-        conf = config[key]
-        var = await number.new_number(
-            conf, min_value=min_val, max_value=max_val, step=step
-        )
-        await cg.register_component(var, conf)
-        cg.add(getattr(hub, f"set_{key}_number")(var))
-        cg.add(var.set_parent(hub))
-        cg.add(var.set_holding_register(address))
-        cg.add(var.set_factor(factor))
+        if key in config:
+            conf = config[key]
+            var = await number.new_number(
+                conf, min_value=min_val, max_value=max_val, step=step
+            )
+            await cg.register_component(var, conf)
+            cg.add(getattr(hub, f"set_{key}_number")(var))
+            cg.add(var.set_parent(hub))
+            cg.add(var.set_holding_register(address))
+            cg.add(var.set_factor(factor))

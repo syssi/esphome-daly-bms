@@ -10,10 +10,8 @@ DEPENDENCIES = ["daly_bms_ble"]
 CODEOWNERS = ["@syssi"]
 
 CONF_RETRIEVE_SETTINGS = "retrieve_settings"
-# CONF_RESTART = "restart"
 CONF_SHUTDOWN = "shutdown"
 CONF_RESET_CURRENT = "reset_current"
-# CONF_FACTORY_RESET = "factory_reset"
 
 ICON_RETRIEVE_SETTINGS = "mdi:cog"
 ICON_RESTART = "mdi:restart"
