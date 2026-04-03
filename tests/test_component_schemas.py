@@ -89,7 +89,7 @@ class TestNumberConstants:
         assert number.CONF_STATE_OF_CHARGE_SETTING in number.NUMBERS
 
     def test_number_tuple_structure(self):
-        for key, (address, factor, min_val, max_val, step) in number.NUMBERS.items():
+        for address, factor, min_val, max_val, step in number.NUMBERS.values():
             assert isinstance(address, int)
             assert factor > 0
             assert min_val < max_val
