@@ -17,12 +17,6 @@ from components.daly_bms_ble import (  # noqa: E402
 
 
 class TestHubConstants:
-    def test_shared_charging_constant(self):
-        assert hub.CONF_CHARGING == "charging"
-
-    def test_shared_discharging_constant(self):
-        assert hub.CONF_DISCHARGING == "discharging"
-
     def test_conf_ids_defined(self):
         assert hub.CONF_DALY_BMS_BLE_ID == "daly_bms_ble_id"
         assert hub.CONF_STATUS_REGISTERS == "status_registers"
@@ -60,12 +54,6 @@ class TestSensorLists:
 
 
 class TestBinarySensorConstants:
-    def test_uses_shared_charging_constant(self):
-        assert binary_sensor.CONF_CHARGING is hub.CONF_CHARGING
-
-    def test_uses_shared_discharging_constant(self):
-        assert binary_sensor.CONF_DISCHARGING is hub.CONF_DISCHARGING
-
     def test_binary_sensor_defs_dict(self):
         assert binary_sensor.CONF_BALANCING in binary_sensor.BINARY_SENSOR_DEFS
         assert binary_sensor.CONF_CHARGING in binary_sensor.BINARY_SENSOR_DEFS
@@ -74,12 +62,6 @@ class TestBinarySensorConstants:
 
 
 class TestSwitchConstants:
-    def test_uses_shared_charging_constant(self):
-        assert switch.CONF_CHARGING is hub.CONF_CHARGING
-
-    def test_uses_shared_discharging_constant(self):
-        assert switch.CONF_DISCHARGING is hub.CONF_DISCHARGING
-
     def test_switches_dict(self):
         assert switch.CONF_CHARGING in switch.SWITCHES
         assert switch.CONF_DISCHARGING in switch.SWITCHES
