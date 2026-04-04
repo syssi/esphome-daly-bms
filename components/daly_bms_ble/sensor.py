@@ -207,8 +207,6 @@ SENSOR_DEFS = {
     },
 }
 
-SENSORS = list(SENSOR_DEFS)
-
 _CELL_VOLTAGE_SCHEMA = sensor.sensor_schema(
     unit_of_measurement=UNIT_VOLT,
     icon=ICON_EMPTY,
@@ -249,7 +247,7 @@ async def to_code(config):
             conf = config[key]
             sens = await sensor.new_sensor(conf)
             cg.add(hub.set_cell_voltage_sensor(i, sens))
-    for key in SENSORS:
+    for key in SENSOR_DEFS:
         if key in config:
             conf = config[key]
             sens = await sensor.new_sensor(conf)
