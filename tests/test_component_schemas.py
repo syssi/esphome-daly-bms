@@ -42,13 +42,13 @@ class TestSensorLists:
             assert key == f"temperature_{i}"
 
     def test_sensors_list_completeness(self):
-        assert "total_voltage" in sensor.SENSORS
-        assert "state_of_charge" in sensor.SENSORS
-        assert "error_bitmask" in sensor.SENSORS
-        assert len(sensor.SENSORS) == 20
+        assert "total_voltage" in sensor.SENSOR_DEFS
+        assert "state_of_charge" in sensor.SENSOR_DEFS
+        assert "error_bitmask" in sensor.SENSOR_DEFS
+        assert len(sensor.SENSOR_DEFS) == 20
 
     def test_no_cell_keys_in_sensors_list(self):
-        for key in sensor.SENSORS:
+        for key in sensor.SENSOR_DEFS:
             assert key not in sensor.CELLS
             assert key not in sensor.TEMPERATURES
 

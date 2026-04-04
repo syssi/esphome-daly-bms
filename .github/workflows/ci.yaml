@@ -418,7 +418,7 @@ jobs:
       - name: Run pytest
         run: |
           . venv/bin/activate
-          pytest tests/test_component_schemas.py -v
+          pytest tests/ -v
 
   esphome-config:
     name: Validate example configurations
