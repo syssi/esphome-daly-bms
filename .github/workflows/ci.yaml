@@ -375,28 +375,10 @@ jobs:
           mkdir -p .temp
           pio run --list-targets -e esp32-idf-tidy
 
-      - name: Check if full clang-tidy scan needed
-        id: check_full_scan
-        run: |
-          . venv/bin/activate
-          if python script/clang_tidy_hash.py --check; then
-            echo "full_scan=true" >> $GITHUB_OUTPUT
-            echo "reason=hash_changed" >> $GITHUB_OUTPUT
-          else
-            echo "full_scan=false" >> $GITHUB_OUTPUT
-            echo "reason=normal" >> $GITHUB_OUTPUT
-          fi
-
       - name: Run clang-tidy
         run: |
           . venv/bin/activate
-          if [ "${{ steps.check_full_scan.outputs.full_scan }}" = "true" ]; then
-            echo "Running FULL clang-tidy scan (hash changed)"
-            script/clang-tidy --all-headers --fix ${{ matrix.options }} ../components
-          else
-            echo "Running clang-tidy on changed files only"
-            script/clang-tidy --all-headers --fix --changed ${{ matrix.options }} ../components
-          fi
+          script/clang-tidy --all-headers --fix ${{ matrix.options }} ../components
         env:
           # Also cache libdeps, store them in a ~/.platformio subfolder
           PLATFORMIO_LIBDEPS_DIR: ~/.platformio/libdeps
