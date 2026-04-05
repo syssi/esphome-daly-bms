@@ -35,7 +35,7 @@ static const uint8_t DALY_FRAME_LEN_PASSWORD = 6;
 static const uint8_t MAX_RESPONSE_SIZE = 165;
 
 static const uint8_t ERRORS_SIZE = 64;
-static const char *const ERRORS[ERRORS_SIZE] = {
+static constexpr const char *const ERRORS[ERRORS_SIZE] = {
     // Register 0x3D, Byte 0
     // Reserved but unused
     "",
