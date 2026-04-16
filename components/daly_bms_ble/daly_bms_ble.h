@@ -1,8 +1,6 @@
 #pragma once
 
 #include "esphome/core/component.h"
-#include "esphome/components/ble_client/ble_client.h"
-#include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/number/number.h"
 #include "esphome/components/sensor/sensor.h"
@@ -10,18 +8,24 @@
 #include "esphome/components/text_sensor/text_sensor.h"
 
 #ifdef USE_ESP32
-
+#include "esphome/components/ble_client/ble_client.h"
+#include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include <esp_gattc_api.h>
+#endif
 
 namespace esphome {
 namespace daly_bms_ble {
 
+#ifdef USE_ESP32
 namespace espbt = esphome::esp32_ble_tracker;
+#endif
 
-class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComponent {
+class DalyBmsBle :
+#ifdef USE_ESP32
+    public esphome::ble_client::BLEClientNode,
+#endif
+    public PollingComponent {
  public:
-  void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
-                           esp_ble_gattc_cb_param_t *param) override;
   void dump_config() override;
   void update() override;
   float get_setup_priority() const override { return setup_priority::DATA; }
@@ -103,10 +107,14 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
 
   void set_state_of_charge_setting_number(number::Number *number) { state_of_charge_setting_number_ = number; }
+#ifdef USE_ESP32
+  void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
+                           esp_ble_gattc_cb_param_t *param) override;
   bool write_register(uint16_t address, uint16_t value) { return send_command(0x06, address, value); }
+  bool send_command(uint8_t function, uint16_t address, uint16_t value);
+#endif
 
   void on_daly_bms_ble_data(const std::vector<uint8_t> &data);
-  bool send_command(uint8_t function, uint16_t address, uint16_t value);
   void set_password(uint32_t password) { this->password_ = password; }
   void set_status_registers(uint8_t protocol_version) { this->status_registers_ = protocol_version; }
 
@@ -153,8 +161,10 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
     sensor::Sensor *temperature_sensor_{nullptr};
   } temperatures_[8];
 
+#ifdef USE_ESP32
   uint16_t char_notify_handle_{0};
   uint16_t char_command_handle_{0};
+#endif
   uint32_t password_ = 12345678;
   uint8_t status_registers_{62};
 
@@ -174,5 +184,3 @@ class DalyBmsBle : public esphome::ble_client::BLEClientNode, public PollingComp
 
 }  // namespace daly_bms_ble
 }  // namespace esphome
-
-#endif

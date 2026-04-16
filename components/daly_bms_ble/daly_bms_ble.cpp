@@ -103,6 +103,7 @@ static constexpr const char *const ERRORS[ERRORS_SIZE] = {
     "Critical: Cell voltage too high",
     "Warning: Cell voltage too low",
     "Critical: Cell voltage too low",
+    "Warning: Total voltage too high",
     "Critical: Total voltage too high",
     "Warning: Total voltage too low",
     "Critical: Total voltage too low",
@@ -117,6 +118,34 @@ static constexpr const char *const ERRORS[ERRORS_SIZE] = {
     "Warning: Discharging temperature too low",
     "Critical: Discharging temperature too low",
 };
+
+#ifdef USE_ESP32
+bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
+  uint8_t frame[8];
+
+  frame[0] = 0xD2;      // Modbus device address
+  frame[1] = function;  // Function (0x03: Read register, 0x06: Write register, 0x10: Write multiple registers)
+  frame[2] = address >> 8;
+  frame[3] = address >> 0;
+  frame[4] = value >> 8;
+  frame[5] = value >> 0;
+  auto crc = crc16(frame, 6);
+  frame[6] = crc >> 0;
+  frame[7] = crc >> 8;
+
+  ESP_LOGD(TAG, "Send command (handle 0x%02X): %s", this->char_command_handle_,
+           format_hex_pretty(frame, sizeof(frame)).c_str());  // NOLINT
+
+  auto status =
+      esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(), this->char_command_handle_,
+                               sizeof(frame), frame, ESP_GATT_WRITE_TYPE_NO_RSP, ESP_GATT_AUTH_REQ_NONE);
+
+  if (status) {
+    ESP_LOGW(TAG, "[%s] esp_ble_gattc_write_char failed, status=%d", ADDR_STR(this->parent_->address_str()), status);
+  }
+
+  return (status == 0);
+}
 
 void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                                      esp_ble_gattc_cb_param_t *param) {
@@ -185,19 +214,22 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
       break;
   }
 }
+#endif  // USE_ESP32
 
 void DalyBmsBle::update() {
+#ifdef USE_ESP32
   if (this->node_state != espbt::ClientState::ESTABLISHED) {
     ESP_LOGW(TAG, "[%s] Not connected", ADDR_STR(this->parent_->address_str()));
     return;
   }
 
   this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
+#endif
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   if (data[0] != DALY_FRAME_START || data.size() > MAX_RESPONSE_SIZE) {
-    ESP_LOGW(TAG, "Invalid response received (%d bytes): %s", data.size(),
+    ESP_LOGW(TAG, "Invalid response received (%zu bytes): %s", data.size(),
              format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
     return;
   }
@@ -254,7 +286,7 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
     return (uint64_t(daly_get_32bit(i + 0)) << 32) | (uint64_t(daly_get_32bit(i + 4)) << 0);
   };
 
-  ESP_LOGI(TAG, "Status frame received (%d bytes)", data.size());
+  ESP_LOGI(TAG, "Status frame received (%zu bytes)", data.size());
   ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), 100).c_str());                      // NOLINT
   ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front() + 100, data.size() - 100).c_str());  // NOLINT
 
@@ -723,33 +755,6 @@ void DalyBmsBle::publish_state_(text_sensor::TextSensor *text_sensor, const std:
     return;
 
   text_sensor->publish_state(state);
-}
-
-bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
-  uint8_t frame[8];
-
-  frame[0] = 0xD2;      // Modbus device address
-  frame[1] = function;  // Function (0x03: Read register, 0x06: Write register, 0x10: Write multiple registers)
-  frame[2] = address >> 8;
-  frame[3] = address >> 0;
-  frame[4] = value >> 8;
-  frame[5] = value >> 0;
-  auto crc = crc16(frame, 6);
-  frame[6] = crc >> 0;
-  frame[7] = crc >> 8;
-
-  ESP_LOGD(TAG, "Send command (handle 0x%02X): %s", this->char_command_handle_,
-           format_hex_pretty(frame, sizeof(frame)).c_str());  // NOLINT
-
-  auto status =
-      esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(), this->char_command_handle_,
-                               sizeof(frame), frame, ESP_GATT_WRITE_TYPE_NO_RSP, ESP_GATT_AUTH_REQ_NONE);
-
-  if (status) {
-    ESP_LOGW(TAG, "[%s] esp_ble_gattc_write_char failed, status=%d", ADDR_STR(this->parent_->address_str()), status);
-  }
-
-  return (status == 0);
 }
 
 std::string DalyBmsBle::bitmask_to_string_(const char *const messages[], const uint8_t &messages_size,
