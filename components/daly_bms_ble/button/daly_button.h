@@ -4,8 +4,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/button/button.h"
 
-namespace esphome {
-namespace daly_bms_ble {
+namespace esphome::daly_bms_ble {
 
 class DalyBmsBle;
 class DalyButton : public button::Button, public Component {
@@ -22,5 +21,4 @@ class DalyButton : public button::Button, public Component {
   uint16_t holding_register_;
 };
 
-}  // namespace daly_bms_ble
-}  // namespace esphome
+}  // namespace esphome::daly_bms_ble

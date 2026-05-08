@@ -4,8 +4,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/number/number.h"
 
-namespace esphome {
-namespace daly_bms_ble {
+namespace esphome::daly_bms_ble {
 
 class DalyBmsBle;
 class DalyNumber : public number::Number, public Component {
@@ -22,5 +21,4 @@ class DalyNumber : public number::Number, public Component {
   float factor_{1.0f};
 };
 
-}  // namespace daly_bms_ble
-}  // namespace esphome
+}  // namespace esphome::daly_bms_ble

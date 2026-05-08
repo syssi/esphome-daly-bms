@@ -1,8 +1,7 @@
 #include "daly_number.h"
 #include "esphome/core/log.h"
 
-namespace esphome {
-namespace daly_bms_ble {
+namespace esphome::daly_bms_ble {
 
 static const char *const TAG = "daly_bms_ble.number";
 
@@ -13,5 +12,4 @@ void DalyNumber::control(float value) {
   }
 }
 
-}  // namespace daly_bms_ble
-}  // namespace esphome
+}  // namespace esphome::daly_bms_ble
