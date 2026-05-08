@@ -9,8 +9,7 @@
 #define ADDR_STR(x) (x).c_str()
 #endif
 
-namespace esphome {
-namespace daly_bms_ble {
+namespace esphome::daly_bms_ble {
 
 static const char *const TAG = "daly_bms_ble";
 
@@ -774,5 +773,4 @@ std::string DalyBmsBle::bitmask_to_string_(const char *const messages[], const u
   return values;
 }
 
-}  // namespace daly_bms_ble
-}  // namespace esphome
+}  // namespace esphome::daly_bms_ble

@@ -13,8 +13,7 @@
 #include <esp_gattc_api.h>
 #endif
 
-namespace esphome {
-namespace daly_bms_ble {
+namespace esphome::daly_bms_ble {
 
 #ifdef USE_ESP32
 namespace espbt = esphome::esp32_ble_tracker;
@@ -182,5 +181,4 @@ class DalyBmsBle :
   bool check_bit_(uint16_t mask, uint16_t flag) { return (mask & flag) == flag; }
 };
 
-}  // namespace daly_bms_ble
-}  // namespace esphome
+}  // namespace esphome::daly_bms_ble

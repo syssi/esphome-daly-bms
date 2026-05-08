@@ -2,8 +2,7 @@
 #include "esphome/core/log.h"
 #include "esphome/core/application.h"
 
-namespace esphome {
-namespace daly_bms_ble {
+namespace esphome::daly_bms_ble {
 
 static const char *const TAG = "daly_bms_ble.button";
 
@@ -23,5 +22,4 @@ void DalyButton::press_action() {
   this->parent_->send_command(DALY_FUNCTION_WRITE, this->holding_register_, 0x0001);
 }
 
-}  // namespace daly_bms_ble
-}  // namespace esphome
+}  // namespace esphome::daly_bms_ble
