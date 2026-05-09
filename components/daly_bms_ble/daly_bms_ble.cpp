@@ -758,7 +758,7 @@ void DalyBmsBle::publish_state_(text_sensor::TextSensor *text_sensor, const std:
 
 std::string DalyBmsBle::bitmask_to_string_(const char *const messages[], const uint8_t &messages_size,
                                            const uint64_t &mask) {
-  std::string values = "";
+  std::string values;
   if (mask) {
     for (uint8_t i = 0; i < messages_size; i++) {
       if (mask & (1ULL << i)) {
