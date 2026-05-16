@@ -14,15 +14,15 @@ CONF_RETRIEVE_VERSION = "retrieve_version"
 CONF_SHUTDOWN = "shutdown"
 CONF_RESET_CURRENT = "reset_current"
 
-DALY_FUNCTION_READ = 0x03
-DALY_FUNCTION_WRITE = 0x06
-
 ICON_RETRIEVE_SETTINGS = "mdi:cog"
 ICON_RETRIEVE_VERSION = "mdi:information"
 ICON_RESTART = "mdi:restart"
 ICON_SHUTDOWN = "mdi:power"
 ICON_RESET_CURRENT = "mdi:counter"
 ICON_FACTORY_RESET = "mdi:factory"
+
+DALY_FUNCTION_READ = 0x03
+DALY_FUNCTION_WRITE = 0x06
 
 # (function, address, value)
 BUTTONS = {
