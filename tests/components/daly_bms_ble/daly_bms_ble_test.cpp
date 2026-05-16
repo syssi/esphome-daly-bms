@@ -10,6 +10,46 @@ TEST(DalyBmsBleVersionTest, NullSensorsDoNotCrash) {
   bms.decode_version_data_(VERSION_FRAME_1);
 }
 
+TEST(DalyBmsBleVersionTest, SoftwareVersion) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor sw_version;
+  bms.set_software_version_text_sensor(&sw_version);
+
+  bms.decode_version_data_(VERSION_FRAME_1);
+
+  EXPECT_EQ(sw_version.state, "401012");
+}
+
+TEST(DalyBmsBleVersionTest, HardwareVersion) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor hw_version;
+  bms.set_hardware_version_text_sensor(&hw_version);
+
+  bms.decode_version_data_(VERSION_FRAME_1);
+
+  EXPECT_EQ(hw_version.state, "BMS");
+}
+
+TEST(DalyBmsBleVersionTest, SoftwareVersionFrame2) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor sw_version;
+  bms.set_software_version_text_sensor(&sw_version);
+
+  bms.decode_version_data_(VERSION_FRAME_2);
+
+  EXPECT_EQ(sw_version.state, "204012");
+}
+
+TEST(DalyBmsBleVersionTest, HardwareVersionFrame2) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor hw_version;
+  bms.set_hardware_version_text_sensor(&hw_version);
+
+  bms.decode_version_data_(VERSION_FRAME_2);
+
+  EXPECT_EQ(hw_version.state, "SH39F003");
+}
+
 TEST(DalyBmsBleVersionTest, DispatchedViaOnData) {
   TestableDalyBmsBle bms;
   bms.on_daly_bms_ble_data(VERSION_FRAME_1);
