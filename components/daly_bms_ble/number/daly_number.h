@@ -12,6 +12,7 @@ class DalyNumber : public number::Number, public Component {
   void set_parent(DalyBmsBle *parent) { this->parent_ = parent; };
   void set_holding_register(uint16_t holding_register) { this->holding_register_ = holding_register; };
   void set_factor(float factor) { this->factor_ = factor; };
+  void set_offset(float offset) { this->offset_ = offset; };
   void dump_config() override;
 
  protected:
@@ -19,6 +20,7 @@ class DalyNumber : public number::Number, public Component {
   DalyBmsBle *parent_;
   uint16_t holding_register_;
   float factor_{1.0f};
+  float offset_{0.0f};
 };
 
 }  // namespace esphome::daly_bms_ble

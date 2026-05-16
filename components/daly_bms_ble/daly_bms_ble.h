@@ -6,6 +6,7 @@
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/switch/switch.h"
 #include "esphome/components/text_sensor/text_sensor.h"
+#include <map>
 
 #ifdef USE_ESP32
 #include "esphome/components/ble_client/ble_client.h"
@@ -111,7 +112,9 @@ class DalyBmsBle :
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
 
-  void set_state_of_charge_setting_number(number::Number *number) { state_of_charge_setting_number_ = number; }
+  void register_settings_number(uint16_t address, number::Number *number, float factor, float offset) {
+    this->settings_numbers_[address] = {number, factor, offset};
+  }
 #ifdef USE_ESP32
   void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                            esp_ble_gattc_cb_param_t *param) override;
@@ -153,7 +156,12 @@ class DalyBmsBle :
   switch_::Switch *charging_switch_{nullptr};
   switch_::Switch *discharging_switch_{nullptr};
 
-  number::Number *state_of_charge_setting_number_{nullptr};
+  struct SettingsNumber {
+    number::Number *number;
+    float factor;
+    float offset;
+  };
+  std::map<uint16_t, SettingsNumber> settings_numbers_;
 
   text_sensor::TextSensor *battery_status_text_sensor_{nullptr};
   text_sensor::TextSensor *errors_text_sensor_{nullptr};

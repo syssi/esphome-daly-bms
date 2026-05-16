@@ -492,6 +492,251 @@ sensor:
       name: "capacity remaining"
       device_id: device1
 
+number:
+  - platform: daly_bms_ble
+    daly_bms_ble_id: bms0
+    # These entities write directly to BMS settings registers and have not been tested
+    # on real hardware. Use at your own risk - no guarantee is provided.
+    # state_of_charge_setting:
+    #   name: "state of charge setting"
+    #   device_id: device0
+    # rated_capacity:
+    #   name: "rated capacity"
+    #   device_id: device0
+    # cell_voltage_reference:
+    #   name: "cell voltage reference"
+    #   device_id: device0
+    # acquisition_board_count:
+    #   name: "acquisition board count"
+    #   device_id: device0
+    # board_1_cell_count:
+    #   name: "board 1 cell count"
+    #   device_id: device0
+    # board_2_cell_count:
+    #   name: "board 2 cell count"
+    #   device_id: device0
+    # board_3_cell_count:
+    #   name: "board 3 cell count"
+    #   device_id: device0
+    # board_1_temperature_sensor_count:
+    #   name: "board 1 temperature sensor count"
+    #   device_id: device0
+    # board_2_temperature_sensor_count:
+    #   name: "board 2 temperature sensor count"
+    #   device_id: device0
+    # board_3_temperature_sensor_count:
+    #   name: "board 3 temperature sensor count"
+    #   device_id: device0
+    # battery_type:
+    #   name: "battery type"
+    #   device_id: device0
+    # sleep_wait_time:
+    #   name: "sleep wait time"
+    #   device_id: device0
+    # cell_overvoltage_warning:
+    #   name: "cell overvoltage warning"
+    #   device_id: device0
+    # cell_overvoltage_alarm:
+    #   name: "cell overvoltage alarm"
+    #   device_id: device0
+    # cell_undervoltage_warning:
+    #   name: "cell undervoltage warning"
+    #   device_id: device0
+    # cell_undervoltage_alarm:
+    #   name: "cell undervoltage alarm"
+    #   device_id: device0
+    # total_overvoltage_warning:
+    #   name: "total overvoltage warning"
+    #   device_id: device0
+    # total_overvoltage_alarm:
+    #   name: "total overvoltage alarm"
+    #   device_id: device0
+    # total_undervoltage_warning:
+    #   name: "total undervoltage warning"
+    #   device_id: device0
+    # total_undervoltage_alarm:
+    #   name: "total undervoltage alarm"
+    #   device_id: device0
+    # charging_overcurrent_warning:
+    #   name: "charging overcurrent warning"
+    #   device_id: device0
+    # charging_overcurrent_alarm:
+    #   name: "charging overcurrent alarm"
+    #   device_id: device0
+    # discharging_overcurrent_warning:
+    #   name: "discharging overcurrent warning"
+    #   device_id: device0
+    # discharging_overcurrent_alarm:
+    #   name: "discharging overcurrent alarm"
+    #   device_id: device0
+    # charging_overtemperature_warning:
+    #   name: "charging overtemperature warning"
+    #   device_id: device0
+    # charging_overtemperature_alarm:
+    #   name: "charging overtemperature alarm"
+    #   device_id: device0
+    # charging_undertemperature_warning:
+    #   name: "charging undertemperature warning"
+    #   device_id: device0
+    # charging_undertemperature_alarm:
+    #   name: "charging undertemperature alarm"
+    #   device_id: device0
+    # discharging_overtemperature_warning:
+    #   name: "discharging overtemperature warning"
+    #   device_id: device0
+    # discharging_overtemperature_alarm:
+    #   name: "discharging overtemperature alarm"
+    #   device_id: device0
+    # discharging_undertemperature_warning:
+    #   name: "discharging undertemperature warning"
+    #   device_id: device0
+    # discharging_undertemperature_alarm:
+    #   name: "discharging undertemperature alarm"
+    #   device_id: device0
+    # cell_voltage_difference_warning:
+    #   name: "cell voltage difference warning"
+    #   device_id: device0
+    # cell_voltage_difference_alarm:
+    #   name: "cell voltage difference alarm"
+    #   device_id: device0
+    # temperature_difference_warning:
+    #   name: "temperature difference warning"
+    #   device_id: device0
+    # temperature_difference_alarm:
+    #   name: "temperature difference alarm"
+    #   device_id: device0
+    # balancing_activation_voltage:
+    #   name: "balancing activation voltage"
+    #   device_id: device0
+    # balancing_activation_voltage_difference:
+    #   name: "balancing activation voltage difference"
+    #   device_id: device0
+    # mosfet_overtemperature_alarm:
+    #   name: "mosfet overtemperature alarm"
+    #   device_id: device0
+
+  - platform: daly_bms_ble
+    daly_bms_ble_id: bms1
+    # These entities write directly to BMS settings registers and have not been tested
+    # on real hardware. Use at your own risk - no guarantee is provided.
+    # state_of_charge_setting:
+    #   name: "state of charge setting"
+    #   device_id: device1
+    # rated_capacity:
+    #   name: "rated capacity"
+    #   device_id: device1
+    # cell_voltage_reference:
+    #   name: "cell voltage reference"
+    #   device_id: device1
+    # acquisition_board_count:
+    #   name: "acquisition board count"
+    #   device_id: device1
+    # board_1_cell_count:
+    #   name: "board 1 cell count"
+    #   device_id: device1
+    # board_2_cell_count:
+    #   name: "board 2 cell count"
+    #   device_id: device1
+    # board_3_cell_count:
+    #   name: "board 3 cell count"
+    #   device_id: device1
+    # board_1_temperature_sensor_count:
+    #   name: "board 1 temperature sensor count"
+    #   device_id: device1
+    # board_2_temperature_sensor_count:
+    #   name: "board 2 temperature sensor count"
+    #   device_id: device1
+    # board_3_temperature_sensor_count:
+    #   name: "board 3 temperature sensor count"
+    #   device_id: device1
+    # battery_type:
+    #   name: "battery type"
+    #   device_id: device1
+    # sleep_wait_time:
+    #   name: "sleep wait time"
+    #   device_id: device1
+    # cell_overvoltage_warning:
+    #   name: "cell overvoltage warning"
+    #   device_id: device1
+    # cell_overvoltage_alarm:
+    #   name: "cell overvoltage alarm"
+    #   device_id: device1
+    # cell_undervoltage_warning:
+    #   name: "cell undervoltage warning"
+    #   device_id: device1
+    # cell_undervoltage_alarm:
+    #   name: "cell undervoltage alarm"
+    #   device_id: device1
+    # total_overvoltage_warning:
+    #   name: "total overvoltage warning"
+    #   device_id: device1
+    # total_overvoltage_alarm:
+    #   name: "total overvoltage alarm"
+    #   device_id: device1
+    # total_undervoltage_warning:
+    #   name: "total undervoltage warning"
+    #   device_id: device1
+    # total_undervoltage_alarm:
+    #   name: "total undervoltage alarm"
+    #   device_id: device1
+    # charging_overcurrent_warning:
+    #   name: "charging overcurrent warning"
+    #   device_id: device1
+    # charging_overcurrent_alarm:
+    #   name: "charging overcurrent alarm"
+    #   device_id: device1
+    # discharging_overcurrent_warning:
+    #   name: "discharging overcurrent warning"
+    #   device_id: device1
+    # discharging_overcurrent_alarm:
+    #   name: "discharging overcurrent alarm"
+    #   device_id: device1
+    # charging_overtemperature_warning:
+    #   name: "charging overtemperature warning"
+    #   device_id: device1
+    # charging_overtemperature_alarm:
+    #   name: "charging overtemperature alarm"
+    #   device_id: device1
+    # charging_undertemperature_warning:
+    #   name: "charging undertemperature warning"
+    #   device_id: device1
+    # charging_undertemperature_alarm:
+    #   name: "charging undertemperature alarm"
+    #   device_id: device1
+    # discharging_overtemperature_warning:
+    #   name: "discharging overtemperature warning"
+    #   device_id: device1
+    # discharging_overtemperature_alarm:
+    #   name: "discharging overtemperature alarm"
+    #   device_id: device1
+    # discharging_undertemperature_warning:
+    #   name: "discharging undertemperature warning"
+    #   device_id: device1
+    # discharging_undertemperature_alarm:
+    #   name: "discharging undertemperature alarm"
+    #   device_id: device1
+    # cell_voltage_difference_warning:
+    #   name: "cell voltage difference warning"
+    #   device_id: device1
+    # cell_voltage_difference_alarm:
+    #   name: "cell voltage difference alarm"
+    #   device_id: device1
+    # temperature_difference_warning:
+    #   name: "temperature difference warning"
+    #   device_id: device1
+    # temperature_difference_alarm:
+    #   name: "temperature difference alarm"
+    #   device_id: device1
+    # balancing_activation_voltage:
+    #   name: "balancing activation voltage"
+    #   device_id: device1
+    # balancing_activation_voltage_difference:
+    #   name: "balancing activation voltage difference"
+    #   device_id: device1
+    # mosfet_overtemperature_alarm:
+    #   name: "mosfet overtemperature alarm"
+    #   device_id: device1
+
 switch:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0

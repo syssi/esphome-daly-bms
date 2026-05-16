@@ -86,15 +86,72 @@ class TestButtonConstants:
 
 
 class TestNumberConstants:
-    def test_numbers_dict(self):
-        assert number.CONF_STATE_OF_CHARGE_SETTING in number.NUMBERS
+    def test_numbers_count(self):
+        assert len(number.NUMBERS) == 39
+
+    def test_number_addresses_are_unique(self):
+        addresses = [address for address, *_ in number.NUMBERS.values()]
+        assert len(addresses) == len(set(addresses))
 
     def test_number_tuple_structure(self):
-        for address, factor, min_val, max_val, step in number.NUMBERS.values():
+        for address, factor, offset, min_val, max_val, step in number.NUMBERS.values():
             assert isinstance(address, int)
             assert factor > 0
             assert min_val < max_val
             assert step > 0
+
+    def test_rated_capacity_address(self):
+        assert number.NUMBERS[number.CONF_RATED_CAPACITY][0] == 0x0080
+
+    def test_mosfet_overtemperature_alarm_address(self):
+        assert number.NUMBERS[number.CONF_MOSFET_OVERTEMPERATURE_ALARM][0] == 0x00A8
+
+    def test_state_of_charge_setting_address(self):
+        assert number.NUMBERS[number.CONF_STATE_OF_CHARGE_SETTING][0] == 0x00A7
+
+    def test_all_number_keys_present(self):
+        expected = {
+            number.CONF_RATED_CAPACITY,
+            number.CONF_CELL_VOLTAGE_REFERENCE,
+            number.CONF_ACQUISITION_BOARD_COUNT,
+            number.CONF_BOARD_1_CELL_COUNT,
+            number.CONF_BOARD_2_CELL_COUNT,
+            number.CONF_BOARD_3_CELL_COUNT,
+            number.CONF_BOARD_1_TEMPERATURE_SENSOR_COUNT,
+            number.CONF_BOARD_2_TEMPERATURE_SENSOR_COUNT,
+            number.CONF_BOARD_3_TEMPERATURE_SENSOR_COUNT,
+            number.CONF_BATTERY_TYPE,
+            number.CONF_SLEEP_WAIT_TIME,
+            number.CONF_CELL_OVERVOLTAGE_WARNING,
+            number.CONF_CELL_OVERVOLTAGE_ALARM,
+            number.CONF_CELL_UNDERVOLTAGE_WARNING,
+            number.CONF_CELL_UNDERVOLTAGE_ALARM,
+            number.CONF_TOTAL_OVERVOLTAGE_WARNING,
+            number.CONF_TOTAL_OVERVOLTAGE_ALARM,
+            number.CONF_TOTAL_UNDERVOLTAGE_WARNING,
+            number.CONF_TOTAL_UNDERVOLTAGE_ALARM,
+            number.CONF_CHARGING_OVERCURRENT_WARNING,
+            number.CONF_CHARGING_OVERCURRENT_ALARM,
+            number.CONF_DISCHARGING_OVERCURRENT_WARNING,
+            number.CONF_DISCHARGING_OVERCURRENT_ALARM,
+            number.CONF_CHARGING_OVERTEMPERATURE_WARNING,
+            number.CONF_CHARGING_OVERTEMPERATURE_ALARM,
+            number.CONF_CHARGING_UNDERTEMPERATURE_WARNING,
+            number.CONF_CHARGING_UNDERTEMPERATURE_ALARM,
+            number.CONF_DISCHARGING_OVERTEMPERATURE_WARNING,
+            number.CONF_DISCHARGING_OVERTEMPERATURE_ALARM,
+            number.CONF_DISCHARGING_UNDERTEMPERATURE_WARNING,
+            number.CONF_DISCHARGING_UNDERTEMPERATURE_ALARM,
+            number.CONF_CELL_VOLTAGE_DIFFERENCE_WARNING,
+            number.CONF_CELL_VOLTAGE_DIFFERENCE_ALARM,
+            number.CONF_TEMPERATURE_DIFFERENCE_WARNING,
+            number.CONF_TEMPERATURE_DIFFERENCE_ALARM,
+            number.CONF_BALANCING_ACTIVATION_VOLTAGE,
+            number.CONF_BALANCING_ACTIVATION_VOLTAGE_DIFFERENCE,
+            number.CONF_STATE_OF_CHARGE_SETTING,
+            number.CONF_MOSFET_OVERTEMPERATURE_ALARM,
+        }
+        assert set(number.NUMBERS.keys()) == expected
 
 
 class TestTextSensorConstants:

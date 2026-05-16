@@ -598,12 +598,16 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 
   //  81   2  0x02 0xA8   0xA7    SOC settings (68.0)                                     %          0.1
   ESP_LOGI(TAG, "SOC settings: %.1f %%", daly_get_16bit(81) * 0.1f);
-  this->publish_state_(this->state_of_charge_setting_number_, daly_get_16bit(81) * 0.1f);
 
   //  83   2  0x00 0x57   0xA8    MOS temperature protection alarm (7)                    °C         1
   ESP_LOGI(TAG, "MOS temperature protection alarm: %d °C", daly_get_16bit(83) - 40);
 
   //  85   2  0x7F 0x8B   CRC
+
+  for (auto &[address, sn] : this->settings_numbers_) {
+    uint16_t raw = daly_get_16bit(3 + (address - 0x0080) * 2);
+    this->publish_state_(sn.number, (raw - sn.offset) / sn.factor);
+  }
 }
 
 void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
@@ -720,8 +724,6 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Balance current", this->balance_current_sensor_);
   LOG_SENSOR("", "Mosfet temperature", this->mosfet_temperature_sensor_);
   LOG_SENSOR("", "Board temperature", this->board_temperature_sensor_);
-
-  LOG_NUMBER("", "State of charge setting", this->state_of_charge_setting_number_);
 
   LOG_TEXT_SENSOR("", "Errors", this->errors_text_sensor_);
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);

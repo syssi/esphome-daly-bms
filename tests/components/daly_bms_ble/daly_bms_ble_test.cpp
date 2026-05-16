@@ -97,11 +97,321 @@ TEST(DalyBmsBleSettingsTest, DischargingSwitchOn) {
 TEST(DalyBmsBleSettingsTest, StateOfChargeSetting) {
   TestableDalyBmsBle bms;
   TestNumber soc_setting;
-  bms.set_state_of_charge_setting_number(&soc_setting);
+  bms.register_settings_number(0x00A7, &soc_setting, 10.0f, 0.0f);
 
   bms.decode_settings_data_(SETTINGS_FRAME_1);
 
   EXPECT_NEAR(soc_setting.state, 68.0f, 0.01f);
+}
+
+TEST(DalyBmsBleSettingsTest, RatedCapacity) {
+  TestableDalyBmsBle bms;
+  TestNumber rated_capacity;
+  bms.register_settings_number(0x0080, &rated_capacity, 10.0f, 0.0f);
+
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+
+  EXPECT_NEAR(rated_capacity.state, 105.0f, 0.01f);  // raw=1050, 1050/10=105.0
+}
+
+TEST(DalyBmsBleSettingsTest, MosfetOvertemperatureAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber mos_temp;
+  bms.register_settings_number(0x00A8, &mos_temp, 1.0f, 40.0f);
+
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+
+  EXPECT_NEAR(mos_temp.state, 47.0f, 0.01f);  // raw=87, (87-40)/1=47
+}
+
+TEST(DalyBmsBleSettingsTest, ChargingOvercurrentWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber current_warning;
+  bms.register_settings_number(0x0093, &current_warning, 10.0f, 30000.0f);
+
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+
+  EXPECT_NEAR(current_warning.state, -10.0f, 0.01f);  // raw=29900, (29900-30000)/10=-10.0
+}
+
+TEST(DalyBmsBleSettingsTest, CellVoltageReference) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0081, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 3200.0f, 0.01f);  // raw=3200, 3200/1=3200
+}
+
+TEST(DalyBmsBleSettingsTest, AcquisitionBoardCount) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0082, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 1.0f, 0.01f);  // raw=1
+}
+
+TEST(DalyBmsBleSettingsTest, Board1CellCount) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0083, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 4.0f, 0.01f);  // raw=4
+}
+
+TEST(DalyBmsBleSettingsTest, Board2CellCount) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0084, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 0.0f, 0.01f);  // raw=0
+}
+
+TEST(DalyBmsBleSettingsTest, Board3CellCount) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0085, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 0.0f, 0.01f);  // raw=0
+}
+
+TEST(DalyBmsBleSettingsTest, Board1TemperatureSensorCount) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0086, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 1.0f, 0.01f);  // raw=1
+}
+
+TEST(DalyBmsBleSettingsTest, Board2TemperatureSensorCount) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0087, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 0.0f, 0.01f);  // raw=0
+}
+
+TEST(DalyBmsBleSettingsTest, Board3TemperatureSensorCount) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0088, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 0.0f, 0.01f);  // raw=0
+}
+
+TEST(DalyBmsBleSettingsTest, BatteryType) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0089, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 0.0f, 0.01f);  // raw=0
+}
+
+TEST(DalyBmsBleSettingsTest, SleepWaitTime) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x008A, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 7200.0f, 0.01f);  // raw=7200
+}
+
+TEST(DalyBmsBleSettingsTest, CellOvervoltageWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x008B, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 3500.0f, 0.01f);  // raw=3500
+}
+
+TEST(DalyBmsBleSettingsTest, CellOvervoltageAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x008C, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 3500.0f, 0.01f);  // raw=3500
+}
+
+TEST(DalyBmsBleSettingsTest, CellUndervoltageWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x008D, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 2600.0f, 0.01f);  // raw=2600
+}
+
+TEST(DalyBmsBleSettingsTest, CellUndervoltageAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x008E, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 2600.0f, 0.01f);  // raw=2600
+}
+
+TEST(DalyBmsBleSettingsTest, TotalOvervoltageWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x008F, &n, 10.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 14.0f, 0.01f);  // raw=140, 140/10=14.0
+}
+
+TEST(DalyBmsBleSettingsTest, TotalOvervoltageAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0090, &n, 10.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 14.0f, 0.01f);  // raw=140, 140/10=14.0
+}
+
+TEST(DalyBmsBleSettingsTest, TotalUndervoltageWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0091, &n, 10.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 10.4f, 0.01f);  // raw=104, 104/10=10.4
+}
+
+TEST(DalyBmsBleSettingsTest, TotalUndervoltageAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0092, &n, 10.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 10.4f, 0.01f);  // raw=104, 104/10=10.4
+}
+
+TEST(DalyBmsBleSettingsTest, ChargingOvercurrentAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0094, &n, 10.0f, 30000.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, -10.0f, 0.01f);  // raw=29900, (29900-30000)/10=-10.0
+}
+
+TEST(DalyBmsBleSettingsTest, DischargingOvercurrentWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0095, &n, 10.0f, 30000.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, -16.0f, 0.01f);  // raw=29840, (29840-30000)/10=-16.0
+}
+
+TEST(DalyBmsBleSettingsTest, DischargingOvercurrentAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0096, &n, 10.0f, 30000.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 16.0f, 0.01f);  // raw=30160, (30160-30000)/10=16.0
+}
+
+TEST(DalyBmsBleSettingsTest, ChargingOvertemperatureWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0097, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 45.0f, 0.01f);  // raw=85, (85-40)/1=45
+}
+
+TEST(DalyBmsBleSettingsTest, ChargingOvertemperatureAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0098, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 45.0f, 0.01f);  // raw=85, (85-40)/1=45
+}
+
+TEST(DalyBmsBleSettingsTest, ChargingUndertemperatureWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x0099, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 0.0f, 0.01f);  // raw=40, (40-40)/1=0
+}
+
+TEST(DalyBmsBleSettingsTest, ChargingUndertemperatureAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x009A, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 0.0f, 0.01f);  // raw=40, (40-40)/1=0
+}
+
+TEST(DalyBmsBleSettingsTest, DischargingOvertemperatureWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x009B, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 70.0f, 0.01f);  // raw=110, (110-40)/1=70
+}
+
+TEST(DalyBmsBleSettingsTest, DischargingOvertemperatureAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x009C, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 70.0f, 0.01f);  // raw=110, (110-40)/1=70
+}
+
+TEST(DalyBmsBleSettingsTest, DischargingUndertemperatureWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x009D, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, -1.0f, 0.01f);  // raw=39, (39-40)/1=-1
+}
+
+TEST(DalyBmsBleSettingsTest, DischargingUndertemperatureAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x009E, &n, 1.0f, 40.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, -1.0f, 0.01f);  // raw=39, (39-40)/1=-1
+}
+
+TEST(DalyBmsBleSettingsTest, CellVoltageDifferenceWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x009F, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 255.0f, 0.01f);  // raw=255
+}
+
+TEST(DalyBmsBleSettingsTest, CellVoltageDifferenceAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x00A0, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 255.0f, 0.01f);  // raw=255
+}
+
+TEST(DalyBmsBleSettingsTest, TemperatureDifferenceWarning) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x00A1, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 255.0f, 0.01f);  // raw=255
+}
+
+TEST(DalyBmsBleSettingsTest, TemperatureDifferenceAlarm) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x00A2, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 255.0f, 0.01f);  // raw=255
+}
+
+TEST(DalyBmsBleSettingsTest, BalancingActivationVoltage) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x00A3, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 3200.0f, 0.01f);  // raw=3200
+}
+
+TEST(DalyBmsBleSettingsTest, BalancingActivationVoltageDifference) {
+  TestableDalyBmsBle bms;
+  TestNumber n;
+  bms.register_settings_number(0x00A4, &n, 1.0f, 0.0f);
+  bms.decode_settings_data_(SETTINGS_FRAME_1);
+  EXPECT_NEAR(n.state, 20.0f, 0.01f);  // raw=20
 }
 
 TEST(DalyBmsBleSettingsTest, NullSensorsDoNotCrash) {
