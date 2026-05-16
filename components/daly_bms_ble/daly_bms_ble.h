@@ -100,6 +100,12 @@ class DalyBmsBle :
     battery_status_text_sensor_ = battery_status_text_sensor;
   }
   void set_errors_text_sensor(text_sensor::TextSensor *errors_text_sensor) { errors_text_sensor_ = errors_text_sensor; }
+  void set_software_version_text_sensor(text_sensor::TextSensor *software_version_text_sensor) {
+    software_version_text_sensor_ = software_version_text_sensor;
+  }
+  void set_hardware_version_text_sensor(text_sensor::TextSensor *hardware_version_text_sensor) {
+    hardware_version_text_sensor_ = hardware_version_text_sensor;
+  }
 
   void set_balancer_switch(switch_::Switch *balancer_switch) { balancer_switch_ = balancer_switch; }
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
@@ -151,6 +157,8 @@ class DalyBmsBle :
 
   text_sensor::TextSensor *battery_status_text_sensor_{nullptr};
   text_sensor::TextSensor *errors_text_sensor_{nullptr};
+  text_sensor::TextSensor *software_version_text_sensor_{nullptr};
+  text_sensor::TextSensor *hardware_version_text_sensor_{nullptr};
 
   struct Cell {
     sensor::Sensor *cell_voltage_sensor_{nullptr};

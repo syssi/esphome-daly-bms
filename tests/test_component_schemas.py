@@ -74,13 +74,14 @@ class TestButtonConstants:
         from esphome.const import CONF_FACTORY_RESET, CONF_RESTART
 
         assert button.CONF_RETRIEVE_SETTINGS in button.BUTTONS
+        assert button.CONF_RETRIEVE_VERSION in button.BUTTONS
         assert CONF_RESTART in button.BUTTONS
         assert button.CONF_SHUTDOWN in button.BUTTONS
         assert button.CONF_RESET_CURRENT in button.BUTTONS
         assert CONF_FACTORY_RESET in button.BUTTONS
 
     def test_button_addresses_are_unique(self):
-        addresses = list(button.BUTTONS.values())
+        addresses = [address for _, address, _ in button.BUTTONS.values()]
         assert len(addresses) == len(set(addresses))
 
 
@@ -100,3 +101,5 @@ class TestTextSensorConstants:
     def test_text_sensors_list(self):
         assert text_sensor.CONF_BATTERY_STATUS in text_sensor.TEXT_SENSORS
         assert text_sensor.CONF_ERRORS in text_sensor.TEXT_SENSORS
+        assert text_sensor.CONF_SOFTWARE_VERSION in text_sensor.TEXT_SENSORS
+        assert text_sensor.CONF_HARDWARE_VERSION in text_sensor.TEXT_SENSORS

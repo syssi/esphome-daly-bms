@@ -76,6 +76,9 @@ button:
     # Retrieves the BMS settings and prints them in the ESPHome logs
     retrieve_settings:
       name: "retrieve settings"
+    # Retrieves the BMS software/hardware version and publishes it to the text sensors
+    retrieve_version:
+      name: "retrieve version"
     # Restarts the BMS
     restart:
       name: "restart"
@@ -241,3 +244,7 @@ text_sensor:
       name: "battery status"
     errors:
       name: "errors"
+    software_version:
+      name: "software version"
+    hardware_version:
+      name: "hardware version"

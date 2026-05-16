@@ -620,13 +620,19 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00            Software version
-  ESP_LOGI(TAG, "Software version: %s", std::string(data.begin() + 3, data.begin() + 3 + 32).c_str());
+  auto sw_begin = data.begin() + 3;
+  auto software_version = std::string(sw_begin, std::find(sw_begin, sw_begin + 32, '\0'));
+  ESP_LOGI(TAG, "Software version: %s", software_version.c_str());
+  this->publish_state_(this->software_version_text_sensor_, software_version);
 
   //  35  32  0x42 0x4D 0x53 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
   //          0x00 0x00            Hardware version
-  ESP_LOGI(TAG, "Hardware version: %s", std::string(data.begin() + 35, data.begin() + 35 + 32).c_str());
+  auto hw_begin = data.begin() + 35;
+  auto hardware_version = std::string(hw_begin, std::find(hw_begin, hw_begin + 32, '\0'));
+  ESP_LOGI(TAG, "Hardware version: %s", hardware_version.c_str());
+  this->publish_state_(this->hardware_version_text_sensor_, hardware_version);
 
   //  67   2  0x65 0x13            CRC
 }
@@ -719,6 +725,8 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
 
   LOG_TEXT_SENSOR("", "Errors", this->errors_text_sensor_);
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);
+  LOG_TEXT_SENSOR("", "Software Version", this->software_version_text_sensor_);
+  LOG_TEXT_SENSOR("", "Hardware Version", this->hardware_version_text_sensor_);
 }
 
 void DalyBmsBle::publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state) {

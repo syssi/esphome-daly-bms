@@ -11,13 +11,19 @@ CODEOWNERS = ["@syssi"]
 
 CONF_BATTERY_STATUS = "battery_status"
 CONF_ERRORS = "errors"
+CONF_SOFTWARE_VERSION = "software_version"
+CONF_HARDWARE_VERSION = "hardware_version"
 
 ICON_BATTERY_STATUS = "mdi:battery-charging"
 ICON_ERRORS = "mdi:alert-circle-outline"
+ICON_SOFTWARE_VERSION = "mdi:tag"
+ICON_HARDWARE_VERSION = "mdi:tag"
 
 TEXT_SENSORS = [
     CONF_BATTERY_STATUS,
     CONF_ERRORS,
+    CONF_SOFTWARE_VERSION,
+    CONF_HARDWARE_VERSION,
 ]
 
 CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
@@ -27,6 +33,14 @@ CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
         ),
         cv.Optional(CONF_ERRORS): text_sensor.text_sensor_schema(
             icon=ICON_ERRORS,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+        ),
+        cv.Optional(CONF_SOFTWARE_VERSION): text_sensor.text_sensor_schema(
+            icon=ICON_SOFTWARE_VERSION,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+        ),
+        cv.Optional(CONF_HARDWARE_VERSION): text_sensor.text_sensor_schema(
+            icon=ICON_HARDWARE_VERSION,
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         ),
     }
