@@ -2,7 +2,6 @@ substitutions:
   name: esp32c6-compatibility-test
   device_description: "Verify the project builds from source on ESP32C6"
   external_components_source: github://syssi/esphome-daly-bms@main
-  mac_address: !secret bms0_mac_address
 
 esphome:
   name: ${name}
@@ -39,7 +38,7 @@ esp32_ble_tracker:
     active: false
 
 ble_client:
-  - mac_address: ${mac_address}
+  - mac_address: !secret bms0_mac_address
     id: client0
 
 daly_bms_ble:
