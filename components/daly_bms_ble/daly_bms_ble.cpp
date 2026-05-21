@@ -118,26 +118,30 @@ static constexpr const char *const ERRORS[ERRORS_SIZE] = {
     "Critical: Discharging temperature too low",
 };
 
-#ifdef USE_ESP32
-bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
-  uint8_t frame[8];
-
-  frame[0] = 0xD2;      // Modbus device address
-  frame[1] = function;  // Function (0x03: Read register, 0x06: Write register, 0x10: Write multiple registers)
+std::array<uint8_t, 8> DalyBmsBle::build_frame_(uint8_t function, uint16_t address, uint16_t value) const {
+  std::array<uint8_t, 8> frame;
+  frame[0] = 0xD2;
+  frame[1] = function;
   frame[2] = address >> 8;
   frame[3] = address >> 0;
   frame[4] = value >> 8;
   frame[5] = value >> 0;
-  auto crc = crc16(frame, 6);
+  auto crc = crc16(frame.data(), 6);
   frame[6] = crc >> 0;
   frame[7] = crc >> 8;
+  return frame;
+}
+
+#ifdef USE_ESP32
+bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
+  auto frame = this->build_frame_(function, address, value);
 
   ESP_LOGD(TAG, "Send command (handle 0x%02X): %s", this->char_command_handle_,
-           format_hex_pretty(frame, sizeof(frame)).c_str());  // NOLINT
+           format_hex_pretty(frame.data(), frame.size()).c_str());  // NOLINT
 
   auto status =
       esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(), this->char_command_handle_,
-                               sizeof(frame), frame, ESP_GATT_WRITE_TYPE_NO_RSP, ESP_GATT_AUTH_REQ_NONE);
+                               frame.size(), frame.data(), ESP_GATT_WRITE_TYPE_NO_RSP, ESP_GATT_AUTH_REQ_NONE);
 
   if (status) {
     ESP_LOGW(TAG, "[%s] esp_ble_gattc_write_char failed, status=%d", ADDR_STR(this->parent_->address_str()), status);

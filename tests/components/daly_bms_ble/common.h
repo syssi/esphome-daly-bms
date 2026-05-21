@@ -16,6 +16,7 @@ struct TestNumber : number::Number {
 // Exposes protected decoder methods for direct testing.
 class TestableDalyBmsBle : public DalyBmsBle {
  public:
+  using DalyBmsBle::build_frame_;
   using DalyBmsBle::decode_status_data_;
   using DalyBmsBle::decode_settings_data_;
   using DalyBmsBle::decode_version_data_;

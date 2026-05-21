@@ -840,4 +840,43 @@ TEST(DalyBmsBleAlarmTest, TemperatureDifferenceWarningOnly) {
   EXPECT_EQ(errors.state, "Warning: Temperature difference too high");
 }
 
+// ── Request frames (outgoing) ────────────────────────────────────────────────
+// All golden values from https://github.com/syssi/esphome-daly-bms/issues/9
+// Frame layout: D2 <func> <addr_hi> <addr_lo> <val_hi> <val_lo> <crc_lo> <crc_hi>
+
+TEST(DalyBmsBleRequestFrameTest, Status62Registers) {
+  TestableDalyBmsBle bms;
+  // d2 03 00 00 00 3e d7 b9
+  EXPECT_EQ(bms.build_frame_(0x03, 0x0000, 62),
+            (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0x00, 0x00, 0x3E, 0xD7, 0xB9}));
+}
+
+TEST(DalyBmsBleRequestFrameTest, Status80Registers) {
+  TestableDalyBmsBle bms;
+  // d2 03 00 00 00 50 56 55  (CRC verified by Python/Modbus-CRC-16)
+  EXPECT_EQ(bms.build_frame_(0x03, 0x0000, 80),
+            (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0x00, 0x00, 0x50, 0x56, 0x55}));
+}
+
+TEST(DalyBmsBleRequestFrameTest, Settings) {
+  TestableDalyBmsBle bms;
+  // d2 03 00 80 00 29 96 5f
+  EXPECT_EQ(bms.build_frame_(0x03, 0x0080, 0x0029),
+            (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0x80, 0x00, 0x29, 0x96, 0x5F}));
+}
+
+TEST(DalyBmsBleRequestFrameTest, SoftwareVersion) {
+  TestableDalyBmsBle bms;
+  // d2 03 00 a9 00 20 87 91
+  EXPECT_EQ(bms.build_frame_(0x03, 0x00A9, 0x0020),
+            (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0xA9, 0x00, 0x20, 0x87, 0x91}));
+}
+
+TEST(DalyBmsBleRequestFrameTest, Password) {
+  TestableDalyBmsBle bms;
+  // d2 03 00 c9 00 03 c6 56
+  EXPECT_EQ(bms.build_frame_(0x03, 0x00C9, 0x0003),
+            (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0xC9, 0x00, 0x03, 0xC6, 0x56}));
+}
+
 }  // namespace esphome::daly_bms_ble::testing
