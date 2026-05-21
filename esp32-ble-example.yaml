@@ -57,7 +57,10 @@ daly_bms_ble:
   - ble_client_id: client0
     id: bms0
     password: 12345678
+    # Use status_registers: 80 to enable the mosfet_temperature and board_temperature sensors.
+    # Supported on the Daly Smart BMS (Blue Series) and more.
     status_registers: 62
+    # status_registers: 80
     update_interval: 10s
 
 binary_sensor:
@@ -211,6 +214,7 @@ sensor:
       name: "capacity remaining"
     balance_current:
       name: "balance current"
+    # mosfet_temperature and board_temperature require status_registers: 80
     mosfet_temperature:
       name: "mosfet temperature"
     board_temperature:
