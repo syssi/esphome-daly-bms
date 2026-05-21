@@ -221,6 +221,84 @@ number:
     daly_bms_ble_id: bms0
     state_of_charge_setting:
       name: "state of charge setting"
+    # These entities write directly to BMS settings registers and have not been tested
+    # on real hardware. Use at your own risk - no guarantee is provided.
+    # rated_capacity:
+    #   name: "rated capacity"
+    # cell_voltage_reference:
+    #   name: "cell voltage reference"
+    # acquisition_board_count:
+    #   name: "acquisition board count"
+    # board_1_cell_count:
+    #   name: "board 1 cell count"
+    # board_2_cell_count:
+    #   name: "board 2 cell count"
+    # board_3_cell_count:
+    #   name: "board 3 cell count"
+    # board_1_temperature_sensor_count:
+    #   name: "board 1 temperature sensor count"
+    # board_2_temperature_sensor_count:
+    #   name: "board 2 temperature sensor count"
+    # board_3_temperature_sensor_count:
+    #   name: "board 3 temperature sensor count"
+    # battery_type:
+    #   name: "battery type"
+    # sleep_wait_time:
+    #   name: "sleep wait time"
+    # cell_overvoltage_warning:
+    #   name: "cell overvoltage warning"
+    # cell_overvoltage_alarm:
+    #   name: "cell overvoltage alarm"
+    # cell_undervoltage_warning:
+    #   name: "cell undervoltage warning"
+    # cell_undervoltage_alarm:
+    #   name: "cell undervoltage alarm"
+    # total_overvoltage_warning:
+    #   name: "total overvoltage warning"
+    # total_overvoltage_alarm:
+    #   name: "total overvoltage alarm"
+    # total_undervoltage_warning:
+    #   name: "total undervoltage warning"
+    # total_undervoltage_alarm:
+    #   name: "total undervoltage alarm"
+    # charging_overcurrent_warning:
+    #   name: "charging overcurrent warning"
+    # charging_overcurrent_alarm:
+    #   name: "charging overcurrent alarm"
+    # discharging_overcurrent_warning:
+    #   name: "discharging overcurrent warning"
+    # discharging_overcurrent_alarm:
+    #   name: "discharging overcurrent alarm"
+    # charging_overtemperature_warning:
+    #   name: "charging overtemperature warning"
+    # charging_overtemperature_alarm:
+    #   name: "charging overtemperature alarm"
+    # charging_undertemperature_warning:
+    #   name: "charging undertemperature warning"
+    # charging_undertemperature_alarm:
+    #   name: "charging undertemperature alarm"
+    # discharging_overtemperature_warning:
+    #   name: "discharging overtemperature warning"
+    # discharging_overtemperature_alarm:
+    #   name: "discharging overtemperature alarm"
+    # discharging_undertemperature_warning:
+    #   name: "discharging undertemperature warning"
+    # discharging_undertemperature_alarm:
+    #   name: "discharging undertemperature alarm"
+    # cell_voltage_difference_warning:
+    #   name: "cell voltage difference warning"
+    # cell_voltage_difference_alarm:
+    #   name: "cell voltage difference alarm"
+    # temperature_difference_warning:
+    #   name: "temperature difference warning"
+    # temperature_difference_alarm:
+    #   name: "temperature difference alarm"
+    # balancing_activation_voltage:
+    #   name: "balancing activation voltage"
+    # balancing_activation_voltage_difference:
+    #   name: "balancing activation voltage difference"
+    # mosfet_overtemperature_alarm:
+    #   name: "mosfet overtemperature alarm"
 
 switch:
   - platform: daly_bms_ble
