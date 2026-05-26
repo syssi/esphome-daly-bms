@@ -46,6 +46,7 @@ daly_bms_ble:
     id: bms0
     password: 12345678
     update_interval: 10s
+    response_timeout: 3s
 
 binary_sensor:
   - platform: daly_bms_ble

@@ -29,6 +29,7 @@ class DalyBmsBle :
  public:
   void dump_config() override;
   void update() override;
+  void loop() override;
   float get_setup_priority() const override { return setup_priority::DATA; }
 
   void set_balancing_binary_sensor(binary_sensor::BinarySensor *balancing_binary_sensor) {
@@ -116,11 +117,12 @@ class DalyBmsBle :
   void register_settings_number(uint16_t address, number::Number *number, float factor, float offset) {
     this->settings_numbers_[address] = {number, factor, offset};
   }
+  void send_command(uint8_t function, uint16_t address, uint16_t value);
+  void set_response_timeout(uint32_t ms) { queue_.set_timeout_ms(ms); }
 #ifdef USE_ESP32
   void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                            esp_ble_gattc_cb_param_t *param) override;
-  bool write_register(uint16_t address, uint16_t value) { return send_command(0x06, address, value); }
-  bool send_command(uint8_t function, uint16_t address, uint16_t value);
+  void write_register(uint16_t address, uint16_t value) { send_command(0x06, address, value); }
 #endif
 
   void on_daly_bms_ble_data(const std::vector<uint8_t> &data);
@@ -176,6 +178,58 @@ class DalyBmsBle :
   struct Temperature {
     sensor::Sensor *temperature_sensor_{nullptr};
   } temperatures_[8];
+
+  struct CommandQueue {
+    static const size_t LENGTH = 10;
+
+    struct Command {
+      uint8_t function;
+      uint16_t address;
+      uint16_t value;
+    };
+
+    void set_timeout_ms(uint32_t ms) { timeout_ms_ = ms; }
+
+    bool enqueue(uint8_t function, uint16_t address, uint16_t value) {
+      uint8_t next = (tail_ + 1) % LENGTH;
+      if (next == head_)
+        return false;
+      commands_[tail_] = {function, address, value};
+      tail_ = next;
+      return true;
+    }
+    const Command &front() const { return commands_[head_]; }
+    void advance() {
+      if (empty())
+        return;
+      head_ = (head_ + 1) % LENGTH;
+      pending_ = false;
+    }
+    void mark_pending(uint32_t now) {
+      pending_ = true;
+      start_millis_ = now;
+    }
+    void reset() {
+      head_ = tail_ = 0;
+      pending_ = false;
+    }
+    bool empty() const { return head_ == tail_; }
+    bool pending() const { return pending_; }
+    bool timed_out(uint32_t now) const { return pending_ && (now - start_millis_ > timeout_ms_); }
+    uint8_t size() const { return (tail_ + LENGTH - head_) % LENGTH; }
+
+   private:
+    Command commands_[LENGTH];
+    uint8_t head_{0};
+    uint8_t tail_{0};
+    bool pending_{false};
+    uint32_t start_millis_{0};
+    uint32_t timeout_ms_{3000};
+  } queue_;
+
+  void queue_command_(uint8_t function, uint16_t address, uint16_t value);
+  void send_next_command_();
+  void advance_command_queue_();
 
 #ifdef USE_ESP32
   uint16_t char_notify_handle_{0};

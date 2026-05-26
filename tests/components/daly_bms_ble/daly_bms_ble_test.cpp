@@ -879,4 +879,122 @@ TEST(DalyBmsBleRequestFrameTest, Password) {
             (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0xC9, 0x00, 0x03, 0xC6, 0x56}));
 }
 
+// ── Command queue ────────────────────────────────────────────────────────────
+
+TEST(DalyBmsBleQueueTest, InitiallyEmpty) {
+  TestableDalyBmsBle bms;
+  EXPECT_EQ(bms.queue_size(), 0);
+  EXPECT_FALSE(bms.command_pending());
+}
+
+TEST(DalyBmsBleQueueTest, Enqueue) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+  EXPECT_EQ(bms.queue_size(), 1);
+}
+
+TEST(DalyBmsBleQueueTest, MultipleEnqueue) {
+  TestableDalyBmsBle bms;
+  for (uint8_t i = 0; i < 5; i++)
+    bms.queue_command_(0x03, i, 0);
+  EXPECT_EQ(bms.queue_size(), 5);
+}
+
+TEST(DalyBmsBleQueueTest, QueueFullDropsCommand) {
+  TestableDalyBmsBle bms;
+  const uint8_t max_size = TestableDalyBmsBle::CommandQueue::LENGTH - 1;
+  for (uint8_t i = 0; i < max_size; i++)
+    bms.queue_command_(0x03, i, 0);
+  EXPECT_EQ(bms.queue_size(), max_size);
+
+  bms.queue_command_(0x03, 0xAA, 0);
+  EXPECT_EQ(bms.queue_size(), max_size);
+}
+
+TEST(DalyBmsBleQueueTest, AdvanceDecrementsSize) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+  bms.queue_command_(0x03, 0x0080, 41);
+
+  bms.advance_command_queue_();
+
+  EXPECT_EQ(bms.queue_size(), 1);
+  EXPECT_FALSE(bms.command_pending());
+}
+
+TEST(DalyBmsBleQueueTest, AdvanceDrainsFully) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+  bms.queue_command_(0x03, 0x0080, 41);
+
+  bms.advance_command_queue_();
+  bms.advance_command_queue_();
+
+  EXPECT_EQ(bms.queue_size(), 0);
+}
+
+TEST(DalyBmsBleQueueTest, ResetClearsQueue) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+  bms.queue_command_(0x03, 0x0080, 41);
+
+  bms.reset_queue();
+
+  EXPECT_EQ(bms.queue_size(), 0);
+  EXPECT_FALSE(bms.command_pending());
+}
+
+TEST(DalyBmsBleQueueTest, WrapAround) {
+  TestableDalyBmsBle bms;
+  for (uint8_t i = 0; i < 9; i++)
+    bms.queue_command_(0x03, i, 0);
+  for (int i = 0; i < 5; i++)
+    bms.advance_command_queue_();
+
+  EXPECT_EQ(bms.queue_size(), 4);
+
+  for (uint8_t i = 0; i < 5; i++)
+    bms.queue_command_(0x03, 0x10 + i, 0);
+
+  EXPECT_EQ(bms.queue_size(), 9);
+}
+
+TEST(DalyBmsBleQueueTest, AdvanceOnEmptyQueueIsNoop) {
+  TestableDalyBmsBle bms;
+  bms.advance_command_queue_();
+  EXPECT_EQ(bms.queue_size(), 0);
+  EXPECT_FALSE(bms.command_pending());
+}
+
+TEST(DalyBmsBleQueueTest, ValidResponseAdvancesQueue) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+  bms.queue_command_(0x03, 0x0080, 41);
+
+  bms.on_daly_bms_ble_data(STATUS_FRAME_80_REG_2);
+
+  EXPECT_EQ(bms.queue_size(), 1);
+  EXPECT_FALSE(bms.command_pending());
+}
+
+TEST(DalyBmsBleQueueTest, InvalidStartByteDoesNotAdvanceQueue) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+
+  bms.on_daly_bms_ble_data({0xFF, 0x03, 0x00, 0x00, 0x00});
+
+  EXPECT_EQ(bms.queue_size(), 1);
+}
+
+TEST(DalyBmsBleQueueTest, BadCrcDoesNotAdvanceQueue) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+
+  auto bad_crc = STATUS_FRAME_80_REG_2;
+  bad_crc.back() ^= 0xFF;
+  bms.on_daly_bms_ble_data(bad_crc);
+
+  EXPECT_EQ(bms.queue_size(), 1);
+}
+
 }  // namespace esphome::daly_bms_ble::testing

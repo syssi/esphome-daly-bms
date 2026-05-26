@@ -22,6 +22,14 @@ class TestableDalyBmsBle : public DalyBmsBle {
   using DalyBmsBle::decode_version_data_;
   using DalyBmsBle::decode_password_data_;
   using DalyBmsBle::on_daly_bms_ble_data;
+
+  using DalyBmsBle::CommandQueue;
+  using DalyBmsBle::queue_command_;
+  using DalyBmsBle::advance_command_queue_;
+
+  uint8_t queue_size() const { return queue_.size(); }
+  bool command_pending() const { return queue_.pending(); }
+  void reset_queue() { queue_.reset(); }
 };
 
 // ── Real frames from esp32-ble-example-faker.yaml ────────────────────────────

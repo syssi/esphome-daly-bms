@@ -4,6 +4,7 @@ daly_bms_ble:
   - ble_client_id: client0
     id: bms0
     update_interval: 10s
+    response_timeout: 3s
 
 interval:
   - interval: 10s

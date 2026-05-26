@@ -73,6 +73,7 @@ daly_bms_ble:
     status_registers: 62
     # status_registers: 80
     update_interval: 10s
+    response_timeout: 3s
   - ble_client_id: client1
     id: bms1
     password: 12345678
@@ -81,6 +82,7 @@ daly_bms_ble:
     status_registers: 62
     # status_registers: 80
     update_interval: 10s
+    response_timeout: 3s
 
 binary_sensor:
   - platform: daly_bms_ble
