@@ -30,7 +30,9 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(DalyBmsBle),
             cv.Optional(CONF_PASSWORD, default="12345678"): cv.uint32_t,
             cv.Optional(CONF_STATUS_REGISTERS, default=62): cv.one_of(62, 80, int=True),
-            cv.Optional(CONF_RESPONSE_TIMEOUT, default="3s"): cv.positive_time_period_milliseconds,
+            cv.Optional(
+                CONF_RESPONSE_TIMEOUT, default="3s"
+            ): cv.positive_time_period_milliseconds,
         }
     )
     .extend(ble_client.BLE_CLIENT_SCHEMA)
