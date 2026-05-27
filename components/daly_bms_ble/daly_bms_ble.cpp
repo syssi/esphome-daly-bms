@@ -24,6 +24,8 @@ static const uint8_t DALY_FUNCTION_READ = 0x03;
 static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 
 static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0;
+static const uint16_t DALY_COMMAND_REQ_SETTINGS_START = 0x0080;
+static const uint16_t DALY_COMMAND_REQ_SETTINGS_COUNT = 41;
 
 static const uint8_t DALY_FRAME_LEN_STATUS_80_REGISTERS = 80 * 2;
 static const uint8_t DALY_FRAME_LEN_STATUS_62_REGISTERS = 62 * 2;
@@ -132,10 +134,28 @@ std::array<uint8_t, 8> DalyBmsBle::build_frame_(uint8_t function, uint16_t addre
   return frame;
 }
 
-#ifdef USE_ESP32
-bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
-  auto frame = this->build_frame_(function, address, value);
+void DalyBmsBle::queue_command_(uint8_t function, uint16_t address, uint16_t value) {
+  if (!this->queue_.enqueue(function, address, value))
+    ESP_LOGW(TAG, "Command queue full, dropping: func=0x%02X addr=0x%04X val=0x%04X", function, address, value);
+}
 
+void DalyBmsBle::advance_command_queue_() {
+  this->queue_.advance();
+  this->send_next_command_();
+}
+
+void DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value) {
+  this->queue_command_(function, address, value);
+  this->send_next_command_();
+}
+
+#ifdef USE_ESP32
+void DalyBmsBle::send_next_command_() {
+  if (this->queue_.pending() || this->node_state != espbt::ClientState::ESTABLISHED || this->queue_.empty())
+    return;
+  auto &cmd = this->queue_.front();
+
+  auto frame = this->build_frame_(cmd.function, cmd.address, cmd.value);
   ESP_LOGD(TAG, "Send command (handle 0x%02X): %s", this->char_command_handle_,
            format_hex_pretty(frame.data(), frame.size()).c_str());  // NOLINT
 
@@ -145,11 +165,17 @@ bool DalyBmsBle::send_command(uint8_t function, uint16_t address, uint16_t value
 
   if (status) {
     ESP_LOGW(TAG, "[%s] esp_ble_gattc_write_char failed, status=%d", ADDR_STR(this->parent_->address_str()), status);
+    this->queue_.advance();
+    return;
   }
 
-  return (status == 0);
+  this->queue_.mark_pending(millis());
 }
+#else
+void DalyBmsBle::send_next_command_() {}
+#endif
 
+#ifdef USE_ESP32
 void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                                      esp_ble_gattc_cb_param_t *param) {
   switch (event) {
@@ -158,6 +184,8 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
     }
     case ESP_GATTC_DISCONNECT_EVT: {
       this->node_state = espbt::ClientState::IDLE;
+
+      this->queue_.reset();
 
       // this->publish_state_(this->voltage_sensor_, NAN);
 
@@ -219,6 +247,13 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
 }
 #endif  // USE_ESP32
 
+void DalyBmsBle::loop() {
+  if (this->queue_.timed_out(millis())) {
+    ESP_LOGW(TAG, "Command timeout, advancing queue");
+    this->advance_command_queue_();
+  }
+}
+
 void DalyBmsBle::update() {
 #ifdef USE_ESP32
   if (this->node_state != espbt::ClientState::ESTABLISHED) {
@@ -226,7 +261,9 @@ void DalyBmsBle::update() {
     return;
   }
 
-  this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
+  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
+  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_COMMAND_REQ_SETTINGS_COUNT);
+  this->send_next_command_();
 #endif
 }
 
@@ -244,6 +281,8 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
     ESP_LOGW(TAG, "CRC check failed! 0x%04X != 0x%04X", computed_crc, remote_crc);
     return;
   }
+
+  this->advance_command_queue_();
 
   if (data[1] == DALY_FUNCTION_WRITE) {
     ESP_LOGD(TAG, "Write register acknowledged (reg=0x%02X%02X, value=0x%02X%02X)", data[2], data[3], data[4], data[5]);
