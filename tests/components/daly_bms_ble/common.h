@@ -216,11 +216,11 @@ static const std::vector<uint8_t> STATUS_FRAME_62_REG_ALARM_TEMP_DIFF_BOTH = {
 };
 
 // Balancer switch frame (data_len=0x02=2, reg=0x00CF) ────────────────────────
-// Captured from btsnoop: d2 03 02 00 01 fc 56  (balancer ON)
+// See docs/pdus/btsnoop_daly_balancer.log: d2 03 02 00 01 fc 56  (balancer ON)
 static const std::vector<uint8_t> BALANCER_SWITCH_FRAME_ON = {
     0xD2, 0x03, 0x02, 0x00, 0x01, 0xFC, 0x56,
 };
-// Captured from btsnoop: d2 03 02 00 00 3d 96  (balancer OFF)
+// See docs/pdus/btsnoop_daly_balancer.log: d2 03 02 00 00 3d 96  (balancer OFF)
 static const std::vector<uint8_t> BALANCER_SWITCH_FRAME_OFF = {
     0xD2, 0x03, 0x02, 0x00, 0x00, 0x3D, 0x96,
 };
