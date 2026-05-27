@@ -26,12 +26,14 @@ static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0;
 static const uint16_t DALY_COMMAND_REQ_SETTINGS_START = 0x0080;
 static const uint16_t DALY_COMMAND_REQ_SETTINGS_COUNT = 41;
+static const uint16_t DALY_COMMAND_REQ_BALANCER_SWITCH = 0x00CF;
 
 static const uint8_t DALY_FRAME_LEN_STATUS_80_REGISTERS = 80 * 2;
 static const uint8_t DALY_FRAME_LEN_STATUS_62_REGISTERS = 62 * 2;
 static const uint8_t DALY_FRAME_LEN_SETTINGS = 82;
 static const uint8_t DALY_FRAME_LEN_VERSIONS = 64;
 static const uint8_t DALY_FRAME_LEN_PASSWORD = 6;
+static const uint8_t DALY_FRAME_LEN_BALANCER_SWITCH = 2;
 
 static const uint8_t MAX_RESPONSE_SIZE = 165;
 
@@ -263,6 +265,7 @@ void DalyBmsBle::update() {
 
   this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
   this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_COMMAND_REQ_SETTINGS_COUNT);
+  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, 1);
   this->send_next_command_();
 #endif
 }
@@ -304,6 +307,9 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
       break;
     case DALY_FRAME_LEN_SETTINGS:
       this->decode_settings_data_(data);
+      break;
+    case DALY_FRAME_LEN_BALANCER_SWITCH:
+      this->decode_balancer_switch_data_(data);
       break;
     case DALY_FRAME_LEN_VERSIONS:
       this->decode_version_data_(data);
@@ -651,6 +657,14 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
     uint16_t raw = daly_get_16bit(3 + (address - 0x0080) * 2);
     this->publish_state_(sn.number, (raw - sn.offset) / sn.factor);
   }
+}
+
+void DalyBmsBle::decode_balancer_switch_data_(const std::vector<uint8_t> &data) {
+  // Frame layout: D2 03 02 [val_hi] [val_lo] [crc_lo] [crc_hi]
+  // Byte 3–4: register 0x00CF  (0: off, 1: on)
+  bool state = (data[3] << 8 | data[4]) != 0;
+  ESP_LOGI(TAG, "Balancer switch: %s", ONOFF(state));
+  this->publish_state_(this->balancer_switch_, state);
 }
 
 void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {

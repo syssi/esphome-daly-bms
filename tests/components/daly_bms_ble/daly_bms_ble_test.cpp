@@ -840,6 +840,53 @@ TEST(DalyBmsBleAlarmTest, TemperatureDifferenceWarningOnly) {
   EXPECT_EQ(errors.state, "Warning: Temperature difference too high");
 }
 
+// ── Balancer switch frame (data_len=0x02) ────────────────────────────────────
+
+TEST(DalyBmsBleBalancerSwitchTest, SwitchOn) {
+  TestableDalyBmsBle bms;
+  TestSwitch balancer;
+  bms.set_balancer_switch(&balancer);
+
+  bms.decode_balancer_switch_data_(BALANCER_SWITCH_FRAME_ON);
+
+  EXPECT_TRUE(balancer.state);
+}
+
+TEST(DalyBmsBleBalancerSwitchTest, SwitchOff) {
+  TestableDalyBmsBle bms;
+  TestSwitch balancer;
+  bms.set_balancer_switch(&balancer);
+
+  bms.decode_balancer_switch_data_(BALANCER_SWITCH_FRAME_OFF);
+
+  EXPECT_FALSE(balancer.state);
+}
+
+TEST(DalyBmsBleBalancerSwitchTest, NullSwitchDoesNotCrash) {
+  TestableDalyBmsBle bms;
+  bms.decode_balancer_switch_data_(BALANCER_SWITCH_FRAME_ON);
+}
+
+TEST(DalyBmsBleBalancerSwitchTest, DispatchedViaOnDataOn) {
+  TestableDalyBmsBle bms;
+  TestSwitch balancer;
+  bms.set_balancer_switch(&balancer);
+
+  bms.on_daly_bms_ble_data(BALANCER_SWITCH_FRAME_ON);
+
+  EXPECT_TRUE(balancer.state);
+}
+
+TEST(DalyBmsBleBalancerSwitchTest, DispatchedViaOnDataOff) {
+  TestableDalyBmsBle bms;
+  TestSwitch balancer;
+  bms.set_balancer_switch(&balancer);
+
+  bms.on_daly_bms_ble_data(BALANCER_SWITCH_FRAME_OFF);
+
+  EXPECT_FALSE(balancer.state);
+}
+
 // ── Request frames (outgoing) ────────────────────────────────────────────────
 // All golden values from https://github.com/syssi/esphome-daly-bms/issues/9
 // Frame layout: D2 <func> <addr_hi> <addr_lo> <val_hi> <val_lo> <crc_lo> <crc_hi>
@@ -877,6 +924,13 @@ TEST(DalyBmsBleRequestFrameTest, Password) {
   // d2 03 00 c9 00 03 c6 56
   EXPECT_EQ(bms.build_frame_(0x03, 0x00C9, 0x0003),
             (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0xC9, 0x00, 0x03, 0xC6, 0x56}));
+}
+
+TEST(DalyBmsBleRequestFrameTest, BalancerSwitch) {
+  TestableDalyBmsBle bms;
+  // d2 03 00 cf 00 01 a7 96
+  EXPECT_EQ(bms.build_frame_(0x03, 0x00CF, 0x0001),
+            (std::array<uint8_t, 8>{0xD2, 0x03, 0x00, 0xCF, 0x00, 0x01, 0xA7, 0x96}));
 }
 
 // ── Command queue ────────────────────────────────────────────────────────────
