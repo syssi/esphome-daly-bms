@@ -241,6 +241,7 @@ class DalyBmsBle :
   std::array<uint8_t, 8> build_frame_(uint8_t function, uint16_t address, uint16_t value) const;
   void decode_status_data_(const std::vector<uint8_t> &data);
   void decode_settings_data_(const std::vector<uint8_t> &data);
+  void decode_balancer_switch_data_(const std::vector<uint8_t> &data);
   void decode_version_data_(const std::vector<uint8_t> &data);
   void decode_password_data_(const std::vector<uint8_t> &data);
   void publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state);
