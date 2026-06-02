@@ -23,17 +23,18 @@ static const uint8_t DALY_FRAME_START2 = 0x03;
 static const uint8_t DALY_FUNCTION_READ = 0x03;
 static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 
-static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0;
+static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0x0000;
 static const uint16_t DALY_COMMAND_REQ_SETTINGS_START = 0x0080;
-static const uint16_t DALY_COMMAND_REQ_SETTINGS_COUNT = 41;
+static const uint16_t DALY_COMMAND_REQ_VERSION_START = 0x00A9;
+static const uint16_t DALY_COMMAND_REQ_PASSWORD = 0x00C9;
 static const uint16_t DALY_COMMAND_REQ_BALANCER_SWITCH = 0x00CF;
 
 static const uint8_t DALY_FRAME_LEN_STATUS_80_REGISTERS = 80 * 2;
 static const uint8_t DALY_FRAME_LEN_STATUS_62_REGISTERS = 62 * 2;
-static const uint8_t DALY_FRAME_LEN_SETTINGS = 82;
-static const uint8_t DALY_FRAME_LEN_VERSIONS = 64;
-static const uint8_t DALY_FRAME_LEN_PASSWORD = 6;
-static const uint8_t DALY_FRAME_LEN_BALANCER_SWITCH = 2;
+static const uint8_t DALY_FRAME_LEN_SETTINGS = 41 * 2;
+static const uint8_t DALY_FRAME_LEN_VERSIONS = 32 * 2;
+static const uint8_t DALY_FRAME_LEN_PASSWORD = 3 * 2;
+static const uint8_t DALY_FRAME_LEN_BALANCER_SWITCH = 1 * 2;
 
 static const uint8_t MAX_RESPONSE_SIZE = 165;
 
@@ -264,8 +265,8 @@ void DalyBmsBle::update() {
   }
 
   this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
-  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_COMMAND_REQ_SETTINGS_COUNT);
-  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, 1);
+  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_FRAME_LEN_SETTINGS / 2);
+  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, DALY_FRAME_LEN_BALANCER_SWITCH / 2);
   this->send_next_command_();
 #endif
 }
@@ -285,6 +286,7 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
     return;
   }
 
+  uint16_t cmd_address = this->queue_.empty() ? 0xFFFF : this->queue_.front().address;
   this->advance_command_queue_();
 
   if (data[1] == DALY_FUNCTION_WRITE) {
@@ -298,27 +300,24 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
     return;
   }
 
-  uint8_t frame_type = data[2];  // data length
-
-  switch (frame_type) {
-    case DALY_FRAME_LEN_STATUS_80_REGISTERS:
-    case DALY_FRAME_LEN_STATUS_62_REGISTERS:
+  switch (cmd_address) {
+    case DALY_COMMAND_REQ_STATUS_START:
       this->decode_status_data_(data);
       break;
-    case DALY_FRAME_LEN_SETTINGS:
+    case DALY_COMMAND_REQ_SETTINGS_START:
       this->decode_settings_data_(data);
       break;
-    case DALY_FRAME_LEN_BALANCER_SWITCH:
-      this->decode_balancer_switch_data_(data);
-      break;
-    case DALY_FRAME_LEN_VERSIONS:
+    case DALY_COMMAND_REQ_VERSION_START:
       this->decode_version_data_(data);
       break;
-    case DALY_FRAME_LEN_PASSWORD:
+    case DALY_COMMAND_REQ_PASSWORD:
       this->decode_password_data_(data);
       break;
+    case DALY_COMMAND_REQ_BALANCER_SWITCH:
+      this->decode_balancer_switch_data_(data);
+      break;
     default:
-      ESP_LOGW(TAG, "Unhandled response received (frame_type 0x%02X): %s", frame_type,
+      ESP_LOGW(TAG, "Unhandled response received (addr=0x%04X, len=%zu): %s", cmd_address, data.size(),
                format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
   }
 }
@@ -334,6 +333,10 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
     return (uint64_t(daly_get_32bit(i + 0)) << 32) | (uint64_t(daly_get_32bit(i + 4)) << 0);
   };
 
+  if (data.size() != DALY_FRAME_LEN_STATUS_62_REGISTERS + 5 && data.size() != DALY_FRAME_LEN_STATUS_80_REGISTERS + 5) {
+    ESP_LOGW(TAG, "decode_status_data_: unexpected frame size %zu", data.size());
+    return;
+  }
   ESP_LOGI(TAG, "Status frame received (%zu bytes)", data.size());
   ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), 100).c_str());                      // NOLINT
   ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front() + 100, data.size() - 100).c_str());  // NOLINT
@@ -516,6 +519,10 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
     return (uint16_t(data[i + 0]) << 8) | (uint16_t(data[i + 1]) << 0);
   };
 
+  if (data.size() != DALY_FRAME_LEN_SETTINGS + 5) {
+    ESP_LOGW(TAG, "decode_settings_data_: unexpected frame size %zu", data.size());
+    return;
+  }
   ESP_LOGI(TAG, "Settings frame received");
   ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
@@ -660,6 +667,10 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
 }
 
 void DalyBmsBle::decode_balancer_switch_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_BALANCER_SWITCH + 5) {
+    ESP_LOGW(TAG, "decode_balancer_switch_data_: unexpected frame size %zu", data.size());
+    return;
+  }
   // Frame layout: D2 03 02 [val_hi] [val_lo] [crc_lo] [crc_hi]
   // Byte 3–4: register 0x00CF  (0: off, 1: on)
   bool state = (data[3] << 8 | data[4]) != 0;
@@ -668,6 +679,10 @@ void DalyBmsBle::decode_balancer_switch_data_(const std::vector<uint8_t> &data) 
 }
 
 void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_VERSIONS + 5) {
+    ESP_LOGW(TAG, "decode_version_data_: unexpected frame size %zu", data.size());
+    return;
+  }
   ESP_LOGI(TAG, "Software/hardware version frame received");
   ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 
@@ -699,6 +714,10 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
 }
 
 void DalyBmsBle::decode_password_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_PASSWORD + 5) {
+    ESP_LOGW(TAG, "decode_password_data_: unexpected frame size %zu", data.size());
+    return;
+  }
   ESP_LOGI(TAG, "Password frame received");
   ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
 

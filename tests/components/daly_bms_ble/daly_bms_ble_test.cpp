@@ -50,14 +50,36 @@ TEST(DalyBmsBleVersionTest, HardwareVersionFrame2) {
   EXPECT_EQ(hw_version.state, "SH39F003");
 }
 
+TEST(DalyBmsBleVersionTest, WrongFrameSizeIsRejected) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor sw_version;
+  bms.set_software_version_text_sensor(&sw_version);
+
+  bms.decode_version_data_(BALANCER_SWITCH_FRAME_ON);
+
+  EXPECT_EQ(sw_version.state, "");
+}
+
 TEST(DalyBmsBleVersionTest, DispatchedViaOnData) {
   TestableDalyBmsBle bms;
+  text_sensor::TextSensor sw_version;
+  bms.set_software_version_text_sensor(&sw_version);
+
+  bms.queue_command_(0x03, 0x00A9, 0x20);
   bms.on_daly_bms_ble_data(VERSION_FRAME_1);
+
+  EXPECT_EQ(sw_version.state, "401012");
 }
 
 TEST(DalyBmsBleVersionTest, SecondFrameDispatchedViaOnData) {
   TestableDalyBmsBle bms;
+  text_sensor::TextSensor sw_version;
+  bms.set_software_version_text_sensor(&sw_version);
+
+  bms.queue_command_(0x03, 0x00A9, 0x20);
   bms.on_daly_bms_ble_data(VERSION_FRAME_2);
+
+  EXPECT_EQ(sw_version.state, "204012");
 }
 
 // ── Password frame (data_len=0x06) ───────────────────────────────────────────
@@ -67,8 +89,14 @@ TEST(DalyBmsBlePasswordTest, NullSensorsDoNotCrash) {
   bms.decode_password_data_(PASSWORD_FRAME_1);
 }
 
+TEST(DalyBmsBlePasswordTest, WrongFrameSizeIsRejected) {
+  TestableDalyBmsBle bms;
+  bms.decode_password_data_(SETTINGS_FRAME_1);
+}
+
 TEST(DalyBmsBlePasswordTest, DispatchedViaOnData) {
   TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x00C9, 0x03);
   bms.on_daly_bms_ble_data(PASSWORD_FRAME_1);
 }
 
@@ -421,7 +449,23 @@ TEST(DalyBmsBleSettingsTest, NullSensorsDoNotCrash) {
 
 TEST(DalyBmsBleSettingsTest, DispatchedViaOnData) {
   TestableDalyBmsBle bms;
+  TestSwitch charging;
+  bms.set_charging_switch(&charging);
+
+  bms.queue_command_(0x03, 0x0080, 41);
   bms.on_daly_bms_ble_data(SETTINGS_FRAME_1);
+
+  EXPECT_TRUE(charging.state);
+}
+
+TEST(DalyBmsBleSettingsTest, WrongFrameSizeIsRejected) {
+  TestableDalyBmsBle bms;
+  TestSwitch charging;
+  bms.set_charging_switch(&charging);
+
+  bms.decode_settings_data_(BALANCER_SWITCH_FRAME_ON);
+
+  EXPECT_FALSE(charging.state);
 }
 
 // ── Status frame, 80 registers (data_len=0xA0) ───────────────────────────────
@@ -637,7 +681,23 @@ TEST(DalyBmsBleStatus80RegTest, NullSensorsDoNotCrash) {
 
 TEST(DalyBmsBleStatus80RegTest, DispatchedViaOnData) {
   TestableDalyBmsBle bms;
+  sensor::Sensor voltage;
+  bms.set_total_voltage_sensor(&voltage);
+
+  bms.queue_command_(0x03, 0x0000, 80);
   bms.on_daly_bms_ble_data(STATUS_FRAME_80_REG_2);
+
+  EXPECT_NEAR(voltage.state, 52.5f, 0.01f);
+}
+
+TEST(DalyBmsBleStatus80RegTest, WrongFrameSizeIsRejected) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor charging;
+  bms.set_charging_binary_sensor(&charging);
+
+  bms.decode_status_data_(BALANCER_SWITCH_FRAME_ON);
+
+  EXPECT_FALSE(charging.state);
 }
 
 // ── Status frame, 62 registers (data_len=0x7C) ───────────────────────────────
@@ -745,7 +805,13 @@ TEST(DalyBmsBleStatus62RegTest, NullSensorsDoNotCrash) {
 
 TEST(DalyBmsBleStatus62RegTest, DispatchedViaOnData) {
   TestableDalyBmsBle bms;
+  sensor::Sensor voltage;
+  bms.set_total_voltage_sensor(&voltage);
+
+  bms.queue_command_(0x03, 0x0000, 62);
   bms.on_daly_bms_ble_data(STATUS_FRAME_62_REG_NO_ALARMS);
+
+  EXPECT_NEAR(voltage.state, 27.1f, 0.01f);
 }
 
 // ── Alarm decoding ───────────────────────────────────────────────────────────
@@ -872,6 +938,7 @@ TEST(DalyBmsBleBalancerSwitchTest, DispatchedViaOnDataOn) {
   TestSwitch balancer;
   bms.set_balancer_switch(&balancer);
 
+  bms.queue_command_(0x03, 0x00CF, 1);
   bms.on_daly_bms_ble_data(BALANCER_SWITCH_FRAME_ON);
 
   EXPECT_TRUE(balancer.state);
@@ -882,7 +949,18 @@ TEST(DalyBmsBleBalancerSwitchTest, DispatchedViaOnDataOff) {
   TestSwitch balancer;
   bms.set_balancer_switch(&balancer);
 
+  bms.queue_command_(0x03, 0x00CF, 1);
   bms.on_daly_bms_ble_data(BALANCER_SWITCH_FRAME_OFF);
+
+  EXPECT_FALSE(balancer.state);
+}
+
+TEST(DalyBmsBleBalancerSwitchTest, WrongFrameSizeIsRejected) {
+  TestableDalyBmsBle bms;
+  TestSwitch balancer;
+  bms.set_balancer_switch(&balancer);
+
+  bms.decode_balancer_switch_data_(SETTINGS_FRAME_1);
 
   EXPECT_FALSE(balancer.state);
 }
