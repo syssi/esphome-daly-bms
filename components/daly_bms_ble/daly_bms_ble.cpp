@@ -26,6 +26,8 @@ static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0;
 static const uint16_t DALY_COMMAND_REQ_SETTINGS_START = 0x0080;
 static const uint16_t DALY_COMMAND_REQ_SETTINGS_COUNT = 41;
+static const uint16_t DALY_COMMAND_REQ_VERSION_START = 0x00A9;
+static const uint16_t DALY_COMMAND_REQ_PASSWORD = 0x00C9;
 static const uint16_t DALY_COMMAND_REQ_BALANCER_SWITCH = 0x00CF;
 
 static const uint8_t DALY_FRAME_LEN_STATUS_80_REGISTERS = 80 * 2;
@@ -305,6 +307,12 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
       break;
     case DALY_COMMAND_REQ_SETTINGS_START:
       this->decode_settings_data_(data);
+      break;
+    case DALY_COMMAND_REQ_VERSION_START:
+      this->decode_version_data_(data);
+      break;
+    case DALY_COMMAND_REQ_PASSWORD:
+      this->decode_password_data_(data);
       break;
     case DALY_COMMAND_REQ_BALANCER_SWITCH:
       this->decode_balancer_switch_data_(data);
