@@ -59,7 +59,6 @@ ICON_CELL_COUNT = "mdi:car-battery"
 ICON_CAPACITY_REMAINING = "mdi:battery-50"
 
 UNIT_AMPERE_HOURS = "Ah"
-UNIT_SECONDS = "s"
 
 CELLS = [f"cell_voltage_{i}" for i in range(1, 33)]
 TEMPERATURES = [f"temperature_{i}" for i in range(1, 9)]
