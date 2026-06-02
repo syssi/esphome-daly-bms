@@ -98,6 +98,12 @@ class DalyBmsBle :
   void set_board_temperature_sensor(sensor::Sensor *board_temperature_sensor) {
     board_temperature_sensor_ = board_temperature_sensor;
   }
+  void set_max_battery_temperature_sensor(sensor::Sensor *s) { max_battery_temperature_sensor_ = s; }
+  void set_max_battery_temperature_probe_sensor(sensor::Sensor *s) { max_battery_temperature_probe_sensor_ = s; }
+  void set_min_battery_temperature_sensor(sensor::Sensor *s) { min_battery_temperature_sensor_ = s; }
+  void set_min_battery_temperature_probe_sensor(sensor::Sensor *s) { min_battery_temperature_probe_sensor_ = s; }
+  void set_energy_sensor(sensor::Sensor *s) { energy_sensor_ = s; }
+  void set_precharging_binary_sensor(binary_sensor::BinarySensor *s) { precharging_binary_sensor_ = s; }
 
   void set_battery_status_text_sensor(text_sensor::TextSensor *battery_status_text_sensor) {
     battery_status_text_sensor_ = battery_status_text_sensor;
@@ -113,6 +119,7 @@ class DalyBmsBle :
   void set_balancer_switch(switch_::Switch *balancer_switch) { balancer_switch_ = balancer_switch; }
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
+  void set_protocol_version(uint8_t protocol_version) { protocol_version_ = protocol_version; }
 
   void register_settings_number(uint16_t address, number::Number *number, float factor, float offset) {
     this->settings_numbers_[address] = {number, factor, offset};
@@ -154,6 +161,12 @@ class DalyBmsBle :
   sensor::Sensor *balance_current_sensor_{nullptr};
   sensor::Sensor *mosfet_temperature_sensor_{nullptr};
   sensor::Sensor *board_temperature_sensor_{nullptr};
+  sensor::Sensor *max_battery_temperature_sensor_{nullptr};
+  sensor::Sensor *max_battery_temperature_probe_sensor_{nullptr};
+  sensor::Sensor *min_battery_temperature_sensor_{nullptr};
+  sensor::Sensor *min_battery_temperature_probe_sensor_{nullptr};
+  sensor::Sensor *energy_sensor_{nullptr};
+  binary_sensor::BinarySensor *precharging_binary_sensor_{nullptr};
 
   switch_::Switch *balancer_switch_{nullptr};
   switch_::Switch *charging_switch_{nullptr};
@@ -173,14 +186,14 @@ class DalyBmsBle :
 
   struct Cell {
     sensor::Sensor *cell_voltage_sensor_{nullptr};
-  } cells_[32];
+  } cells_[48];
 
   struct Temperature {
     sensor::Sensor *temperature_sensor_{nullptr};
   } temperatures_[8];
 
   struct CommandQueue {
-    static const size_t LENGTH = 10;
+    static const size_t LENGTH = 16;
 
     struct Command {
       uint8_t function;
@@ -237,6 +250,7 @@ class DalyBmsBle :
 #endif
   uint32_t password_ = 12345678;
   uint8_t status_registers_{62};
+  uint8_t protocol_version_{0xD2};
 
   std::array<uint8_t, 8> build_frame_(uint8_t function, uint16_t address, uint16_t value) const;
   void decode_status_data_(const std::vector<uint8_t> &data);
@@ -244,6 +258,9 @@ class DalyBmsBle :
   void decode_balancer_switch_data_(const std::vector<uint8_t> &data);
   void decode_version_data_(const std::vector<uint8_t> &data);
   void decode_password_data_(const std::vector<uint8_t> &data);
+  void decode_p81_cells_data_(const std::vector<uint8_t> &data);
+  void decode_p81_status_data_(const std::vector<uint8_t> &data);
+  void decode_p81_version_data_(const std::vector<uint8_t> &data);
   void publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state);
   void publish_state_(sensor::Sensor *sensor, float value);
   void publish_state_(number::Number *obj, float value);

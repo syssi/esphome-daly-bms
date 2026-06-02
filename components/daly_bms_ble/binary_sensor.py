@@ -3,7 +3,14 @@ from esphome.components import binary_sensor
 import esphome.config_validation as cv
 
 from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
-from .const import CONF_CHARGING, CONF_DISCHARGING, ICON_CHARGING, ICON_DISCHARGING
+from .const import (
+    CONF_CHARGING,
+    CONF_DISCHARGING,
+    CONF_PRECHARGING,
+    ICON_CHARGING,
+    ICON_DISCHARGING,
+    ICON_PRECHARGING,
+)
 
 DEPENDENCIES = ["daly_bms_ble"]
 
@@ -23,6 +30,9 @@ BINARY_SENSOR_DEFS = {
     },
     CONF_DISCHARGING: {
         "icon": ICON_DISCHARGING,
+    },
+    CONF_PRECHARGING: {
+        "icon": ICON_PRECHARGING,
     },
 }
 

@@ -24,11 +24,11 @@ class TestHubConstants:
 
 class TestSensorLists:
     def test_cells_count(self):
-        assert len(sensor.CELLS) == 32
+        assert len(sensor.CELLS) == 48
 
     def test_cells_naming(self):
         assert sensor.CELLS[0] == "cell_voltage_1"
-        assert sensor.CELLS[31] == "cell_voltage_32"
+        assert sensor.CELLS[47] == "cell_voltage_48"
         for i, key in enumerate(sensor.CELLS, 1):
             assert key == f"cell_voltage_{i}"
 
@@ -45,7 +45,7 @@ class TestSensorLists:
         assert "total_voltage" in sensor.SENSOR_DEFS
         assert "state_of_charge" in sensor.SENSOR_DEFS
         assert "error_bitmask" in sensor.SENSOR_DEFS
-        assert len(sensor.SENSOR_DEFS) == 20
+        assert len(sensor.SENSOR_DEFS) == 25
 
     def test_no_cell_keys_in_sensors_list(self):
         for key in sensor.SENSOR_DEFS:
@@ -58,7 +58,8 @@ class TestBinarySensorConstants:
         assert binary_sensor.CONF_BALANCING in binary_sensor.BINARY_SENSOR_DEFS
         assert binary_sensor.CONF_CHARGING in binary_sensor.BINARY_SENSOR_DEFS
         assert binary_sensor.CONF_DISCHARGING in binary_sensor.BINARY_SENSOR_DEFS
-        assert len(binary_sensor.BINARY_SENSOR_DEFS) == 3
+        assert binary_sensor.CONF_PRECHARGING in binary_sensor.BINARY_SENSOR_DEFS
+        assert len(binary_sensor.BINARY_SENSOR_DEFS) == 4
 
 
 class TestSwitchConstants:
