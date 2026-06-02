@@ -23,19 +23,18 @@ static const uint8_t DALY_FRAME_START2 = 0x03;
 static const uint8_t DALY_FUNCTION_READ = 0x03;
 static const uint8_t DALY_FUNCTION_WRITE = 0x06;
 
-static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0;
+static const uint16_t DALY_COMMAND_REQ_STATUS_START = 0x0000;
 static const uint16_t DALY_COMMAND_REQ_SETTINGS_START = 0x0080;
-static const uint16_t DALY_COMMAND_REQ_SETTINGS_COUNT = 41;
 static const uint16_t DALY_COMMAND_REQ_VERSION_START = 0x00A9;
 static const uint16_t DALY_COMMAND_REQ_PASSWORD = 0x00C9;
 static const uint16_t DALY_COMMAND_REQ_BALANCER_SWITCH = 0x00CF;
 
 static const uint8_t DALY_FRAME_LEN_STATUS_80_REGISTERS = 80 * 2;
 static const uint8_t DALY_FRAME_LEN_STATUS_62_REGISTERS = 62 * 2;
-static const uint8_t DALY_FRAME_LEN_SETTINGS = 82;
-static const uint8_t DALY_FRAME_LEN_VERSIONS = 64;
-static const uint8_t DALY_FRAME_LEN_PASSWORD = 6;
-static const uint8_t DALY_FRAME_LEN_BALANCER_SWITCH = 2;
+static const uint8_t DALY_FRAME_LEN_SETTINGS = 41 * 2;
+static const uint8_t DALY_FRAME_LEN_VERSIONS = 32 * 2;
+static const uint8_t DALY_FRAME_LEN_PASSWORD = 3 * 2;
+static const uint8_t DALY_FRAME_LEN_BALANCER_SWITCH = 1 * 2;
 
 static const uint8_t MAX_RESPONSE_SIZE = 165;
 
@@ -266,8 +265,8 @@ void DalyBmsBle::update() {
   }
 
   this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
-  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_COMMAND_REQ_SETTINGS_COUNT);
-  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, 1);
+  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_FRAME_LEN_SETTINGS / 2);
+  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, DALY_FRAME_LEN_BALANCER_SWITCH / 2);
   this->send_next_command_();
 #endif
 }
