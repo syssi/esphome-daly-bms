@@ -21,6 +21,11 @@ namespace esphome::daly_bms_ble {
 namespace espbt = esphome::esp32_ble_tracker;
 #endif
 
+enum ProtocolVersion {
+  DALY_0xD2,
+  DALY_0x81,
+};
+
 class DalyBmsBle :
 #ifdef USE_ESP32
     public esphome::ble_client::BLEClientNode,
@@ -113,6 +118,7 @@ class DalyBmsBle :
   void set_balancer_switch(switch_::Switch *balancer_switch) { balancer_switch_ = balancer_switch; }
   void set_charging_switch(switch_::Switch *charging_switch) { charging_switch_ = charging_switch; }
   void set_discharging_switch(switch_::Switch *discharging_switch) { discharging_switch_ = discharging_switch; }
+  void set_protocol_version(ProtocolVersion protocol_version) { protocol_version_ = protocol_version; }
 
   void register_settings_number(uint16_t address, number::Number *number, float factor, float offset) {
     this->settings_numbers_[address] = {number, factor, offset};
@@ -173,14 +179,14 @@ class DalyBmsBle :
 
   struct Cell {
     sensor::Sensor *cell_voltage_sensor_{nullptr};
-  } cells_[32];
+  } cells_[48];
 
   struct Temperature {
     sensor::Sensor *temperature_sensor_{nullptr};
   } temperatures_[8];
 
   struct CommandQueue {
-    static const size_t LENGTH = 10;
+    static const size_t LENGTH = 16;
 
     struct Command {
       uint8_t function;
@@ -237,6 +243,7 @@ class DalyBmsBle :
 #endif
   uint32_t password_ = 12345678;
   uint8_t status_registers_{62};
+  ProtocolVersion protocol_version_{DALY_0xD2};
 
   std::array<uint8_t, 8> build_frame_(uint8_t function, uint16_t address, uint16_t value) const;
   void decode_status_data_(const std::vector<uint8_t> &data);
@@ -244,6 +251,9 @@ class DalyBmsBle :
   void decode_balancer_switch_data_(const std::vector<uint8_t> &data);
   void decode_version_data_(const std::vector<uint8_t> &data);
   void decode_password_data_(const std::vector<uint8_t> &data);
+  void decode_dl_cells_data_(const std::vector<uint8_t> &data);
+  void decode_dl_status_data_(const std::vector<uint8_t> &data);
+  void decode_dl_version_data_(const std::vector<uint8_t> &data);
   void publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state);
   void publish_state_(sensor::Sensor *sensor, float value);
   void publish_state_(number::Number *obj, float value);

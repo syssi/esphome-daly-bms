@@ -24,11 +24,11 @@ class TestHubConstants:
 
 class TestSensorLists:
     def test_cells_count(self):
-        assert len(sensor.CELLS) == 32
+        assert len(sensor.CELLS) == 48
 
     def test_cells_naming(self):
         assert sensor.CELLS[0] == "cell_voltage_1"
-        assert sensor.CELLS[31] == "cell_voltage_32"
+        assert sensor.CELLS[47] == "cell_voltage_48"
         for i, key in enumerate(sensor.CELLS, 1):
             assert key == f"cell_voltage_{i}"
 

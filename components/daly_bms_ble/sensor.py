@@ -60,7 +60,7 @@ ICON_CAPACITY_REMAINING = "mdi:battery-50"
 
 UNIT_AMPERE_HOURS = "Ah"
 
-CELLS = [f"cell_voltage_{i}" for i in range(1, 33)]
+CELLS = [f"cell_voltage_{i}" for i in range(1, 49)]
 TEMPERATURES = [f"temperature_{i}" for i in range(1, 9)]
 
 # key: sensor_schema kwargs
