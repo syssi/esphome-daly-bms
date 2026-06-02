@@ -60,6 +60,28 @@ TEST(DalyBmsBleVersionTest, WrongFrameSizeIsRejected) {
   EXPECT_EQ(sw_version.state, "");
 }
 
+TEST(DalyBmsBleVersionTest, DispatchedViaOnData) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor sw_version;
+  bms.set_software_version_text_sensor(&sw_version);
+
+  bms.queue_command_(0x03, 0x00A9, 0x20);
+  bms.on_daly_bms_ble_data(VERSION_FRAME_1);
+
+  EXPECT_EQ(sw_version.state, "401012");
+}
+
+TEST(DalyBmsBleVersionTest, SecondFrameDispatchedViaOnData) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor sw_version;
+  bms.set_software_version_text_sensor(&sw_version);
+
+  bms.queue_command_(0x03, 0x00A9, 0x20);
+  bms.on_daly_bms_ble_data(VERSION_FRAME_2);
+
+  EXPECT_EQ(sw_version.state, "204012");
+}
+
 // ── Password frame (data_len=0x06) ───────────────────────────────────────────
 
 TEST(DalyBmsBlePasswordTest, NullSensorsDoNotCrash) {
@@ -70,6 +92,12 @@ TEST(DalyBmsBlePasswordTest, NullSensorsDoNotCrash) {
 TEST(DalyBmsBlePasswordTest, WrongFrameSizeIsRejected) {
   TestableDalyBmsBle bms;
   bms.decode_password_data_(SETTINGS_FRAME_1);
+}
+
+TEST(DalyBmsBlePasswordTest, DispatchedViaOnData) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x00C9, 0x03);
+  bms.on_daly_bms_ble_data(PASSWORD_FRAME_1);
 }
 
 // ── Settings frame (data_len=0x52) ───────────────────────────────────────────
