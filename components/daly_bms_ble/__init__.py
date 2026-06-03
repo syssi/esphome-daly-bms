@@ -9,6 +9,7 @@ AUTO_LOAD = ["binary_sensor", "button", "number", "sensor", "text_sensor", "swit
 MULTI_CONF = True
 
 CONF_DALY_BMS_BLE_ID = "daly_bms_ble_id"
+CONF_PROTOCOL_VERSION = "protocol_version"
 CONF_STATUS_REGISTERS = "status_registers"
 CONF_RESPONSE_TIMEOUT = "response_timeout"
 
@@ -29,6 +30,9 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(DalyBmsBle),
             cv.Optional(CONF_PASSWORD, default="12345678"): cv.uint32_t,
+            cv.Optional(CONF_PROTOCOL_VERSION, default=0xD2): cv.one_of(
+                0xD2, 0x81, int=True
+            ),
             cv.Optional(CONF_STATUS_REGISTERS, default=62): cv.one_of(62, 80, int=True),
             cv.Optional(
                 CONF_RESPONSE_TIMEOUT, default="3s"
@@ -46,5 +50,6 @@ async def to_code(config):
     await ble_client.register_ble_node(var, config)
 
     cg.add(var.set_password(config[CONF_PASSWORD]))
+    cg.add(var.set_protocol_version(config[CONF_PROTOCOL_VERSION]))
     cg.add(var.set_status_registers(config[CONF_STATUS_REGISTERS]))
     cg.add(var.set_response_timeout(config[CONF_RESPONSE_TIMEOUT]))

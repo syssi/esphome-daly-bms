@@ -18,6 +18,11 @@ static const uint16_t DALY_BMS_NOTIFY_CHARACTERISTIC_UUID = 0xFFF1;
 static const uint16_t DALY_BMS_CONTROL_CHARACTERISTIC_UUID = 0xFFF2;
 
 static const uint8_t DALY_FRAME_START = 0xD2;
+static const uint8_t DALY_FRAME_START_P81_REQ = 0x81;
+static const uint8_t DALY_FRAME_START_P81_RESP = 0x51;
+
+static const uint8_t DALY_PROTOCOL_D2 = 0xD2;
+static const uint8_t DALY_PROTOCOL_P81 = 0x81;
 static const uint8_t DALY_FRAME_START2 = 0x03;
 
 static const uint8_t DALY_FUNCTION_READ = 0x03;
@@ -36,7 +41,29 @@ static const uint8_t DALY_FRAME_LEN_VERSIONS = 32 * 2;
 static const uint8_t DALY_FRAME_LEN_PASSWORD = 3 * 2;
 static const uint8_t DALY_FRAME_LEN_BALANCER_SWITCH = 1 * 2;
 
-static const uint8_t MAX_RESPONSE_SIZE = 165;
+// DL (0x81) protocol command start addresses
+static const uint16_t DALY_COMMAND_REQ_P81_CELLS_START = 0x0000;
+static const uint16_t DALY_COMMAND_REQ_P81_STATUS_START = 0x0041;
+static const uint16_t DALY_COMMAND_REQ_P81_ALARMS_START = 0x00A4;
+static const uint16_t DALY_COMMAND_REQ_P81_VERSION_START = 0x0178;
+static const uint16_t DALY_COMMAND_REQ_P81_SETTINGS1_START = 0x0100;
+static const uint16_t DALY_COMMAND_REQ_P81_SETTINGS2_START = 0x0151;
+static const uint16_t DALY_COMMAND_REQ_P81_SETTINGS3_START = 0x01C3;
+static const uint16_t DALY_COMMAND_REQ_P81_SETTINGS4_START = 0x0220;
+static const uint16_t DALY_COMMAND_REQ_P81_SETTINGS5_START = 0x024B;
+
+// DL (0x81) protocol frame data lengths (frame[2] = register count * 2)
+static const uint8_t DALY_FRAME_LEN_P81_CELLS = 64 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_STATUS = 62 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_ALARMS = 10 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_VERSION = 74 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_SETTINGS1 = 81 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_SETTINGS2 = 39 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_SETTINGS3 = 80 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_SETTINGS4 = 11 * 2;
+static const uint8_t DALY_FRAME_LEN_P81_SETTINGS5 = 2 * 2;
+
+static const uint8_t MAX_RESPONSE_SIZE = 170;
 
 static const uint8_t ERRORS_SIZE = 64;
 static constexpr const char *const ERRORS[ERRORS_SIZE] = {
@@ -123,9 +150,18 @@ static constexpr const char *const ERRORS[ERRORS_SIZE] = {
     "Critical: Discharging temperature too low",
 };
 
+static void log_frame_hex(const char *tag, const char *label, const std::vector<uint8_t> &data) {
+  constexpr size_t chunk = 96;
+  ESP_LOGI(tag, "%s (%zu bytes):", label, data.size());
+  for (size_t i = 0; i < data.size(); i += chunk) {
+    ESP_LOGI(tag, "  +%03zu: %s", i,
+             format_hex_pretty(data.data() + i, std::min(chunk, data.size() - i)).c_str());  // NOLINT
+  }
+}
+
 std::array<uint8_t, 8> DalyBmsBle::build_frame_(uint8_t function, uint16_t address, uint16_t value) const {
   std::array<uint8_t, 8> frame;
-  frame[0] = 0xD2;
+  frame[0] = this->protocol_version_ == DALY_PROTOCOL_P81 ? DALY_FRAME_START_P81_REQ : DALY_FRAME_START;
   frame[1] = function;
   frame[2] = address >> 8;
   frame[3] = address >> 0;
@@ -231,8 +267,7 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
     }
     case ESP_GATTC_REG_FOR_NOTIFY_EVT: {
       this->node_state = espbt::ClientState::ESTABLISHED;
-
-      this->send_command(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
+      this->update();
       break;
     }
     case ESP_GATTC_NOTIFY_EVT: {
@@ -264,17 +299,36 @@ void DalyBmsBle::update() {
     return;
   }
 
-  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
-  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_FRAME_LEN_SETTINGS / 2);
-  this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, DALY_FRAME_LEN_BALANCER_SWITCH / 2);
+  if (this->protocol_version_ == DALY_PROTOCOL_P81) {
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_CELLS_START, DALY_FRAME_LEN_P81_CELLS / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_STATUS_START, DALY_FRAME_LEN_P81_STATUS / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_ALARMS_START, DALY_FRAME_LEN_P81_ALARMS / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_VERSION_START, DALY_FRAME_LEN_P81_VERSION / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_SETTINGS1_START, DALY_FRAME_LEN_P81_SETTINGS1 / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_SETTINGS2_START, DALY_FRAME_LEN_P81_SETTINGS2 / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_SETTINGS3_START, DALY_FRAME_LEN_P81_SETTINGS3 / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_SETTINGS4_START, DALY_FRAME_LEN_P81_SETTINGS4 / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_P81_SETTINGS5_START, DALY_FRAME_LEN_P81_SETTINGS5 / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, DALY_FRAME_LEN_BALANCER_SWITCH / 2);
+  } else {
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_STATUS_START, this->status_registers_);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_SETTINGS_START, DALY_FRAME_LEN_SETTINGS / 2);
+    this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_BALANCER_SWITCH, DALY_FRAME_LEN_BALANCER_SWITCH / 2);
+  }
   this->send_next_command_();
 #endif
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
-  if (data[0] != DALY_FRAME_START || data.size() > MAX_RESPONSE_SIZE) {
-    ESP_LOGW(TAG, "Invalid response received (%zu bytes): %s", data.size(),
-             format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+  const uint8_t expected_start =
+      this->protocol_version_ == DALY_PROTOCOL_P81 ? DALY_FRAME_START_P81_RESP : DALY_FRAME_START;
+  if (data[0] != expected_start || data.size() > MAX_RESPONSE_SIZE) {
+    constexpr size_t chunk = 96;
+    ESP_LOGW(TAG, "Invalid response received (%zu bytes):", data.size());
+    for (size_t i = 0; i < data.size(); i += chunk) {
+      ESP_LOGW(TAG, "  +%03zu: %s", i,
+               format_hex_pretty(data.data() + i, std::min(chunk, data.size() - i)).c_str());  // NOLINT
+    }
     return;
   }
 
@@ -297,6 +351,45 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   if (data[1] != DALY_FRAME_START2) {
     ESP_LOGW(TAG, "Unknown function code 0x%02X: %s", data[1],
              format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+    return;
+  }
+
+  if (this->protocol_version_ == DALY_PROTOCOL_P81) {
+    switch (cmd_address) {
+      case DALY_COMMAND_REQ_P81_CELLS_START:
+        this->decode_p81_cells_data_(data);
+        break;
+      case DALY_COMMAND_REQ_P81_STATUS_START:
+        this->decode_p81_status_data_(data);
+        break;
+      case DALY_COMMAND_REQ_P81_ALARMS_START:
+        log_frame_hex(TAG, "[P81] Alarm registers 0x00A4-0x00AD", data);
+        break;
+      case DALY_COMMAND_REQ_P81_VERSION_START:
+        this->decode_p81_version_data_(data);
+        break;
+      case DALY_COMMAND_REQ_P81_SETTINGS1_START:
+        log_frame_hex(TAG, "[P81] Settings registers 0x0100-0x0150", data);
+        break;
+      case DALY_COMMAND_REQ_P81_SETTINGS2_START:
+        log_frame_hex(TAG, "[P81] Settings registers 0x0151-0x0177", data);
+        break;
+      case DALY_COMMAND_REQ_P81_SETTINGS3_START:
+        log_frame_hex(TAG, "[P81] Settings registers 0x01C3-0x0212", data);
+        break;
+      case DALY_COMMAND_REQ_P81_SETTINGS4_START:
+        log_frame_hex(TAG, "[P81] Settings registers 0x0220-0x022A", data);
+        break;
+      case DALY_COMMAND_REQ_P81_SETTINGS5_START:
+        log_frame_hex(TAG, "[P81] Settings registers 0x024B-0x024C", data);
+        break;
+      case DALY_COMMAND_REQ_BALANCER_SWITCH:
+        this->decode_balancer_switch_data_(data);
+        break;
+      default:
+        ESP_LOGW(TAG, "[P81] Unhandled response (addr=0x%04X, len=%zu): %s", cmd_address, data.size(),
+                 format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+    }
     return;
   }
 
@@ -794,12 +887,34 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Cell Voltage 30", this->cells_[29].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 31", this->cells_[30].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell Voltage 32", this->cells_[31].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 33", this->cells_[32].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 34", this->cells_[33].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 35", this->cells_[34].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 36", this->cells_[35].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 37", this->cells_[36].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 38", this->cells_[37].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 39", this->cells_[38].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 40", this->cells_[39].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 41", this->cells_[40].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 42", this->cells_[41].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 43", this->cells_[42].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 44", this->cells_[43].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 45", this->cells_[44].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 46", this->cells_[45].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 47", this->cells_[46].cell_voltage_sensor_);
+  LOG_SENSOR("", "Cell Voltage 48", this->cells_[47].cell_voltage_sensor_);
   LOG_SENSOR("", "Cell count", this->cell_count_sensor_);
   LOG_SENSOR("", "Temperature sensors", this->temperature_sensors_sensor_);
   LOG_SENSOR("", "Capacity remaining", this->capacity_remaining_sensor_);
   LOG_SENSOR("", "Balance current", this->balance_current_sensor_);
   LOG_SENSOR("", "Mosfet temperature", this->mosfet_temperature_sensor_);
   LOG_SENSOR("", "Board temperature", this->board_temperature_sensor_);
+  LOG_SENSOR("", "Max battery temperature", this->max_battery_temperature_sensor_);
+  LOG_SENSOR("", "Max battery temperature probe", this->max_battery_temperature_probe_sensor_);
+  LOG_SENSOR("", "Min battery temperature", this->min_battery_temperature_sensor_);
+  LOG_SENSOR("", "Min battery temperature probe", this->min_battery_temperature_probe_sensor_);
+  LOG_SENSOR("", "Energy", this->energy_sensor_);
+  LOG_BINARY_SENSOR("", "Precharging", this->precharging_binary_sensor_);
 
   LOG_TEXT_SENSOR("", "Errors", this->errors_text_sensor_);
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);
@@ -857,6 +972,156 @@ std::string DalyBmsBle::bitmask_to_string_(const char *const messages[], const u
     }
   }
   return values;
+}
+
+void DalyBmsBle::decode_p81_cells_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_P81_CELLS + 5) {
+    ESP_LOGW(TAG, "decode_p81_cells_data_: unexpected frame size %zu", data.size());
+    return;
+  }
+  // Response to realDataCmd00_40: registers 0-63
+  // frame: [0x81, 0x03, 0x80, reg0_hi, reg0_lo, reg1_hi, reg1_lo, ..., crc_lo, crc_hi]
+  auto daly_offset_get_16bit = [&](uint8_t reg) -> uint16_t {
+    size_t i = 3 + reg * 2;
+    return (uint16_t(data[i]) << 8) | data[i + 1];
+  };
+
+  uint8_t cells = std::min((uint8_t) daly_offset_get_16bit(0x3C), (uint8_t) 48);        // reg 60 = cell count
+  uint8_t temp_sensors = std::min((uint8_t) daly_offset_get_16bit(0x3D), (uint8_t) 8);  // reg 61 = temp sensor count
+
+  ESP_LOGI(TAG, "[P81] RT1: cells=%u temp_sensors=%u", cells, temp_sensors);
+
+  float min_cell_voltage = 100.0f, max_cell_voltage = -100.0f, avg_cell_voltage = 0.0f;
+  uint8_t min_voltage_cell = 0, max_voltage_cell = 0;
+  for (uint8_t i = 0; i < cells; i++) {
+    float cell_voltage = daly_offset_get_16bit(i) * 0.001f;
+    avg_cell_voltage += cell_voltage;
+    if (cell_voltage > 0.0f && cell_voltage < min_cell_voltage) {
+      min_cell_voltage = cell_voltage;
+      min_voltage_cell = i + 1;
+    }
+    if (cell_voltage > max_cell_voltage) {
+      max_cell_voltage = cell_voltage;
+      max_voltage_cell = i + 1;
+    }
+    this->publish_state_(this->cells_[i].cell_voltage_sensor_, cell_voltage);
+  }
+  avg_cell_voltage /= cells;
+
+  this->publish_state_(this->min_cell_voltage_sensor_, min_cell_voltage);
+  this->publish_state_(this->max_cell_voltage_sensor_, max_cell_voltage);
+  this->publish_state_(this->average_cell_voltage_sensor_, avg_cell_voltage);
+  this->publish_state_(this->delta_cell_voltage_sensor_, max_cell_voltage - min_cell_voltage);
+  this->publish_state_(this->min_voltage_cell_sensor_, (float) min_voltage_cell);
+  this->publish_state_(this->max_voltage_cell_sensor_, (float) max_voltage_cell);
+  this->publish_state_(this->cell_count_sensor_, (float) cells);
+
+  // Temperatures: registers 48-55 (offset -40)
+  this->publish_state_(this->temperature_sensors_sensor_, (float) temp_sensors);
+  for (uint8_t i = 0; i < temp_sensors; i++) {
+    this->publish_state_(this->temperatures_[i].temperature_sensor_, (daly_offset_get_16bit(0x30 + i) - 40) * 1.0f);
+  }
+
+  float total_voltage = daly_offset_get_16bit(0x38) * 0.1f;      // reg 56
+  float current = (daly_offset_get_16bit(0x39) - 30000) * 0.1f;  // reg 57, offset -30000
+
+  this->publish_state_(this->total_voltage_sensor_, total_voltage);
+  this->publish_state_(this->current_sensor_, current);
+  this->publish_state_(this->state_of_charge_sensor_, daly_offset_get_16bit(0x3A) * 0.1f);  // reg 58
+
+  float power = total_voltage * current;
+  this->publish_state_(this->power_sensor_, power);
+  this->publish_state_(this->charging_power_sensor_, std::max(0.0f, power));
+  this->publish_state_(this->discharging_power_sensor_, std::abs(std::min(0.0f, power)));
+
+  ESP_LOGI(TAG, "[P81] RT1: %.1fV  %.1fA  SOC=%.1f%%  cells=%u  temps=%u  max_cell=%.3fV  min_cell=%.3fV",
+           total_voltage, current, daly_offset_get_16bit(0x3A) * 0.1f, cells, temp_sensors, max_cell_voltage,
+           min_cell_voltage);
+}
+
+void DalyBmsBle::decode_p81_status_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_P81_STATUS + 5) {
+    ESP_LOGW(TAG, "decode_p81_status_data_: unexpected frame size %zu", data.size());
+    return;
+  }
+  // Response to realDataCmd41_7E: registers 65-126
+  auto daly_offset_get_16bit = [&](uint8_t reg) -> uint16_t {
+    size_t i = 3 + (reg - 0x41) * 2;
+    return (uint16_t(data[i]) << 8) | data[i + 1];
+  };
+
+  // reg 72: charge/discharge status (0=idle, 1=charging, 2=discharging)
+  uint16_t status = daly_offset_get_16bit(0x48);
+  this->publish_state_(this->battery_status_text_sensor_, status == 0   ? "Idle"
+                                                          : status == 1 ? "Charging"
+                                                                        : "Discharging");
+
+  // reg 75: remaining capacity (0.1 Ah)
+  this->publish_state_(this->capacity_remaining_sensor_, daly_offset_get_16bit(0x4B) * 0.1f);
+
+  // reg 76: charging cycles
+  this->publish_state_(this->charging_cycles_sensor_, (float) daly_offset_get_16bit(0x4C));
+
+  // reg 77: balancing state (0=off, 1=passive, 2=active)
+  this->publish_state_(this->balancing_binary_sensor_, daly_offset_get_16bit(0x4D) != 0);
+
+  // reg 78: balance current (offset -30000, factor 0.001 A)
+  this->publish_state_(this->balance_current_sensor_, (daly_offset_get_16bit(0x4E) - 30000) * 0.001f);
+
+  // reg 67: max battery temperature (offset -40)
+  this->publish_state_(this->max_battery_temperature_sensor_, (daly_offset_get_16bit(0x43) - 40) * 1.0f);
+
+  // reg 68: max battery temperature probe index
+  this->publish_state_(this->max_battery_temperature_probe_sensor_, (float) daly_offset_get_16bit(0x44));
+
+  // reg 69: min battery temperature (offset -40)
+  this->publish_state_(this->min_battery_temperature_sensor_, (daly_offset_get_16bit(0x45) - 40) * 1.0f);
+
+  // reg 70: min battery temperature probe index
+  this->publish_state_(this->min_battery_temperature_probe_sensor_, (float) daly_offset_get_16bit(0x46));
+
+  // reg 82: charging MOSFET (0=off, 1=on)
+  this->publish_state_(this->charging_binary_sensor_, daly_offset_get_16bit(0x52) == 1);
+
+  // reg 83: discharging MOSFET (0=off, 1=on)
+  this->publish_state_(this->discharging_binary_sensor_, daly_offset_get_16bit(0x53) == 1);
+
+  // reg 84: pre-charge MOSFET (0=off, 1=on)
+  this->publish_state_(this->precharging_binary_sensor_, daly_offset_get_16bit(0x54) == 1);
+
+  // reg 89: energy counter (Wh)
+  this->publish_state_(this->energy_sensor_, (float) daly_offset_get_16bit(0x59));
+
+  // reg 90: MOSFET temperature (offset -40)
+  this->publish_state_(this->mosfet_temperature_sensor_, (daly_offset_get_16bit(0x5A) - 40) * 1.0f);
+
+  // reg 91: board/ambient temperature (offset -40)
+  this->publish_state_(this->board_temperature_sensor_, (daly_offset_get_16bit(0x5B) - 40) * 1.0f);
+
+  ESP_LOGI(TAG, "[P81] RT2: status=%s  capacity=%.1fAh  cycles=%u  bal=%u  chg_mos=%u  dis_mos=%u  mosfet_temp=%.0f°C",
+           status == 0   ? "Idle"
+           : status == 1 ? "Charging"
+                         : "Discharging",
+           daly_offset_get_16bit(0x4B) * 0.1f, daly_offset_get_16bit(0x4C), daly_offset_get_16bit(0x4D),
+           daly_offset_get_16bit(0x52), daly_offset_get_16bit(0x53), (daly_offset_get_16bit(0x5A) - 40) * 1.0f);
+}
+
+void DalyBmsBle::decode_p81_version_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_P81_VERSION + 5) {
+    ESP_LOGW(TAG, "decode_p81_version_data_: unexpected frame size %zu", data.size());
+    return;
+  }
+  // SW version: first 28-byte null-padded field starting at data[3]
+  // HW version: next 14-byte null-padded field starting at data[31]
+  auto sw_begin = data.begin() + 3;
+  auto software_version = std::string(sw_begin, std::find(sw_begin, sw_begin + 28, '\0'));
+  ESP_LOGI(TAG, "[P81] Software version: %s", software_version.c_str());
+  this->publish_state_(this->software_version_text_sensor_, software_version);
+
+  auto hw_begin = data.begin() + 31;
+  auto hardware_version = std::string(hw_begin, std::find(hw_begin, hw_begin + 14, '\0'));
+  ESP_LOGI(TAG, "[P81] Hardware version: %s", hardware_version.c_str());
+  this->publish_state_(this->hardware_version_text_sensor_, hardware_version);
 }
 
 }  // namespace esphome::daly_bms_ble

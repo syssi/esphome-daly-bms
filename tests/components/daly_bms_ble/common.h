@@ -22,6 +22,9 @@ class TestableDalyBmsBle : public DalyBmsBle {
   using DalyBmsBle::decode_balancer_switch_data_;
   using DalyBmsBle::decode_version_data_;
   using DalyBmsBle::decode_password_data_;
+  using DalyBmsBle::decode_p81_cells_data_;
+  using DalyBmsBle::decode_p81_status_data_;
+  using DalyBmsBle::decode_p81_version_data_;
   using DalyBmsBle::on_daly_bms_ble_data;
 
   using DalyBmsBle::CommandQueue;
@@ -33,7 +36,7 @@ class TestableDalyBmsBle : public DalyBmsBle {
   void reset_queue() { queue_.reset(); }
 };
 
-// ── Real frames from esp32-ble-example-faker.yaml ────────────────────────────
+// ── D2 protocol: real frames from esp32-ble-example-faker.yaml ──────────────
 // Frame format: 0xD2 0x03 <data_len> [data...] [CRC_lo] [CRC_hi]
 
 // Version frame (data_len=0x40=64) ───────────────────────────────────────────
@@ -237,3 +240,7 @@ static const std::vector<uint8_t> STATUS_FRAME_62_REG_ALARM_TEMP_DIFF_WARNING = 
 };
 
 }  // namespace esphome::daly_bms_ble::testing
+
+// ── 0x81 protocol frames ─────────────────────────────────────────────────────
+// Frame format: 0x51 0x03 <data_len> [data...] [CRC_lo] [CRC_hi]
+#include "frames_p81_ess_dl_bms.h"

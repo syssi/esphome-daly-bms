@@ -38,15 +38,16 @@ esp32_ble_tracker:
   on_ble_advertise:
     then:
       - lambda: |-
-          if (x.get_name().rfind("DL-", 0) == 0) {
-            ESP_LOGI("ble_adv", "New DALY-BMS found");
-            ESP_LOGI("ble_adv", "  Name: %s", x.get_name().c_str());
-            ESP_LOGI("ble_adv", "  MAC address: %s", x.address_str().c_str());
-            ESP_LOGD("ble_adv", "  Advertised service UUIDs:");
-            char uuidstr[esphome::esp32_ble::UUID_STR_LEN];
-            for (auto uuid : x.get_service_uuids()) {
-              ESP_LOGD("ble_adv", "    - %s", uuid.to_str(uuidstr));
-            }
+          const std::string name = x.get_name();
+          if (name.rfind("DL-", 0) != 0 && name.rfind("JHB-", 0) != 0 && name.rfind("BT", 0) != 0)
+            return;
+          ESP_LOGI("ble_adv", "New DALY-BMS found");
+          ESP_LOGI("ble_adv", "  Name: %s", name.c_str());
+          ESP_LOGI("ble_adv", "  MAC address: %s", x.address_str().c_str());
+          ESP_LOGD("ble_adv", "  Advertised service UUIDs:");
+          char uuidstr[esphome::esp32_ble::UUID_STR_LEN];
+          for (auto uuid : x.get_service_uuids()) {
+            ESP_LOGD("ble_adv", "    - %s", uuid.to_str(uuidstr));
           }
 
 text_sensor:
