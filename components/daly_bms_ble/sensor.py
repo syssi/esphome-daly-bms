@@ -7,6 +7,7 @@ from esphome.const import (
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_CURRENT,
     DEVICE_CLASS_EMPTY,
+    DEVICE_CLASS_ENERGY,
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_VOLTAGE,
@@ -20,6 +21,7 @@ from esphome.const import (
     UNIT_PERCENT,
     UNIT_VOLT,
     UNIT_WATT,
+    UNIT_WATT_HOURS,
 )
 
 from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
@@ -47,6 +49,11 @@ CONF_CAPACITY_REMAINING = "capacity_remaining"
 CONF_BALANCE_CURRENT = "balance_current"
 CONF_MOSFET_TEMPERATURE = "mosfet_temperature"
 CONF_BOARD_TEMPERATURE = "board_temperature"
+CONF_MAX_BATTERY_TEMPERATURE = "max_battery_temperature"
+CONF_MAX_BATTERY_TEMPERATURE_PROBE = "max_battery_temperature_probe"
+CONF_MIN_BATTERY_TEMPERATURE = "min_battery_temperature"
+CONF_MIN_BATTERY_TEMPERATURE_PROBE = "min_battery_temperature_probe"
+CONF_ENERGY = "energy"
 
 ICON_CURRENT_DC = "mdi:current-dc"
 ICON_CHARGING_CYCLES = "mdi:battery-sync"
@@ -203,6 +210,43 @@ SENSOR_DEFS = {
         "accuracy_decimals": 0,
         "device_class": DEVICE_CLASS_TEMPERATURE,
         "state_class": STATE_CLASS_MEASUREMENT,
+    },
+    CONF_MAX_BATTERY_TEMPERATURE: {
+        "unit_of_measurement": UNIT_CELSIUS,
+        "icon": ICON_EMPTY,
+        "accuracy_decimals": 0,
+        "device_class": DEVICE_CLASS_TEMPERATURE,
+        "state_class": STATE_CLASS_MEASUREMENT,
+    },
+    CONF_MAX_BATTERY_TEMPERATURE_PROBE: {
+        "unit_of_measurement": UNIT_EMPTY,
+        "icon": ICON_EMPTY,
+        "accuracy_decimals": 0,
+        "device_class": DEVICE_CLASS_EMPTY,
+        "entity_category": ENTITY_CATEGORY_DIAGNOSTIC,
+        "state_class": STATE_CLASS_MEASUREMENT,
+    },
+    CONF_MIN_BATTERY_TEMPERATURE: {
+        "unit_of_measurement": UNIT_CELSIUS,
+        "icon": ICON_EMPTY,
+        "accuracy_decimals": 0,
+        "device_class": DEVICE_CLASS_TEMPERATURE,
+        "state_class": STATE_CLASS_MEASUREMENT,
+    },
+    CONF_MIN_BATTERY_TEMPERATURE_PROBE: {
+        "unit_of_measurement": UNIT_EMPTY,
+        "icon": ICON_EMPTY,
+        "accuracy_decimals": 0,
+        "device_class": DEVICE_CLASS_EMPTY,
+        "entity_category": ENTITY_CATEGORY_DIAGNOSTIC,
+        "state_class": STATE_CLASS_MEASUREMENT,
+    },
+    CONF_ENERGY: {
+        "unit_of_measurement": UNIT_WATT_HOURS,
+        "icon": ICON_EMPTY,
+        "accuracy_decimals": 0,
+        "device_class": DEVICE_CLASS_ENERGY,
+        "state_class": STATE_CLASS_TOTAL_INCREASING,
     },
 }
 

@@ -237,6 +237,66 @@ TEST(DalyBmsBleEssDlBmsStatusTest, BoardTemperature) {
   EXPECT_NEAR(board_temp.state, 30.0f, 0.1f);
 }
 
+TEST(DalyBmsBleEssDlBmsStatusTest, MaxBatteryTemperature) {
+  TestableDalyBmsBle bms;
+  sensor::Sensor max_temp;
+  bms.set_max_battery_temperature_sensor(&max_temp);
+
+  bms.decode_dl_status_data_(DL_STATUS_FRAME);
+
+  EXPECT_NEAR(max_temp.state, 22.0f, 0.1f);
+}
+
+TEST(DalyBmsBleEssDlBmsStatusTest, MaxBatteryTemperatureProbe) {
+  TestableDalyBmsBle bms;
+  sensor::Sensor max_temp_probe;
+  bms.set_max_battery_temperature_probe_sensor(&max_temp_probe);
+
+  bms.decode_dl_status_data_(DL_STATUS_FRAME);
+
+  EXPECT_FLOAT_EQ(max_temp_probe.state, 4.0f);
+}
+
+TEST(DalyBmsBleEssDlBmsStatusTest, MinBatteryTemperature) {
+  TestableDalyBmsBle bms;
+  sensor::Sensor min_temp;
+  bms.set_min_battery_temperature_sensor(&min_temp);
+
+  bms.decode_dl_status_data_(DL_STATUS_FRAME);
+
+  EXPECT_NEAR(min_temp.state, 22.0f, 0.1f);
+}
+
+TEST(DalyBmsBleEssDlBmsStatusTest, MinBatteryTemperatureProbe) {
+  TestableDalyBmsBle bms;
+  sensor::Sensor min_temp_probe;
+  bms.set_min_battery_temperature_probe_sensor(&min_temp_probe);
+
+  bms.decode_dl_status_data_(DL_STATUS_FRAME);
+
+  EXPECT_FLOAT_EQ(min_temp_probe.state, 1.0f);
+}
+
+TEST(DalyBmsBleEssDlBmsStatusTest, PrechargingMosfetOff) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor precharging;
+  bms.set_precharging_binary_sensor(&precharging);
+
+  bms.decode_dl_status_data_(DL_STATUS_FRAME);
+
+  EXPECT_FALSE(precharging.state);
+}
+
+TEST(DalyBmsBleEssDlBmsStatusTest, Energy) {
+  TestableDalyBmsBle bms;
+  sensor::Sensor energy;
+  bms.set_energy_sensor(&energy);
+
+  bms.decode_dl_status_data_(DL_STATUS_FRAME);
+
+  EXPECT_FLOAT_EQ(energy.state, 0.0f);
+}
+
 TEST(DalyBmsBleEssDlBmsStatusTest, DispatchedViaOnData) {
   TestableDalyBmsBle bms;
   bms.set_protocol_version(DALY_0X81);

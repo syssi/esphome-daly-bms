@@ -103,6 +103,12 @@ class DalyBmsBle :
   void set_board_temperature_sensor(sensor::Sensor *board_temperature_sensor) {
     board_temperature_sensor_ = board_temperature_sensor;
   }
+  void set_max_battery_temperature_sensor(sensor::Sensor *s) { max_battery_temperature_sensor_ = s; }
+  void set_max_battery_temperature_probe_sensor(sensor::Sensor *s) { max_battery_temperature_probe_sensor_ = s; }
+  void set_min_battery_temperature_sensor(sensor::Sensor *s) { min_battery_temperature_sensor_ = s; }
+  void set_min_battery_temperature_probe_sensor(sensor::Sensor *s) { min_battery_temperature_probe_sensor_ = s; }
+  void set_energy_sensor(sensor::Sensor *s) { energy_sensor_ = s; }
+  void set_precharging_binary_sensor(binary_sensor::BinarySensor *s) { precharging_binary_sensor_ = s; }
 
   void set_battery_status_text_sensor(text_sensor::TextSensor *battery_status_text_sensor) {
     battery_status_text_sensor_ = battery_status_text_sensor;
@@ -160,6 +166,12 @@ class DalyBmsBle :
   sensor::Sensor *balance_current_sensor_{nullptr};
   sensor::Sensor *mosfet_temperature_sensor_{nullptr};
   sensor::Sensor *board_temperature_sensor_{nullptr};
+  sensor::Sensor *max_battery_temperature_sensor_{nullptr};
+  sensor::Sensor *max_battery_temperature_probe_sensor_{nullptr};
+  sensor::Sensor *min_battery_temperature_sensor_{nullptr};
+  sensor::Sensor *min_battery_temperature_probe_sensor_{nullptr};
+  sensor::Sensor *energy_sensor_{nullptr};
+  binary_sensor::BinarySensor *precharging_binary_sensor_{nullptr};
 
   switch_::Switch *balancer_switch_{nullptr};
   switch_::Switch *charging_switch_{nullptr};

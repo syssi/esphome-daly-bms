@@ -69,6 +69,8 @@ binary_sensor:
       name: "charging"
     discharging:
       name: "discharging"
+    precharging:
+      name: "precharging"
 
 sensor:
   - platform: daly_bms_ble
@@ -215,6 +217,16 @@ sensor:
       name: "mosfet temperature"
     board_temperature:
       name: "board temperature"
+    max_battery_temperature:
+      name: "max battery temperature"
+    max_battery_temperature_probe:
+      name: "max battery temperature probe"
+    min_battery_temperature:
+      name: "min battery temperature"
+    min_battery_temperature_probe:
+      name: "min battery temperature probe"
+    energy:
+      name: "energy"
 
 text_sensor:
   - platform: daly_bms_ble

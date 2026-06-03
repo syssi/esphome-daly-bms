@@ -31,8 +31,9 @@ static const std::vector<uint8_t> DL_CELLS_FRAME = {
 // ── Status frame (reg 65-126, data_len=0x7C=124) ──────────────────────────────
 // status=Discharging  capacity_remaining=271.2Ah  charging_cycles=7
 // balancing=true (reg 0x4D=7)
-// charging_mosfet=on  discharging_mosfet=on
-// mosfet_temperature=24.0°C  board_temperature=30.0°C
+// max_battery_temperature=22.0°C (probe 4)  min_battery_temperature=22.0°C (probe 1)
+// charging_mosfet=on  discharging_mosfet=on  precharging_mosfet=off
+// mosfet_temperature=24.0°C  board_temperature=30.0°C  energy=0Wh
 static const std::vector<uint8_t> DL_STATUS_FRAME = {
     0x51, 0x03, 0x7C, 0x00, 0x09, 0x00, 0x05, 0x00, 0x3E, 0x00, 0x04, 0x00, 0x3E, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02,
     0x00, 0x00, 0x00, 0x00, 0x0A, 0x98, 0x00, 0x07, 0x00, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

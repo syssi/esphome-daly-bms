@@ -905,6 +905,12 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_SENSOR("", "Balance current", this->balance_current_sensor_);
   LOG_SENSOR("", "Mosfet temperature", this->mosfet_temperature_sensor_);
   LOG_SENSOR("", "Board temperature", this->board_temperature_sensor_);
+  LOG_SENSOR("", "Max battery temperature", this->max_battery_temperature_sensor_);
+  LOG_SENSOR("", "Max battery temperature probe", this->max_battery_temperature_probe_sensor_);
+  LOG_SENSOR("", "Min battery temperature", this->min_battery_temperature_sensor_);
+  LOG_SENSOR("", "Min battery temperature probe", this->min_battery_temperature_probe_sensor_);
+  LOG_SENSOR("", "Energy", this->energy_sensor_);
+  LOG_BINARY_SENSOR("", "Precharging", this->precharging_binary_sensor_);
 
   LOG_TEXT_SENSOR("", "Errors", this->errors_text_sensor_);
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);
@@ -1057,11 +1063,29 @@ void DalyBmsBle::decode_dl_status_data_(const std::vector<uint8_t> &data) {
   // reg 78: balance current (offset -30000, factor 0.001 A)
   this->publish_state_(this->balance_current_sensor_, (daly_offset_get_16bit(0x4E) - 30000) * 0.001f);
 
+  // reg 67: max battery temperature (offset -40)
+  this->publish_state_(this->max_battery_temperature_sensor_, (daly_offset_get_16bit(0x43) - 40) * 1.0f);
+
+  // reg 68: max battery temperature probe index
+  this->publish_state_(this->max_battery_temperature_probe_sensor_, (float) daly_offset_get_16bit(0x44));
+
+  // reg 69: min battery temperature (offset -40)
+  this->publish_state_(this->min_battery_temperature_sensor_, (daly_offset_get_16bit(0x45) - 40) * 1.0f);
+
+  // reg 70: min battery temperature probe index
+  this->publish_state_(this->min_battery_temperature_probe_sensor_, (float) daly_offset_get_16bit(0x46));
+
   // reg 82: charging MOSFET (0=off, 1=on)
   this->publish_state_(this->charging_binary_sensor_, daly_offset_get_16bit(0x52) == 1);
 
   // reg 83: discharging MOSFET (0=off, 1=on)
   this->publish_state_(this->discharging_binary_sensor_, daly_offset_get_16bit(0x53) == 1);
+
+  // reg 84: pre-charge MOSFET (0=off, 1=on)
+  this->publish_state_(this->precharging_binary_sensor_, daly_offset_get_16bit(0x54) == 1);
+
+  // reg 89: energy counter (Wh)
+  this->publish_state_(this->energy_sensor_, (float) daly_offset_get_16bit(0x59));
 
   // reg 90: MOSFET temperature (offset -40)
   this->publish_state_(this->mosfet_temperature_sensor_, (daly_offset_get_16bit(0x5A) - 40) * 1.0f);
