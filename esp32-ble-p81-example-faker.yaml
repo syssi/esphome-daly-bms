@@ -1,4 +1,4 @@
-<<: !include esp32-ble-p81-example.yaml
+<<: !include esp32-ble-p81-example-debug.yaml
 
 daly_bms_ble:
   - ble_client_id: client0
