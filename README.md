@@ -12,6 +12,7 @@ ESPHome component to monitor a DALY Battery Management System via BLE
 
 * Daly Smart BMS K Series 100A advertised via BLE as `DL-xxxxxxxxxxxx` (e.g. `DL-40D63C3223A2`) or `DL-Fxxxxxxxxxxxx` (e.g. `DL-F28BBED000824`) where the MAC address is the `xxxxxxxxxxxx`
 * Probably all models of the Daly Smart BMS H/K/M/S series (start of frame: `0xD2`, Modbus frames)
+* Sun Deposit 51.2 16.128 200 GXX6 battery bank (DALY BMS F16S48V200A) via BLE (`protocol_version: 0x81`, Modbus frames)
 
 ## Unsupported devices because of a different protocol
 
