@@ -37,7 +37,7 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(DalyBmsBle),
             cv.Optional(CONF_PASSWORD, default="12345678"): cv.uint32_t,
             cv.Optional(CONF_PROTOCOL_VERSION, default="DALY_0xD2"): cv.enum(
-                PROTOCOL_VERSION_OPTIONS, upper=True
+                PROTOCOL_VERSION_OPTIONS, upper=False
             ),
             cv.Optional(CONF_STATUS_REGISTERS, default=62): cv.one_of(62, 80, int=True),
             cv.Optional(
