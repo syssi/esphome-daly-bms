@@ -8,7 +8,7 @@ namespace esphome::daly_bms_ble::testing {
 // Device:        ESS-DL-BMS
 // SW version:    41_260321_0323ESS-DL-BMS
 // HW version:    ESS41_0323
-// Protocol:      0x81 (TX slave address 0x81, RX response byte 0x51)
+// Protocol:      0x81 (TX device address 0x81, RX response byte 0x51)
 
 // ── Cells frame (reg 0-63, data_len=0x80=128) ─────────────────────────────────
 // 16 cells: C1=3.316V C2=3.312V C3=3.315V C4=3.314V C5=3.315V C6=3.313V
