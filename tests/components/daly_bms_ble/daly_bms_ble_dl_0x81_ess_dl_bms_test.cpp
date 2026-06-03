@@ -101,7 +101,7 @@ TEST(DalyBmsBleEssDlBmsCellsTest, MinMaxAvgDeltaCellVoltage) {
   EXPECT_NEAR(max_v.state, 3.317f, 0.001f);
   EXPECT_NEAR(avg_v.state, 3.3146875f, 0.0001f);
   EXPECT_NEAR(delta_v.state, 0.005f, 0.001f);
-  EXPECT_FLOAT_EQ(min_cell.state, 2.0f);   // C2 is first minimum
+  EXPECT_FLOAT_EQ(min_cell.state, 2.0f);  // C2 is first minimum
   EXPECT_FLOAT_EQ(max_cell.state, 16.0f);
 }
 

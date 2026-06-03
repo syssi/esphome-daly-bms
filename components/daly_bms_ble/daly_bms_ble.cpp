@@ -965,6 +965,10 @@ std::string DalyBmsBle::bitmask_to_string_(const char *const messages[], const u
 }
 
 void DalyBmsBle::decode_dl_cells_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_DL_CELLS + 5) {
+    ESP_LOGW(TAG, "decode_dl_cells_data_: unexpected frame size %zu", data.size());
+    return;
+  }
   // Response to realDataCmd00_40: registers 0-63
   // frame: [0x81, 0x03, 0x80, reg0_hi, reg0_lo, reg1_hi, reg1_lo, ..., crc_lo, crc_hi]
   auto daly_offset_get_16bit = [&](uint8_t reg) -> uint16_t {
@@ -1025,6 +1029,10 @@ void DalyBmsBle::decode_dl_cells_data_(const std::vector<uint8_t> &data) {
 }
 
 void DalyBmsBle::decode_dl_status_data_(const std::vector<uint8_t> &data) {
+  if (data.size() != DALY_FRAME_LEN_DL_STATUS + 5) {
+    ESP_LOGW(TAG, "decode_dl_status_data_: unexpected frame size %zu", data.size());
+    return;
+  }
   // Response to realDataCmd41_7E: registers 65-126
   auto daly_offset_get_16bit = [&](uint8_t reg) -> uint16_t {
     size_t i = 3 + (reg - 0x41) * 2;
