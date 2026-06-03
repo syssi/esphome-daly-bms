@@ -20,8 +20,8 @@ DalyBmsBle = daly_bms_ble_ns.class_(
 
 ProtocolVersion = daly_bms_ble_ns.enum("ProtocolVersion")
 PROTOCOL_VERSION_OPTIONS = {
-    "DALY_0xD2": ProtocolVersion.DALY_0xD2,
-    "DALY_0x81": ProtocolVersion.DALY_0x81,
+    "DALY_D2": ProtocolVersion.DALY_D2,
+    "DALY_81": ProtocolVersion.DALY_81,
 }
 
 DALY_BMS_BLE_COMPONENT_SCHEMA = cv.Schema(
@@ -36,8 +36,8 @@ CONFIG_SCHEMA = cv.All(
         {
             cv.GenerateID(): cv.declare_id(DalyBmsBle),
             cv.Optional(CONF_PASSWORD, default="12345678"): cv.uint32_t,
-            cv.Optional(CONF_PROTOCOL_VERSION, default="DALY_0xD2"): cv.enum(
-                PROTOCOL_VERSION_OPTIONS, upper=False
+            cv.Optional(CONF_PROTOCOL_VERSION, default="DALY_D2"): cv.enum(
+                PROTOCOL_VERSION_OPTIONS, upper=True
             ),
             cv.Optional(CONF_STATUS_REGISTERS, default=62): cv.one_of(62, 80, int=True),
             cv.Optional(

@@ -54,9 +54,9 @@ ble_client:
 daly_bms_ble:
   - ble_client_id: client0
     id: bms0
-    # Use protocol_version: DALY_0x81 for DL-WB01 and similar devices.
-    # Use protocol_version: DALY_0xD2 (default) for the standard H/K/M/S series.
-    protocol_version: DALY_0x81
+    # Use protocol_version: DALY_81 for DL-WB01 and similar devices.
+    # Use protocol_version: DALY_D2 (default) for the standard H/K/M/S series.
+    protocol_version: DALY_81
     update_interval: 60s
     response_timeout: 5s
 

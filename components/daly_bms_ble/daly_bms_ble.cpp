@@ -158,7 +158,7 @@ static void log_frame_hex(const char *tag, const char *label, const std::vector<
 
 std::array<uint8_t, 8> DalyBmsBle::build_frame_(uint8_t function, uint16_t address, uint16_t value) const {
   std::array<uint8_t, 8> frame;
-  frame[0] = this->protocol_version_ == DALY_0x81 ? DALY_FRAME_START_DL_REQ : DALY_FRAME_START;
+  frame[0] = this->protocol_version_ == DALY_81 ? DALY_FRAME_START_DL_REQ : DALY_FRAME_START;
   frame[1] = function;
   frame[2] = address >> 8;
   frame[3] = address >> 0;
@@ -296,7 +296,7 @@ void DalyBmsBle::update() {
     return;
   }
 
-  if (this->protocol_version_ == DALY_0x81) {
+  if (this->protocol_version_ == DALY_81) {
     this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_DL_CELLS_START, DALY_FRAME_LEN_DL_CELLS / 2);
     this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_DL_STATUS_START, DALY_FRAME_LEN_DL_STATUS / 2);
     this->queue_command_(DALY_FUNCTION_READ, DALY_COMMAND_REQ_DL_ALARMS_START, DALY_FRAME_LEN_DL_ALARMS / 2);
@@ -317,7 +317,7 @@ void DalyBmsBle::update() {
 }
 
 void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
-  const uint8_t expected_start = this->protocol_version_ == DALY_0x81 ? DALY_FRAME_START_DL_RESP : DALY_FRAME_START;
+  const uint8_t expected_start = this->protocol_version_ == DALY_81 ? DALY_FRAME_START_DL_RESP : DALY_FRAME_START;
   if (data[0] != expected_start || data.size() > MAX_RESPONSE_SIZE) {
     constexpr size_t chunk = 96;
     ESP_LOGW(TAG, "Invalid response received (%zu bytes):", data.size());
@@ -350,7 +350,7 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
     return;
   }
 
-  if (this->protocol_version_ == DALY_0x81) {
+  if (this->protocol_version_ == DALY_81) {
     switch (cmd_address) {
       case DALY_COMMAND_REQ_DL_CELLS_START:
         this->decode_dl_cells_data_(data);

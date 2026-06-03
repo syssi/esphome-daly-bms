@@ -22,8 +22,8 @@ namespace espbt = esphome::esp32_ble_tracker;
 #endif
 
 enum ProtocolVersion {
-  DALY_0xD2,
-  DALY_0x81,
+  DALY_D2,
+  DALY_81,
 };
 
 class DalyBmsBle :
@@ -243,7 +243,7 @@ class DalyBmsBle :
 #endif
   uint32_t password_ = 12345678;
   uint8_t status_registers_{62};
-  ProtocolVersion protocol_version_{DALY_0xD2};
+  ProtocolVersion protocol_version_{DALY_D2};
 
   std::array<uint8_t, 8> build_frame_(uint8_t function, uint16_t address, uint16_t value) const;
   void decode_status_data_(const std::vector<uint8_t> &data);
