@@ -55,11 +55,12 @@ class TestSensorLists:
 
 class TestBinarySensorConstants:
     def test_binary_sensor_defs_dict(self):
+        assert binary_sensor.CONF_ONLINE_STATUS in binary_sensor.BINARY_SENSOR_DEFS
         assert binary_sensor.CONF_BALANCING in binary_sensor.BINARY_SENSOR_DEFS
         assert binary_sensor.CONF_CHARGING in binary_sensor.BINARY_SENSOR_DEFS
         assert binary_sensor.CONF_DISCHARGING in binary_sensor.BINARY_SENSOR_DEFS
         assert binary_sensor.CONF_PRECHARGING in binary_sensor.BINARY_SENSOR_DEFS
-        assert len(binary_sensor.BINARY_SENSOR_DEFS) == 4
+        assert len(binary_sensor.BINARY_SENSOR_DEFS) == 5
 
 
 class TestSwitchConstants:

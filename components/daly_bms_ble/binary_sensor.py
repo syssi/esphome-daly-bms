@@ -1,6 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import binary_sensor
 import esphome.config_validation as cv
+from esphome.const import DEVICE_CLASS_CONNECTIVITY, ENTITY_CATEGORY_DIAGNOSTIC
 
 from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
 from .const import (
@@ -17,11 +18,16 @@ DEPENDENCIES = ["daly_bms_ble"]
 CODEOWNERS = ["@syssi"]
 
 CONF_BALANCING = "balancing"
+CONF_ONLINE_STATUS = "online_status"
 
 ICON_BALANCING = "mdi:battery-heart-variant"
 
 # key: binary_sensor_schema kwargs
 BINARY_SENSOR_DEFS = {
+    CONF_ONLINE_STATUS: {
+        "device_class": DEVICE_CLASS_CONNECTIVITY,
+        "entity_category": ENTITY_CATEGORY_DIAGNOSTIC,
+    },
     CONF_BALANCING: {
         "icon": ICON_BALANCING,
     },

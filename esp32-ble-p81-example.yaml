@@ -63,6 +63,8 @@ daly_bms_ble:
 binary_sensor:
   - platform: daly_bms_ble
     daly_bms_ble_id: bms0
+    online_status:
+      name: "online status"
     balancing:
       name: "balancing"
     charging:
