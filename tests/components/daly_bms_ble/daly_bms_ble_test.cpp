@@ -1129,4 +1129,172 @@ TEST(DalyBmsBleQueueTest, BadCrcDoesNotAdvanceQueue) {
   EXPECT_EQ(bms.queue_size(), 1);
 }
 
+// ── Online status tracker ─────────────────────────────────────────────────────
+
+TEST(DalyBmsBleOnlineStatusTrackerTest, ReachesThreshold) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor online_status;
+  bms.set_online_status_binary_sensor(&online_status);
+
+  for (int i = 0; i < 10; i++)
+    bms.track_online_status_();
+
+  EXPECT_FALSE(online_status.state);
+}
+
+TEST(DalyBmsBleOnlineStatusTrackerTest, DoesNotRepeatAfterThreshold) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor online_status;
+  bms.set_online_status_binary_sensor(&online_status);
+
+  for (int i = 0; i < 10; i++)
+    bms.track_online_status_();
+  EXPECT_EQ(bms.get_no_response_count(), 11);
+
+  bms.track_online_status_();
+  EXPECT_EQ(bms.get_no_response_count(), 11);
+}
+
+TEST(DalyBmsBleOnlineStatusTrackerTest, ResetRestoresOnlineStatus) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor online_status;
+  bms.set_online_status_binary_sensor(&online_status);
+
+  for (int i = 0; i < 10; i++)
+    bms.track_online_status_();
+  EXPECT_FALSE(online_status.state);
+
+  bms.reset_online_status_tracker_();
+  EXPECT_TRUE(online_status.state);
+  EXPECT_EQ(bms.get_no_response_count(), 0);
+}
+
+TEST(DalyBmsBleOnlineStatusTrackerTest, CanRetriggerAfterReset) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor online_status;
+  bms.set_online_status_binary_sensor(&online_status);
+
+  for (int i = 0; i < 10; i++)
+    bms.track_online_status_();
+  bms.reset_online_status_tracker_();
+
+  for (int i = 0; i < 10; i++)
+    bms.track_online_status_();
+  EXPECT_FALSE(online_status.state);
+}
+
+TEST(DalyBmsBleOnlineStatusTrackerTest, ValidFrameResetsCounter) {
+  TestableDalyBmsBle bms;
+  bms.queue_command_(0x03, 0x0000, 62);
+
+  for (int i = 0; i < 5; i++)
+    bms.track_online_status_();
+  EXPECT_EQ(bms.get_no_response_count(), 5);
+
+  bms.on_daly_bms_ble_data(STATUS_FRAME_62_REG_NO_ALARMS);
+  EXPECT_EQ(bms.get_no_response_count(), 0);
+}
+
+TEST(DalyBmsBleOnlineStatusTrackerTest, NotYetAtThresholdStaysOnline) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor online_status;
+  bms.set_online_status_binary_sensor(&online_status);
+
+  online_status.publish_state(true);
+  for (int i = 0; i < 9; i++)
+    bms.track_online_status_();
+
+  EXPECT_TRUE(online_status.state);
+}
+
+// ── publish_device_unavailable_ ───────────────────────────────────────────────
+
+TEST(DalyBmsBlePublishDeviceUnavailableTest, SetsOnlineStatusFalse) {
+  TestableDalyBmsBle bms;
+  binary_sensor::BinarySensor online_status;
+  bms.set_online_status_binary_sensor(&online_status);
+
+  online_status.publish_state(true);
+  bms.publish_device_unavailable_();
+
+  EXPECT_FALSE(online_status.state);
+}
+
+TEST(DalyBmsBlePublishDeviceUnavailableTest, SetsNumericSensorsToNAN) {
+  TestableDalyBmsBle bms;
+  sensor::Sensor total_voltage, current, power, charging_power, discharging_power;
+  sensor::Sensor error_bitmask, state_of_charge, charging_cycles, capacity_remaining, energy;
+  bms.set_total_voltage_sensor(&total_voltage);
+  bms.set_current_sensor(&current);
+  bms.set_power_sensor(&power);
+  bms.set_charging_power_sensor(&charging_power);
+  bms.set_discharging_power_sensor(&discharging_power);
+  bms.set_error_bitmask_sensor(&error_bitmask);
+  bms.set_state_of_charge_sensor(&state_of_charge);
+  bms.set_charging_cycles_sensor(&charging_cycles);
+  bms.set_capacity_remaining_sensor(&capacity_remaining);
+  bms.set_energy_sensor(&energy);
+
+  bms.publish_device_unavailable_();
+
+  EXPECT_TRUE(std::isnan(total_voltage.state));
+  EXPECT_TRUE(std::isnan(current.state));
+  EXPECT_TRUE(std::isnan(power.state));
+  EXPECT_TRUE(std::isnan(charging_power.state));
+  EXPECT_TRUE(std::isnan(discharging_power.state));
+  EXPECT_TRUE(std::isnan(error_bitmask.state));
+  EXPECT_TRUE(std::isnan(state_of_charge.state));
+  EXPECT_TRUE(std::isnan(charging_cycles.state));
+  EXPECT_TRUE(std::isnan(capacity_remaining.state));
+  EXPECT_TRUE(std::isnan(energy.state));
+}
+
+TEST(DalyBmsBlePublishDeviceUnavailableTest, SetsCellAndTempSensorsToNAN) {
+  TestableDalyBmsBle bms;
+  sensor::Sensor cell0, cell1, temp0, temp1;
+  bms.set_cell_voltage_sensor(0, &cell0);
+  bms.set_cell_voltage_sensor(1, &cell1);
+  bms.set_temperature_sensor(0, &temp0);
+  bms.set_temperature_sensor(1, &temp1);
+
+  bms.publish_device_unavailable_();
+
+  EXPECT_TRUE(std::isnan(cell0.state));
+  EXPECT_TRUE(std::isnan(cell1.state));
+  EXPECT_TRUE(std::isnan(temp0.state));
+  EXPECT_TRUE(std::isnan(temp1.state));
+}
+
+TEST(DalyBmsBlePublishDeviceUnavailableTest, SetsDynamicTextSensorsToOffline) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor battery_status, errors;
+  bms.set_battery_status_text_sensor(&battery_status);
+  bms.set_errors_text_sensor(&errors);
+
+  bms.publish_device_unavailable_();
+
+  EXPECT_EQ(battery_status.state, "Offline");
+  EXPECT_EQ(errors.state, "Offline");
+}
+
+TEST(DalyBmsBlePublishDeviceUnavailableTest, LeavesStaticTextSensorsUnchanged) {
+  TestableDalyBmsBle bms;
+  text_sensor::TextSensor software_version, hardware_version;
+  software_version.publish_state("401012");
+  hardware_version.publish_state("BMS");
+  bms.set_software_version_text_sensor(&software_version);
+  bms.set_hardware_version_text_sensor(&hardware_version);
+
+  bms.publish_device_unavailable_();
+
+  EXPECT_EQ(software_version.state, "401012");
+  EXPECT_EQ(hardware_version.state, "BMS");
+}
+
+TEST(DalyBmsBlePublishDeviceUnavailableTest, NullSensorsDoNotCrash) {
+  TestableDalyBmsBle bms;
+
+  EXPECT_NO_FATAL_FAILURE(bms.publish_device_unavailable_());
+}
+
 }  // namespace esphome::daly_bms_ble::testing

@@ -12,6 +12,7 @@
 namespace esphome::daly_bms_ble {
 
 static const char *const TAG = "daly_bms_ble";
+static const uint8_t MAX_NO_RESPONSE_COUNT = 10;
 
 static const uint16_t DALY_BMS_SERVICE_UUID = 0xFFF0;
 static const uint16_t DALY_BMS_NOTIFY_CHARACTERISTIC_UUID = 0xFFF1;
@@ -293,6 +294,7 @@ void DalyBmsBle::loop() {
 }
 
 void DalyBmsBle::update() {
+  this->track_online_status_();
 #ifdef USE_ESP32
   if (this->node_state != espbt::ClientState::ESTABLISHED) {
     ESP_LOGW(TAG, "[%s] Not connected", ADDR_STR(this->parent_->address_str()));
@@ -342,6 +344,7 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
 
   uint16_t cmd_address = this->queue_.empty() ? 0xFFFF : this->queue_.front().address;
   this->advance_command_queue_();
+  this->reset_online_status_tracker_();
 
   if (data[1] == DALY_FUNCTION_WRITE) {
     ESP_LOGD(TAG, "Write register acknowledged (reg=0x%02X%02X, value=0x%02X%02X)", data[2], data[3], data[4], data[5]);
@@ -829,6 +832,7 @@ void DalyBmsBle::decode_password_data_(const std::vector<uint8_t> &data) {
 void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,readability-function-size)
   ESP_LOGCONFIG(TAG, "DalyBmsBle:");
 
+  LOG_BINARY_SENSOR("", "Online Status", this->online_status_binary_sensor_);
   LOG_BINARY_SENSOR("", "Charging", this->charging_binary_sensor_);
   LOG_BINARY_SENSOR("", "Discharging", this->discharging_binary_sensor_);
 
@@ -920,6 +924,55 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);
   LOG_TEXT_SENSOR("", "Software Version", this->software_version_text_sensor_);
   LOG_TEXT_SENSOR("", "Hardware Version", this->hardware_version_text_sensor_);
+}
+
+void DalyBmsBle::track_online_status_() {
+  if (this->no_response_count_ < MAX_NO_RESPONSE_COUNT)
+    this->no_response_count_++;
+  if (this->no_response_count_ == MAX_NO_RESPONSE_COUNT) {
+    this->publish_device_unavailable_();
+    this->no_response_count_++;
+  }
+}
+
+void DalyBmsBle::reset_online_status_tracker_() {
+  this->no_response_count_ = 0;
+  this->publish_state_(this->online_status_binary_sensor_, true);
+}
+
+void DalyBmsBle::publish_device_unavailable_() {
+  this->publish_state_(this->online_status_binary_sensor_, false);
+  this->publish_state_(this->total_voltage_sensor_, NAN);
+  this->publish_state_(this->current_sensor_, NAN);
+  this->publish_state_(this->power_sensor_, NAN);
+  this->publish_state_(this->charging_power_sensor_, NAN);
+  this->publish_state_(this->discharging_power_sensor_, NAN);
+  this->publish_state_(this->error_bitmask_sensor_, NAN);
+  this->publish_state_(this->state_of_charge_sensor_, NAN);
+  this->publish_state_(this->charging_cycles_sensor_, NAN);
+  this->publish_state_(this->min_cell_voltage_sensor_, NAN);
+  this->publish_state_(this->max_cell_voltage_sensor_, NAN);
+  this->publish_state_(this->min_voltage_cell_sensor_, NAN);
+  this->publish_state_(this->max_voltage_cell_sensor_, NAN);
+  this->publish_state_(this->delta_cell_voltage_sensor_, NAN);
+  this->publish_state_(this->average_cell_voltage_sensor_, NAN);
+  this->publish_state_(this->cell_count_sensor_, NAN);
+  this->publish_state_(this->temperature_sensors_sensor_, NAN);
+  this->publish_state_(this->capacity_remaining_sensor_, NAN);
+  this->publish_state_(this->balance_current_sensor_, NAN);
+  this->publish_state_(this->mosfet_temperature_sensor_, NAN);
+  this->publish_state_(this->board_temperature_sensor_, NAN);
+  this->publish_state_(this->max_battery_temperature_sensor_, NAN);
+  this->publish_state_(this->max_battery_temperature_probe_sensor_, NAN);
+  this->publish_state_(this->min_battery_temperature_sensor_, NAN);
+  this->publish_state_(this->min_battery_temperature_probe_sensor_, NAN);
+  this->publish_state_(this->energy_sensor_, NAN);
+  for (auto &cell : this->cells_)
+    this->publish_state_(cell.cell_voltage_sensor_, NAN);
+  for (auto &temp : this->temperatures_)
+    this->publish_state_(temp.temperature_sensor_, NAN);
+  this->publish_state_(this->battery_status_text_sensor_, "Offline");
+  this->publish_state_(this->errors_text_sensor_, "Offline");
 }
 
 void DalyBmsBle::publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state) {

@@ -17,6 +17,10 @@ struct TestNumber : number::Number {
 class TestableDalyBmsBle : public DalyBmsBle {
  public:
   using DalyBmsBle::build_frame_;
+  using DalyBmsBle::track_online_status_;
+  using DalyBmsBle::reset_online_status_tracker_;
+  using DalyBmsBle::publish_device_unavailable_;
+  uint8_t get_no_response_count() const { return no_response_count_; }
   using DalyBmsBle::decode_status_data_;
   using DalyBmsBle::decode_settings_data_;
   using DalyBmsBle::decode_balancer_switch_data_;
