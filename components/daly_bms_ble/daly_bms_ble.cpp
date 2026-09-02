@@ -175,8 +175,9 @@ std::array<uint8_t, 8> DalyBmsBle::build_frame_(uint8_t function, uint16_t addre
 }
 
 void DalyBmsBle::queue_command_(uint8_t function, uint16_t address, uint16_t value) {
-  if (!this->queue_.enqueue(function, address, value))
+  if (!this->queue_.enqueue(function, address, value)) {
     ESP_LOGW(TAG, "Command queue full, dropping: func=0x%02X addr=0x%04X val=0x%04X", function, address, value);
+  }
 }
 
 void DalyBmsBle::advance_command_queue_() {
