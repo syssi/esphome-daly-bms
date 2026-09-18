@@ -1151,9 +1151,9 @@ void DalyBmsBle::decode_p81_status_data_(const std::vector<uint8_t> &data) {
   this->publish_state_(this->board_temperature_sensor_, (daly_offset_get_16bit(0x5B) - 40) * 1.0f);
 
   ESP_LOGI(TAG, "[P81] RT2: status=%s  capacity=%.1fAh  cycles=%u  bal=%u  chg_mos=%u  dis_mos=%u  mosfet_temp=%.0f°C",
-           status == 0   ? "Idle"
-           : status == 1 ? "Charging"
-                         : "Discharging",
+           status == 0   ? LOG_STR_LITERAL("Idle")
+           : status == 1 ? LOG_STR_LITERAL("Charging")
+                         : LOG_STR_LITERAL("Discharging"),
            daly_offset_get_16bit(0x4B) * 0.1f, daly_offset_get_16bit(0x4C), daly_offset_get_16bit(0x4D),
            daly_offset_get_16bit(0x52), daly_offset_get_16bit(0x53), (daly_offset_get_16bit(0x5A) - 40) * 1.0f);
 }
