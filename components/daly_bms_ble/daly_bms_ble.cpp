@@ -17,6 +17,18 @@
 namespace esphome::daly_bms_ble {
 
 ESPHOME_LOG_TAG(TAG, "daly_bms_ble");
+
+static constexpr size_t MAX_HEX_DUMP_BYTES = 100;
+
+#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
+static void log_hex_chunked(const char *tag, const uint8_t *data, size_t size) {
+  char buf[format_hex_pretty_size(100)];
+  for (size_t i = 0; i < size; i += 100) {
+    size_t len = std::min<size_t>(100, size - i);
+    ESP_LOGD(tag, "  %s", format_hex_pretty_to(buf, sizeof(buf), data + i, len, '.'));
+  }
+}
+#endif
 static const uint8_t MAX_NO_RESPONSE_COUNT = 10;
 
 static const uint16_t DALY_BMS_SERVICE_UUID = 0xFFF0;
@@ -160,8 +172,9 @@ static void log_frame_hex(const char *tag, const char *label, const std::vector<
   constexpr size_t chunk = 96;
   ESP_LOGI(tag, "%s (%zu bytes):", label, data.size());
   for (size_t i = 0; i < data.size(); i += chunk) {
+    char hex_buf[format_hex_pretty_size(MAX_HEX_DUMP_BYTES)];
     ESP_LOGI(tag, "  +%03zu: %s", i,
-             format_hex_pretty(data.data() + i, std::min(chunk, data.size() - i)).c_str());  // NOLINT
+             format_hex_pretty_to(hex_buf, data.data() + i, std::min(chunk, data.size() - i), '.'));
   }
 }
 
@@ -202,8 +215,9 @@ void DalyBmsBle::send_next_command_() {
   auto &cmd = this->queue_.front();
 
   auto frame = this->build_frame_(cmd.function, cmd.address, cmd.value);
+  char hex_buf[format_hex_pretty_size(MAX_HEX_DUMP_BYTES)];
   ESP_LOGD(TAG, "Send command (handle 0x%02X): %s", this->char_command_handle_,
-           format_hex_pretty(frame.data(), frame.size()).c_str());  // NOLINT
+           format_hex_pretty_to(hex_buf, frame, '.'));
 
   auto status =
       esp_ble_gattc_write_char(this->parent_->get_gattc_if(), this->parent_->get_conn_id(), this->char_command_handle_,
@@ -276,8 +290,9 @@ void DalyBmsBle::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t g
       break;
     }
     case ESP_GATTC_NOTIFY_EVT: {
+      char hex_buf[format_hex_pretty_size(MAX_HEX_DUMP_BYTES)];
       ESP_LOGV(TAG, "Notification received (handle 0x%02X): %s", param->notify.handle,
-               format_hex_pretty(param->notify.value, param->notify.value_len).c_str());  // NOLINT
+               format_hex_pretty_to(hex_buf, param->notify.value, param->notify.value_len, '.'));
 
       std::vector<uint8_t> data(param->notify.value, param->notify.value + param->notify.value_len);
 
@@ -332,8 +347,9 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
     constexpr size_t chunk = 96;
     ESP_LOGW(TAG, "Invalid response received (%zu bytes):", data.size());
     for (size_t i = 0; i < data.size(); i += chunk) {
+      char hex_buf[format_hex_pretty_size(MAX_HEX_DUMP_BYTES)];
       ESP_LOGW(TAG, "  +%03zu: %s", i,
-               format_hex_pretty(data.data() + i, std::min(chunk, data.size() - i)).c_str());  // NOLINT
+               format_hex_pretty_to(hex_buf, data.data() + i, std::min(chunk, data.size() - i), '.'));
     }
     return;
   }
@@ -356,8 +372,8 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
   }
 
   if (data[1] != DALY_FRAME_START2) {
-    ESP_LOGW(TAG, "Unknown function code 0x%02X: %s", data[1],
-             format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+    char hex_buf[format_hex_pretty_size(MAX_HEX_DUMP_BYTES)];
+    ESP_LOGW(TAG, "Unknown function code 0x%02X: %s", data[1], format_hex_pretty_to(hex_buf, data, '.'));
     return;
   }
 
@@ -394,8 +410,9 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
         this->decode_balancer_switch_data_(data);
         break;
       default:
+        char hex_buf[format_hex_pretty_size(MAX_HEX_DUMP_BYTES)];
         ESP_LOGW(TAG, "[P81] Unhandled response (addr=0x%04X, len=%zu): %s", cmd_address, data.size(),
-                 format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+                 format_hex_pretty_to(hex_buf, data, '.'));
     }
     return;
   }
@@ -417,8 +434,9 @@ void DalyBmsBle::on_daly_bms_ble_data(const std::vector<uint8_t> &data) {
       this->decode_balancer_switch_data_(data);
       break;
     default:
+      char hex_buf[format_hex_pretty_size(MAX_HEX_DUMP_BYTES)];
       ESP_LOGW(TAG, "Unhandled response received (addr=0x%04X, len=%zu): %s", cmd_address, data.size(),
-               format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+               format_hex_pretty_to(hex_buf, data, '.'));
   }
 }
 
@@ -438,8 +456,9 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Status frame received (%zu bytes)", data.size());
-  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), 100).c_str());                      // NOLINT
-  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front() + 100, data.size() - 100).c_str());  // NOLINT
+#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
+  log_hex_chunked(TAG, data.data(), data.size());
+#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -624,7 +643,9 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Settings frame received");
-  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
+  log_hex_chunked(TAG, data.data(), data.size());
+#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -784,7 +805,9 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Software/hardware version frame received");
-  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
+  log_hex_chunked(TAG, data.data(), data.size());
+#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -819,7 +842,9 @@ void DalyBmsBle::decode_password_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Password frame received");
-  ESP_LOGVV(TAG, "  %s", format_hex_pretty(&data.front(), data.size()).c_str());  // NOLINT
+#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
+  log_hex_chunked(TAG, data.data(), data.size());
+#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
