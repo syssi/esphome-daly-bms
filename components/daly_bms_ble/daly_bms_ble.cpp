@@ -13,15 +13,14 @@ ESPHOME_LOG_TAG(TAG, "daly_bms_ble");
 
 static constexpr size_t MAX_HEX_DUMP_BYTES = 100;
 
-#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
 static void log_hex_chunked(const char *tag, const uint8_t *data, size_t size) {
   char buf[format_hex_pretty_size(100)];
   for (size_t i = 0; i < size; i += 100) {
     size_t len = std::min<size_t>(100, size - i);
-    ESP_LOGD(tag, "  %s", format_hex_pretty_to(buf, sizeof(buf), data + i, len, '.'));
+    ESP_LOGVV(tag, "  %s", format_hex_pretty_to(buf, sizeof(buf), data + i, len, '.'));
   }
 }
-#endif
+
 static const uint8_t MAX_NO_RESPONSE_COUNT = 10;
 
 static const uint16_t DALY_BMS_SERVICE_UUID = 0xFFF0;
@@ -447,9 +446,7 @@ void DalyBmsBle::decode_status_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Status frame received (%zu bytes)", data.size());
-#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
   log_hex_chunked(TAG, data.data(), data.size());
-#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -634,9 +631,7 @@ void DalyBmsBle::decode_settings_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Settings frame received");
-#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
   log_hex_chunked(TAG, data.data(), data.size());
-#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -796,9 +791,7 @@ void DalyBmsBle::decode_version_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Software/hardware version frame received");
-#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
   log_hex_chunked(TAG, data.data(), data.size());
-#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
@@ -833,9 +826,7 @@ void DalyBmsBle::decode_password_data_(const std::vector<uint8_t> &data) {
     return;
   }
   ESP_LOGI(TAG, "Password frame received");
-#if ESPHOME_LOG_LEVEL >= ESPHOME_LOG_LEVEL_VERY_VERBOSE
   log_hex_chunked(TAG, data.data(), data.size());
-#endif
 
   // See docs/dalyModbusProtocol.xlsx
   //
