@@ -26,11 +26,11 @@ DALY_BMS_BLE_COMPONENT_SCHEMA = cv.Schema(
 )
 
 CONFIG_SCHEMA = cv.All(
-    cv.require_esphome_version(2026, 1, 0),
+    cv.require_esphome_version(2026, 6, 0),
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(DalyBmsBle),
-            cv.Optional(CONF_PASSWORD, default="12345678"): cv.uint32_t,
+            cv.Optional(CONF_PASSWORD, default="12345678"): cv.sensitive(cv.uint32_t),
             cv.Optional(CONF_PROTOCOL_VERSION, default=0xD2): cv.one_of(
                 0xD2, 0x81, int=True
             ),
