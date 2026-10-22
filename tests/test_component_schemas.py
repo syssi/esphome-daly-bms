@@ -1,9 +1,9 @@
 """Schema structure tests for daly_bms_ble ESPHome component modules."""
 
-import os
+from pathlib import Path
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import components.daly_bms_ble as hub  # noqa: E402
 from components.daly_bms_ble import (  # noqa: E402
@@ -96,7 +96,7 @@ class TestNumberConstants:
         assert len(addresses) == len(set(addresses))
 
     def test_number_tuple_structure(self):
-        for address, factor, offset, min_val, max_val, step in number.NUMBERS.values():
+        for address, factor, _offset, min_val, max_val, step in number.NUMBERS.values():
             assert isinstance(address, int)
             assert factor > 0
             assert min_val < max_val
