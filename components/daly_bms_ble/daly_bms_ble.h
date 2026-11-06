@@ -270,6 +270,7 @@ class DalyBmsBle :
   void reset_online_status_tracker_();
   void track_online_status_();
   void publish_state_(binary_sensor::BinarySensor *binary_sensor, const bool &state);
+  void invalidate_binary_sensor_(binary_sensor::BinarySensor *binary_sensor);
   void publish_state_(sensor::Sensor *sensor, float value);
   void publish_state_(number::Number *obj, float value);
   void publish_state_(switch_::Switch *obj, const bool &state);
