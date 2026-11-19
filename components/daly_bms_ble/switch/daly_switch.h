@@ -1,18 +1,15 @@
 #pragma once
 
 #include "../daly_bms_ble.h"
-#include "esphome/core/component.h"
 #include "esphome/components/switch/switch.h"
 
 namespace esphome::daly_bms_ble {
 
 class DalyBmsBle;
-class DalySwitch : public switch_::Switch, public Component {
+class DalySwitch : public switch_::Switch {
  public:
   void set_parent(DalyBmsBle *parent) { this->parent_ = parent; };
   void set_holding_register(uint16_t holding_register) { this->holding_register_ = holding_register; };
-  void dump_config() override;
-  float get_setup_priority() const override { return setup_priority::DATA; }
 
  protected:
   void write_state(bool state) override;

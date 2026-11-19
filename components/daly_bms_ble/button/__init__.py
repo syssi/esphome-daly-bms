@@ -38,7 +38,7 @@ BUTTONS = {
     CONF_FACTORY_RESET: (DALY_FUNCTION_WRITE, 0x00F3, 0x0001),
 }
 
-DalyButton = daly_bms_ble_ns.class_("DalyButton", button.Button, cg.Component)
+DalyButton = daly_bms_ble_ns.class_("DalyButton", button.Button)
 
 CONFIG_SCHEMA = DALY_BMS_BLE_COMPONENT_SCHEMA.extend(
     {
@@ -70,7 +70,6 @@ async def to_code(config):
         if key in config:
             conf = config[key]
             var = await button.new_button(conf)
-            await cg.register_component(var, conf)
             cg.add(var.set_parent(hub))
             cg.add(var.set_function(function))
             cg.add(var.set_holding_register(address))

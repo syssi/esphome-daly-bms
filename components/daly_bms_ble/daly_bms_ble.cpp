@@ -935,6 +935,10 @@ void DalyBmsBle::dump_config() {  // NOLINT(google-readability-function-size,rea
   LOG_TEXT_SENSOR("", "Battery Status", this->battery_status_text_sensor_);
   LOG_TEXT_SENSOR("", "Software Version", this->software_version_text_sensor_);
   LOG_TEXT_SENSOR("", "Hardware Version", this->hardware_version_text_sensor_);
+
+  LOG_SWITCH("", "Balancer", this->balancer_switch_);
+  LOG_SWITCH("", "Charging", this->charging_switch_);
+  LOG_SWITCH("", "Discharging", this->discharging_switch_);
 }
 
 void DalyBmsBle::track_online_status_() {
