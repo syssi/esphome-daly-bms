@@ -5,6 +5,11 @@ from esphome.const import ENTITY_CATEGORY_DIAGNOSTIC
 
 from . import CONF_DALY_BMS_BLE_ID, DALY_BMS_BLE_COMPONENT_SCHEMA
 
+try:
+    from esphome.components.const import CONF_HARDWARE_VERSION
+except ImportError:  # ESPHome < 2026.12.0
+    CONF_HARDWARE_VERSION = "hardware_version"
+
 DEPENDENCIES = ["daly_bms_ble"]
 
 CODEOWNERS = ["@syssi"]
@@ -12,7 +17,6 @@ CODEOWNERS = ["@syssi"]
 CONF_BATTERY_STATUS = "battery_status"
 CONF_ERRORS = "errors"
 CONF_SOFTWARE_VERSION = "software_version"
-CONF_HARDWARE_VERSION = "hardware_version"
 
 ICON_BATTERY_STATUS = "mdi:battery-charging"
 ICON_ERRORS = "mdi:alert-circle-outline"
